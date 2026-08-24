@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="780" viewBox="0 0 380 780" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="380" height="780" rx="34" fill="#2B2724"/>
+  <rect x="9" y="9" width="362" height="762" rx="27" fill="#FFF8F3"/>
+  <rect x="150" y="17" width="80" height="7" rx="3.5" fill="#2B2724"/>
+
+  <text x="30" y="46" font-size="11" font-weight="600" fill="#5B4F47">9:41</text>
+  <rect x="304" y="39" width="16" height="8" rx="2" fill="#5B4F47"/>
+  <rect x="326" y="39" width="24" height="8" rx="3" fill="#5B4F47"/>
+
+  <text x="26" y="76" font-size="17" font-weight="700" fill="#241E1A">Crispy Corner</text>
+  <text x="26" y="95" font-size="10.5" fill="#8A7F76">Pickup only &#183; Pay cash on collection</text>
+  <rect x="314" y="58" width="40" height="40" rx="13" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <path d="M326 76 h16 l-2 14 h-12 z" fill="none" stroke="#B4471F" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M330 76 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#B4471F" stroke-width="1.6"/>
+  <circle cx="350" cy="60" r="9" fill="#B4471F"/>
+  <text x="350" y="63.5" font-size="9.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+
+  <rect x="26" y="112" width="52" height="30" rx="15" fill="#B4471F"/>
+  <text x="52" y="131" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">All</text>
+  <rect x="86" y="112" width="74" height="30" rx="15" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <text x="123" y="131" font-size="11" fill="#6B5F56" text-anchor="middle">Chicken</text>
+  <rect x="168" y="112" width="70" height="30" rx="15" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <text x="203" y="131" font-size="11" fill="#6B5F56" text-anchor="middle">Snacks</text>
+  <rect x="246" y="112" width="92" height="30" rx="15" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <text x="292" y="131" font-size="11" fill="#6B5F56" text-anchor="middle">Sweet Bites</text>
+
+  <text x="26" y="170" font-size="12.5" font-weight="700" fill="#241E1A">Chicken</text>
+
+  <rect x="26" y="182" width="328" height="104" rx="14" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <rect x="36" y="192" width="84" height="84" rx="10" fill="#F7E3C1"/>
+  <rect x="48" y="204" width="60" height="15" rx="7.5" fill="#E0AC5C"/>
+  <rect x="48" y="226" width="60" height="15" rx="7.5" fill="#CE9440"/>
+  <rect x="48" y="248" width="60" height="15" rx="7.5" fill="#E0AC5C"/>
+  <text x="134" y="214" font-size="13" font-weight="700" fill="#241E1A">Chicken Tender</text>
+  <text x="134" y="233" font-size="10.5" fill="#8A7F76">3 pieces, choice of sauce</text>
+  <text x="134" y="262" font-size="13" font-weight="700" fill="#B4471F">RM 9.90</text>
+  <rect x="290" y="248" width="54" height="26" rx="13" fill="#B4471F"/>
+  <text x="317" y="265" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Add</text>
+
+  <rect x="26" y="298" width="328" height="104" rx="14" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <rect x="36" y="308" width="84" height="84" rx="10" fill="#FBDCCF"/>
+  <ellipse cx="68" cy="332" rx="19" ry="12" fill="#E08A5C"/>
+  <ellipse cx="88" cy="360" rx="19" ry="12" fill="#CF7148"/>
+  <text x="134" y="330" font-size="13" font-weight="700" fill="#241E1A">Spicy Chicken Wings</text>
+  <text x="134" y="349" font-size="10.5" fill="#8A7F76">4 pieces, marinated overnight</text>
+  <text x="134" y="378" font-size="13" font-weight="700" fill="#B4471F">RM 12.00</text>
+  <rect x="290" y="364" width="54" height="26" rx="13" fill="#B4471F"/>
+  <text x="317" y="381" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Add</text>
+
+  <text x="26" y="426" font-size="12.5" font-weight="700" fill="#241E1A">Sweet Bites</text>
+
+  <rect x="26" y="442" width="328" height="104" rx="14" fill="#FBF6F1" stroke="#EFE6DC"/>
+  <g opacity="0.42">
+    <rect x="36" y="452" width="84" height="84" rx="10" fill="#EADFD2"/>
+    <circle cx="62" cy="482" r="13" fill="#CDBDAB"/>
+    <circle cx="94" cy="482" r="13" fill="#CDBDAB"/>
+    <circle cx="78" cy="508" r="13" fill="#B5A390"/>
+  </g>
+  <text x="134" y="474" font-size="13" font-weight="700" fill="#A99B90">Chocolate Ball</text>
+  <text x="134" y="493" font-size="10.5" fill="#B3A79D">6 pieces, warm</text>
+  <text x="134" y="522" font-size="13" font-weight="700" fill="#A99B90">RM 6.50</text>
+  <rect x="282" y="488" width="62" height="26" rx="13" fill="#EFE6DC"/>
+  <text x="313" y="505" font-size="10" font-weight="600" fill="#8A7F76" text-anchor="middle">Sold out</text>
+
+  <rect x="26" y="558" width="328" height="104" rx="14" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <rect x="36" y="568" width="84" height="84" rx="10" fill="#E6F0D4"/>
+  <circle cx="62" cy="598" r="13" fill="#A9C77E"/>
+  <circle cx="94" cy="598" r="13" fill="#A9C77E"/>
+  <circle cx="78" cy="624" r="13" fill="#8FB365"/>
+  <text x="134" y="590" font-size="13" font-weight="700" fill="#241E1A">Kaya Ball</text>
+  <text x="134" y="609" font-size="10.5" fill="#8A7F76">6 pieces, warm kaya filling</text>
+  <text x="134" y="638" font-size="13" font-weight="700" fill="#B4471F">RM 6.00</text>
+  <rect x="290" y="604" width="54" height="26" rx="13" fill="#B4471F"/>
+  <text x="317" y="621" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Add</text>
+
+  <rect x="9" y="678" width="362" height="93" fill="#FFF8F3" opacity="0.96"/>
+  <rect x="26" y="694" width="328" height="50" rx="25" fill="#B4471F"/>
+  <text x="190" y="718" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle">View basket &#183; 3 items</text>
+  <text x="190" y="734" font-size="11" fill="#F6D6C6" text-anchor="middle">RM 27.90</text>
+  <rect x="150" y="758" width="80" height="4" rx="2" fill="#D8CCC0"/>
+</svg>

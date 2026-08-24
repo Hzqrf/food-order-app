@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="780" viewBox="0 0 380 780" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="380" height="780" rx="34" fill="#2B2724"/>
+  <rect x="9" y="9" width="362" height="762" rx="27" fill="#FFF8F3"/>
+  <rect x="150" y="17" width="80" height="7" rx="3.5" fill="#2B2724"/>
+  <text x="30" y="46" font-size="11" font-weight="600" fill="#5B4F47">9:41</text>
+  <rect x="304" y="39" width="16" height="8" rx="2" fill="#5B4F47"/>
+  <rect x="326" y="39" width="24" height="8" rx="3" fill="#5B4F47"/>
+
+  <path d="M34 76 l-9 -8 l9 -8" fill="none" stroke="#241E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="190" y="73" font-size="15" font-weight="700" fill="#241E1A" text-anchor="middle">Checkout</text>
+  <line x1="9" y1="94" x2="371" y2="94" stroke="#EFE6DC"/>
+
+  <text x="26" y="122" font-size="10.5" font-weight="700" fill="#8A7F76">YOUR DETAILS</text>
+
+  <text x="26" y="146" font-size="11" fill="#6B5F56">Name</text>
+  <rect x="26" y="154" width="328" height="42" rx="11" fill="#FFFFFF" stroke="#E4D9CD"/>
+  <text x="40" y="180" font-size="12.5" fill="#241E1A">Nurul Aisyah</text>
+
+  <text x="26" y="222" font-size="11" fill="#6B5F56">Phone number</text>
+  <rect x="26" y="230" width="328" height="42" rx="11" fill="#FFFFFF" stroke="#B4471F"/>
+  <text x="40" y="256" font-size="12.5" fill="#241E1A">012-345 6789</text>
+  <circle cx="40" cy="288" r="6" fill="#2F7D5B"/>
+  <path d="M37 288 l2 2.5 l4 -5" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="52" y="292" font-size="10.5" fill="#2F7D5B">We will contact you at +60 12-345 6789</text>
+
+  <text x="26" y="330" font-size="10.5" font-weight="700" fill="#8A7F76">PICKUP TIME</text>
+  <rect x="26" y="342" width="328" height="42" rx="11" fill="#FFFFFF" stroke="#E4D9CD"/>
+  <text x="40" y="368" font-size="12.5" fill="#241E1A">Saturday, 12 July</text>
+  <path d="M330 361 l6 6 l6 -6" fill="none" stroke="#8A7F76" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="26" y="394" width="76" height="34" rx="10" fill="#FFFFFF" stroke="#E4D9CD"/>
+  <text x="64" y="415" font-size="11" fill="#6B5F56" text-anchor="middle">11:00 AM</text>
+  <rect x="110" y="394" width="76" height="34" rx="10" fill="#B4471F"/>
+  <text x="148" y="415" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">12:00 PM</text>
+  <rect x="194" y="394" width="76" height="34" rx="10" fill="#F4EDE5"/>
+  <text x="232" y="411" font-size="11" fill="#B3A79D" text-anchor="middle">1:00 PM</text>
+  <text x="232" y="423" font-size="8" fill="#B3A79D" text-anchor="middle">Full</text>
+  <rect x="278" y="394" width="76" height="34" rx="10" fill="#FFFFFF" stroke="#E4D9CD"/>
+  <text x="316" y="415" font-size="11" fill="#6B5F56" text-anchor="middle">2:00 PM</text>
+
+  <text x="26" y="462" font-size="11" fill="#6B5F56">Notes for the shop (optional)</text>
+  <rect x="26" y="470" width="328" height="52" rx="11" fill="#FFFFFF" stroke="#E4D9CD"/>
+  <text x="40" y="492" font-size="12" fill="#241E1A">Extra spicy, no cheese dip please</text>
+
+  <rect x="26" y="540" width="328" height="52" rx="11" fill="#FFFFFF" stroke="#E4D9CD"/>
+  <rect x="40" y="556" width="20" height="20" rx="4" fill="#2F7D5B"/>
+  <path d="M45 566 l3.5 3.5 l6.5 -7.5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="70" y="570" font-size="11" fill="#4A403A">Verified &#8212; you are not a robot</text>
+
+  <rect x="26" y="602" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#B4471F" stroke-width="1.8"/>
+  <text x="56" y="612" font-size="10.5" fill="#4A403A">I have read the Privacy Notice and consent</text>
+  <text x="56" y="626" font-size="10.5" fill="#4A403A">to my details being used for this order.</text>
+
+  <line x1="26" y1="646" x2="354" y2="646" stroke="#EFE6DC"/>
+  <text x="26" y="670" font-size="12" fill="#6B5F56">Total to pay</text>
+  <text x="354" y="670" font-size="16" font-weight="700" fill="#241E1A" text-anchor="end">RM 27.90</text>
+  <text x="26" y="687" font-size="10" fill="#8A7F76">Cash on collection &#183; no payment now</text>
+
+  <rect x="26" y="700" width="328" height="48" rx="24" fill="#B4471F"/>
+  <text x="190" y="730" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">Place order</text>
+  <rect x="150" y="758" width="80" height="4" rx="2" fill="#D8CCC0"/>
+</svg>

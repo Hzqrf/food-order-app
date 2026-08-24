@@ -1,12 +1,15 @@
-# Dessert Ordering — Backend
+# Snack Shop Ordering — Backend
 
-API and database for a single dessert shop's online ordering system.
-Customers place pickup orders and track them; staff manage the order queue
-and menu. Payment is cash on collection. There is no delivery and no online
-payment.
+API and database for a single snack shop's online ordering system — fried
+and savoury items, sweet bites, cooked to order for collection. Customers
+place pickup orders and track them; staff manage the order queue and menu.
+Payment is cash on collection. There is no delivery and no online payment.
 
 This repository serves a JSON API only. The customer and admin interfaces
 live in a separate frontend repository and are deployed independently.
+
+A plain-English version of this document, for the shop owner rather than a
+developer, is in [OVERVIEW.md](OVERVIEW.md).
 
 ## Stack
 
@@ -153,10 +156,17 @@ Staff cancellation requires a reason, which is returned to the customer.
 
 One server-side function computes available slots for a date and is the only
 source of truth. Both the slot listing endpoint and the order validator call
-it. It accounts for opening hours, closed days, minimum lead time so nobody
-orders a cake for ten minutes from now, the daily cutoff, and per-slot
-capacity. Capacity counts exclude cancelled orders. A closed day returns no
-slots.
+it. It accounts for opening hours, closed days, minimum lead time so nothing
+is ordered for five minutes from now with an empty fryer, the daily cutoff,
+and per-slot capacity. Capacity counts exclude cancelled orders. A closed day
+returns no slots.
+
+Lead time and slot length are settings, not constants, and this shop's values
+will be short — minutes, not days. Food is cooked to order and does not hold:
+if a slot runs longer than the food stays good, a ready order becomes a cold
+one. Per-slot capacity therefore models kitchen throughput rather than oven
+or fridge space. Nothing in the function assumes either shape; do not
+hard-code defaults that only suit long lead times.
 
 ### Availability
 
@@ -183,11 +193,18 @@ idempotency key makes a double-tapped button produce one order.
 
 ### Abuse and no-shows
 
-Pickup with cash means a no-show costs a whole cake with no recourse — no
-address, no payment, only a phone number. Defences are Turnstile
-verification, a cap of three open orders per normalised phone per day, slot
-capacity limiting total exposure, and the Accepted step as a human gate
+Pickup with cash means a no-show costs whatever has already been cooked,
+with no recourse — no address, no payment, only a phone number. Order values
+here are small, so no single no-show hurts much; the exposure is cumulative,
+and fried food cannot be re-sold once it has gone cold. Defences are
+Turnstile verification, a cap on open orders per normalised phone per day,
+slot capacity limiting total exposure, and the Accepted step as a human gate
 before the kitchen starts.
+
+Put that per-phone cap in the settings table rather than hard-coding it. A
+snack shop sees far more legitimate same-day repeat ordering than a cake shop
+does — the same customer at lunch and again at four is normal — so the right
+number will not be known until real traffic is visible.
 
 If no-shows become a real problem the answer is a deposit, which means
 adding a payment method. Nothing in this design prevents that later.

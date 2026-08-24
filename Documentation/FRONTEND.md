@@ -1,12 +1,16 @@
-# Dessert Ordering — Frontend
+# Snack Shop Ordering — Frontend
 
-Customer and admin interfaces for a single dessert shop's online ordering
-system. Customers browse a menu, place a pickup order and track its status;
-staff manage the order queue and menu. Payment is cash on collection. There
-is no delivery and no online payment.
+Customer and admin interfaces for a single snack shop's online ordering
+system — fried and savoury items, sweet bites, cooked to order for
+collection. Customers browse a menu, place a pickup order and track its
+status; staff manage the order queue and menu. Payment is cash on
+collection. There is no delivery and no online payment.
 
 This repository contains the client only. The API and database live in a
 separate backend repository and are deployed independently.
+
+A plain-English version of this document, for the shop owner rather than a
+developer, is in [OVERVIEW.md](OVERVIEW.md).
 
 ## Surfaces
 
@@ -101,8 +105,8 @@ functional.
 ### Storefront
 
 Menu grouped by category. Each item shows a photo, price, short description
-and current availability. Item detail offers variants such as whole or slice
-and flavour, plus add-ons such as candles or a message on the cake.
+and current availability. Item detail offers variants such as portion size
+and spice level, plus add-ons such as an extra sauce or a dip.
 
 Sold-out items appear visibly unavailable and cannot be added.
 

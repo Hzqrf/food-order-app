@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="780" viewBox="0 0 380 780" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="380" height="780" rx="34" fill="#2B2724"/>
+  <rect x="9" y="9" width="362" height="762" rx="27" fill="#FFF8F3"/>
+  <rect x="150" y="17" width="80" height="7" rx="3.5" fill="#2B2724"/>
+  <text x="30" y="46" font-size="11" font-weight="600" fill="#5B4F47">9:41</text>
+  <rect x="304" y="39" width="16" height="8" rx="2" fill="#5B4F47"/>
+  <rect x="326" y="39" width="24" height="8" rx="3" fill="#5B4F47"/>
+
+  <text x="26" y="80" font-size="10.5" font-weight="700" fill="#8A7F76">ORDER 250712-K4RQ</text>
+  <text x="26" y="104" font-size="19" font-weight="700" fill="#241E1A">We are frying it now</text>
+  <text x="26" y="124" font-size="11" fill="#8A7F76">Ready for pickup at 12:00 PM today</text>
+
+  <rect x="26" y="144" width="328" height="230" rx="16" fill="#FFFFFF" stroke="#EFE6DC"/>
+
+  <line x1="52" y1="186" x2="52" y2="336" stroke="#EFE6DC" stroke-width="3"/>
+  <line x1="52" y1="186" x2="52" y2="286" stroke="#2F7D5B" stroke-width="3"/>
+
+  <circle cx="52" cy="186" r="11" fill="#2F7D5B"/>
+  <path d="M47 186 l3.5 3.5 l6 -7" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="76" y="183" font-size="12.5" font-weight="700" fill="#241E1A">Order received</text>
+  <text x="76" y="198" font-size="10.5" fill="#8A7F76">1:58 PM</text>
+
+  <circle cx="52" cy="236" r="11" fill="#2F7D5B"/>
+  <path d="M47 236 l3.5 3.5 l6 -7" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="76" y="233" font-size="12.5" font-weight="700" fill="#241E1A">Accepted by the shop</text>
+  <text x="76" y="248" font-size="10.5" fill="#8A7F76">2:14 PM</text>
+
+  <circle cx="52" cy="286" r="11" fill="#B4471F"/>
+  <circle cx="52" cy="286" r="4" fill="#FFFFFF"/>
+  <text x="76" y="283" font-size="12.5" font-weight="700" fill="#B4471F">Preparing</text>
+  <text x="76" y="298" font-size="10.5" fill="#8A7F76">2:31 PM</text>
+
+  <circle cx="52" cy="336" r="11" fill="#FFFFFF" stroke="#DFD5C9" stroke-width="2.5"/>
+  <text x="76" y="333" font-size="12.5" font-weight="600" fill="#B3A79D">Ready for pickup</text>
+  <text x="76" y="348" font-size="10.5" fill="#C4BAB0">We will message you</text>
+
+  <rect x="26" y="390" width="328" height="86" rx="16" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <text x="44" y="416" font-size="10.5" font-weight="700" fill="#8A7F76">COLLECT FROM</text>
+  <text x="44" y="437" font-size="12" fill="#241E1A">12 Jalan Kenari, Taman Sri Indah</text>
+  <text x="44" y="455" font-size="12" fill="#241E1A">Kuala Lumpur</text>
+  <rect x="256" y="424" width="82" height="30" rx="15" fill="#FFF3EC"/>
+  <text x="297" y="443" font-size="10.5" font-weight="700" fill="#B4471F" text-anchor="middle">Call shop</text>
+
+  <rect x="26" y="492" width="328" height="164" rx="16" fill="#FFFFFF" stroke="#EFE6DC"/>
+  <text x="44" y="518" font-size="10.5" font-weight="700" fill="#8A7F76">YOUR ORDER</text>
+  <text x="44" y="544" font-size="12" fill="#241E1A">1 &#215; Chicken Tender (3 pcs)</text>
+  <text x="336" y="544" font-size="12" fill="#241E1A" text-anchor="end">RM 9.90</text>
+  <text x="44" y="568" font-size="12" fill="#241E1A">2 &#215; Kaya Ball (6 pcs)</text>
+  <text x="336" y="568" font-size="12" fill="#241E1A" text-anchor="end">RM 12.00</text>
+  <text x="44" y="592" font-size="12" fill="#241E1A">1 &#215; Cheese Dip</text>
+  <text x="336" y="592" font-size="12" fill="#241E1A" text-anchor="end">RM 2.00</text>
+  <line x1="44" y1="608" x2="336" y2="608" stroke="#EFE6DC"/>
+  <text x="44" y="632" font-size="13" font-weight="700" fill="#241E1A">Total</text>
+  <text x="336" y="632" font-size="15" font-weight="700" fill="#241E1A" text-anchor="end">RM 23.90</text>
+  <text x="44" y="648" font-size="10" fill="#8A7F76">Pay in cash when you collect</text>
+
+  <text x="190" y="690" font-size="10.5" fill="#8A7F76" text-anchor="middle">Need to change something? Call the shop.</text>
+  <text x="190" y="712" font-size="9.5" fill="#B3A79D" text-anchor="middle">This page updates by itself</text>
+  <rect x="150" y="758" width="80" height="4" rx="2" fill="#D8CCC0"/>
+</svg>
