@@ -8,7 +8,7 @@
 
   <rect x="0" y="36" width="190" height="584" fill="#2B2724"/>
   <text x="24" y="78" font-size="15" font-weight="700" fill="#FFFFFF">Crispy Corner</text>
-  <text x="24" y="95" font-size="10" fill="#9A8E84">Staff dashboard</text>
+  <text x="24" y="95" font-size="10" fill="#9A8E84">Owner</text>
 
   <rect x="14" y="124" width="162" height="36" rx="9" fill="#B4471F"/>
   <circle cx="32" cy="142" r="3.5" fill="#FFFFFF"/>
@@ -21,7 +21,9 @@
   <text x="46" y="273" font-size="12" fill="#C6BBB1">Settings</text>
   <circle cx="32" cy="310" r="3.5" fill="#6E635A"/>
   <text x="46" y="315" font-size="12" fill="#C6BBB1">Export</text>
-  <text x="24" y="596" font-size="9.5" fill="#7A6E64">Signed in as counter staff</text>
+  <circle cx="32" cy="352" r="3.5" fill="#6E635A"/>
+  <text x="46" y="357" font-size="12" fill="#C6BBB1">Staff &amp; pay</text>
+  <text x="24" y="596" font-size="9.5" fill="#7A6E64">Signed in as owner</text>
 
   <rect x="190" y="36" width="770" height="64" fill="#FFFFFF"/>
   <line x1="190" y1="100" x2="960" y2="100" stroke="#E7E0D8"/>

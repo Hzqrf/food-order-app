@@ -6,6 +6,10 @@ collection. Customers browse a menu, place a pickup order and track its
 status; staff manage the order queue and menu. Payment is cash on
 collection. There is no delivery and no online payment.
 
+Each staff member signs in as themselves and works a shift, because pay here
+is commission-based on the sales attributed to them. Several screens exist
+only to make those figures visible and hard to get wrong.
+
 This repository contains the client only. The API and database live in a
 separate backend repository and are deployed independently.
 
@@ -18,7 +22,13 @@ Three route trees in one application.
 
 - **Storefront** — public, no login. Browse menu, cart, checkout.
 - **Tracking** — public, no login. Order status by token, or by lookup.
-- **Admin** — login required. Order queue, menu, settings.
+- **Admin** — login required. Order queue, shift, menu, settings, reports.
+
+The admin tree is role-aware: a `staff` session sees the order queue, their
+own shift and their own sales; an `owner` session additionally sees the menu,
+settings, staff accounts and everyone's figures. Render only what the role
+allows, but never rely on that — the API enforces it, and a hidden route is
+not a permission.
 
 The admin tree is lazy-loaded so customers never download admin code. This
 is a payload decision, not a security one: access control lives in the API,
@@ -54,6 +64,10 @@ The admin session depends on an httpOnly cookie set by the API. If the two
 deployments sit on unrelated hosts such as `pages.dev` and `railway.app`,
 that cookie is third-party: Safari blocks it and Chrome is phasing it out.
 Admin login will work in development and fail on a staff member's phone.
+
+Per-staff logins make this worse rather than better. One counter machine
+signed in once a day might have survived; several people signing in and out
+across a shift, some on their own phones, will not.
 
 The fix is a custom domain covering both, for example this app on
 `shop.example.com` and the API on `api.example.com`.
@@ -167,6 +181,26 @@ page shows the shop's phone number and asks them to call.
 
 ### Admin
 
+**Sign in** — a list of staff names rather than a username field, then a PIN.
+Typing a name at a counter is slow and invites the shared-account habit this
+whole scheme depends on avoiding. Never offer a "remember me" longer than a
+shift.
+
+**Who is signed in** — the current staff member's name sits permanently in the
+admin header, not buried in a menu. On a shared counter machine the single
+most likely failure is one person's sales landing on the previous person's
+account, and the only cheap defence is making the wrong name impossible to
+miss.
+
+Lock the screen after a configured idle period and require the PIN again. Do
+not sign the session out — losing an open shift mid-service is worse than the
+lock.
+
+**Shift bar** — a persistent strip showing whether a shift is open, how long
+it has run, and the sales attributed so far. Marking an order paid without an
+open shift is refused by the API, so the bar carries the primary "Start
+shift" action rather than hiding it on another screen.
+
 **Order board** — the live queue, polling every 10 seconds, with a sound and
 a badge when a new order arrives. Filters by status and date. Opening an
 order shows its detail and full event timeline.
@@ -175,7 +209,14 @@ order shows its detail and full event timeline.
 Ready → Completed`, with `Cancelled` available before Completed and a reason
 prompt when used.
 
-**Payment flag** — separate from status, marked paid at handover.
+**Payment flag** — separate from status, marked paid at handover. This is
+also the moment the sale is attributed to whoever pressed it, so the button
+states plainly whose figures it will land on, and the confirmation names the
+staff member. A quiet toggle is not enough when the press decides somebody's
+pay.
+
+If no shift is open the API refuses, and the screen offers to start one
+rather than reporting a failure.
 
 **Order editing** — change quantities or remove lines while New or Accepted.
 Totals come back recalculated from the server.
@@ -194,6 +235,31 @@ that a customer was told. The WhatsApp button only records that a tab was
 opened; the browser cannot know whether a message was sent, and the timeline
 must not claim otherwise. Keep the two visually distinct so neither reads as
 confirming the other.
+
+**My shift** — start a shift with an opening float, see orders handled and
+sales attributed as they accumulate, and end the shift. Closing shows
+expected cash — float plus attributed sales — with an optional counted figure
+and the difference. Show the arithmetic rather than a single total; a staff
+member who cannot see how the number was reached has no way to query it.
+
+**My sales** — a staff member's own figures for a chosen period: orders,
+sales, and an indicative commission where a percentage is configured. Label
+it plainly as indicative and not a payslip. A `staff` role sees only their
+own figures, never a colleague's.
+
+**Staff accounts** *(owner only)* — add a person, set their role and
+commission percentage, deactivate someone who leaves. Deactivation is the
+only removal offered; deleting a person would take their pay history with it.
+
+**Sales by staff** *(owner only)* — every staff member for a chosen period,
+with a shift breakdown and cash variance, and a CSV export for payroll. This
+is the screen the client actually asked for; the rest exists to make its
+numbers trustworthy.
+
+**Attribution correction** *(owner only)* — reassign a paid order to a
+different staff member. Requires a reason, shows the previous value, and
+appears afterwards in the order's timeline. Mistakes at the counter are
+routine; silent edits to pay records are not.
 
 **Message templates** — edited in settings, no deploy needed. Placeholders
 cover customer name, order code, total, pickup time and tracking link.
@@ -281,14 +347,17 @@ picker, Turnstile widget, consent checkbox, idempotency key and in-flight
 button state. Confirmation screen, which is the tracking page. Tracking page
 with the stepper, its distinct Ready and Cancelled states, and polling.
 Lookup form. Recent orders in browser storage, surfaced in the header.
-Customer self-cancel while New. Admin login and protected route tree. Order
-board with polling, sound, badge, filters and detail view. Status controls,
-cancellation reason prompt, payment flag. Availability toggles. Privacy
+Customer self-cancel while New. Staff sign-in with the name picker and PIN,
+the role-aware protected route tree, the signed-in-as header and the idle
+lock. Shift bar with start and end. Order board with polling, sound, badge,
+filters and detail view. Status controls, cancellation reason prompt, payment
+flag naming the staff member it attributes to. Availability toggles. Privacy
 notice page, linked from the footer and from checkout.
 
 *Done when:* an order placed on the storefront reaches the board within ten
 seconds and the customer sees every subsequent status change with correct
-timestamps.
+timestamps; and two staff signed in on different machines each see their own
+name in the header, with a paid order landing on the right person's figures.
 
 ### F3 — Staff tooling
 
@@ -299,8 +368,14 @@ notified checkbox. Template editor. Menu CRUD forms. Image upload via
 presigned URL. Settings screen. Dashboard with the sold-out banner. Order
 editing UI.
 
+My shift screen with float, running total and close-with-count. My sales for
+a period. Owner-only staff accounts, sales by staff with the shift breakdown
+and payroll CSV, and attribution correction.
+
 *Done when:* a new product can be created with an image and ordered from the
-storefront entirely through the UI.
+storefront entirely through the UI; and a full day of two overlapping shifts
+closes with each person's sales visible to them, the owner's report matching
+the day's takings, and any correction traceable to who made it.
 
 ### F4 — Polish
 
@@ -390,7 +465,8 @@ Last updated: [date].
 ## Out of scope
 
 No delivery, no online payment, no customer accounts, no automatic customer
-notifications, no multi-outlet support, no per-staff admin logins.
+notifications, no multi-outlet support, no payroll calculation, and no
+attendance or leave management beyond the start and end of a shift.
 
-Deferred: email notifications; delivery; per-staff logins; deposits or
-online payment. Each depends on backend work first.
+Deferred: email notifications; delivery; deposits or online payment. Each
+depends on backend work first.

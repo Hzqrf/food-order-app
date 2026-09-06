@@ -5,6 +5,11 @@ and savoury items, sweet bites, cooked to order for collection. Customers
 place pickup orders and track them; staff manage the order queue and menu.
 Payment is cash on collection. There is no delivery and no online payment.
 
+Each staff member signs in as themselves and works a shift. Sales are
+attributed per person, because pay here is commission-based — which makes the
+order and event tables payroll evidence, not merely an audit trail. That
+single fact drives most of the access rules below.
+
 This repository serves a JSON API only. The customer and admin interfaces
 live in a separate frontend repository and are deployed independently.
 
@@ -29,10 +34,14 @@ credentials enabled and preflight handled.
 
 ### Cookie domain constraint — resolve before building auth
 
-Admin sessions use a JWT in an httpOnly cookie. If the API and frontend sit
+Staff sessions use a JWT in an httpOnly cookie. If the API and frontend sit
 on unrelated hosts such as `railway.app` and `pages.dev`, that cookie is
-third-party: Safari blocks it and Chrome is phasing it out. Admin login will
+third-party: Safari blocks it and Chrome is phasing it out. Staff login will
 work on some machines and silently fail on others.
+
+Per-staff logins raise the stakes here. One shared account on one counter
+machine could have limped along; several people signing in and out, some from
+their own phones, cannot. Treat the custom domain as a prerequisite.
 
 The fix is a custom domain covering both, for example the API on
 `api.example.com` and the app on `shop.example.com`, with the cookie scoped
@@ -87,10 +96,22 @@ Missing it once makes deleted items reappear on the storefront.
 as they were at time of order. Changing a price later must never rewrite a
 past receipt.
 
-**Order events** — append-only. Every status change and notable admin action
-writes a row. It feeds both the customer's status timeline and the admin
-audit trail. Each row records an actor, populated with a fixed admin
-identifier until per-staff logins exist.
+**Order events** — append-only. Every status change and notable staff action
+writes a row. It feeds the customer's status timeline, the admin audit trail,
+and the sales figures pay is calculated from. Each row records the staff
+member who performed the action and the shift they were on.
+
+Because wages depend on these rows, treat the table as a payroll record:
+never update, never delete, never backfill an actor. A correction is a new
+row, not an edit.
+
+**Sales attribution** — an order counts towards the staff member who marked it
+paid, not whoever accepted or prepared it. The value is written onto the
+order at the moment the payment flag flips, and never recalculated.
+
+Resist deriving attribution later by matching order times against shift start
+and end times. It breaks the moment two people are on at once, which is the
+normal case at lunch.
 
 **Order codes** — format `YYMMDD-XXXX`, suffix random base32. Non-sequential
 so order volume is not leaked to anyone counting, still sortable and
@@ -116,8 +137,13 @@ URL, is available, is published, sort order, deleted at.
 
 **orders** — order code, public token (unique, indexed), customer name,
 phone as typed, phone normalised, fulfilment type, scheduled for, status,
-payment status, cancel reason, notified at, consented at, subtotal in sen,
-total in sen, idempotency key, created at.
+payment status, paid at, paid by staff reference, paid in shift reference,
+cancel reason, notified at, consented at, subtotal in sen, total in sen,
+idempotency key, created at.
+
+The three payment columns are the sales attribution, denormalised onto the
+order so that a report is a plain aggregate and no later change to a shift
+can silently rewrite what somebody was paid.
 
 Also on orders, present but unused: address, delivery fee in sen, both
 nullable. They cost nothing now and save a migration against live order data
@@ -127,12 +153,28 @@ pickup.
 **order_items** — order reference, product reference, variant reference,
 name snapshot, unit price in sen, quantity, line total in sen.
 
-**order_events** — order reference, status, note, actor, created at. Append
-only.
+**order_events** — order reference, status, note, actor staff reference,
+actor shift reference, created at. Append only.
 
 **settings** — key and value pairs.
 
-**admin_users** — username, password hash.
+**staff_users** — display name, username, PIN or password hash, role,
+commission percent (nullable), is active, created at, deactivated at.
+
+Two roles only: `owner` and `staff`. Never hard-delete a staff row — pay
+history references it permanently. Deactivating blocks sign-in and leaves
+every past figure intact.
+
+**shifts** — staff reference, started at, ended at, opening float in sen,
+counted cash in sen (nullable), note, was auto-closed, closed by staff
+reference (nullable, set when an owner closes or corrects someone else's
+shift).
+
+One open shift per staff member. Shifts belonging to different staff may
+overlap freely; that is the normal case, not an error.
+
+Expected cash is derived from the float plus attributed sales rather than
+stored, so it cannot drift out of step with the orders behind it.
 
 ## Business rules
 
@@ -151,6 +193,69 @@ refuses, and the frontend directs them to phone the shop — once the kitchen
 has started, a self-serve cancel costs ingredients.
 
 Staff cancellation requires a reason, which is returned to the customer.
+
+### Staff accounts and roles
+
+Everyone who touches the order queue signs in as themselves. There is no
+shared counter account. Two people on one login makes every sales figure
+meaningless, and with pay attached to those figures that is not a tidiness
+preference.
+
+**staff** — the order queue, status transitions, the payment flag, the
+notified flag, availability toggles, their own shift, and their own sales
+figures. Nothing else.
+
+**owner** — all of that, plus the menu, prices, settings, staff accounts,
+every staff member's figures, and shift corrections.
+
+The split exists because commission creates a specific conflict of interest.
+A staff role must not be able to change a price, edit their own shift,
+reassign an order's attribution, or read another person's figures. Enforce
+each of those against the role held in the session, server-side. A hidden
+button in the frontend is not a control.
+
+### Shifts
+
+A shift opens when a staff member starts one and closes when they end it. It
+carries an opening float so the till reconciles, and optionally a counted
+cash figure at close.
+
+Marking an order paid with no open shift is refused. Without that rule the
+sale lands nowhere and surfaces as a shortfall at the end of the month, long
+after anyone can reconstruct what happened.
+
+A shift still open past a configured maximum is closed by the nightly job and
+flagged as auto-closed rather than quietly ended. Staff forget to clock out,
+and one shift left running for three days poisons every report that touches
+it.
+
+Only an owner may alter a closed shift, and the alteration writes an event
+recording who changed what, when, and what the value was before.
+
+### Sales attribution
+
+The rule itself is in Conventions above; its consequences are here.
+
+**Confirm the rule with the shop before building it.** It decides what people
+are paid, so it is not a developer's call. The alternatives are attributing
+to whoever accepted the order, or splitting it across everyone who touched
+it. Paid-by is recommended: cash changes hands exactly once, that moment has
+exactly one owner, and it is the only version that reconciles against the
+money in the till.
+
+An owner may reassign attribution. Doing so updates the order and writes an
+event carrying the previous value; the log is never overwritten.
+
+Cancelling an order that has already been marked paid requires an owner, and
+reverses the attribution with an event on the order. Without that, anyone
+could inflate a figure by marking orders paid and cancelling them later.
+
+### Pay reporting, not payroll
+
+This service reports sales per staff member and per shift. It does not
+calculate wages, tax, EPF or SOCSO, and must not grow to. A commission
+percentage stored against a staff member lets a report show an indicative
+figure; the authoritative payroll calculation happens outside this system.
 
 ### Pickup slots
 
@@ -228,11 +333,21 @@ self-cancel while New.
 Tracking responses must never include internal record ids, staff notes, or
 any field not needed by the tracking page.
 
-**Admin, session required** — login and logout. List and filter orders.
-Order detail with items and event timeline. Change status. Set payment flag.
-Set notified flag. Edit an order's lines while New or Accepted. Toggle
-availability. Menu CRUD. Settings read and write. Dashboard aggregates.
-Presign an image upload. CSV export.
+**Staff session required** — sign in and out. List and filter orders. Order
+detail with items and event timeline. Change status. Set payment flag. Set
+notified flag. Edit an order's lines while New or Accepted. Toggle
+availability. Open a shift, close a shift, read the current shift. Read own
+sales for a date range.
+
+**Owner only** — menu CRUD. Settings read and write. Staff account create,
+edit and deactivate. Dashboard aggregates across everyone. Sales by staff
+member for a date range. Shift listing and correction. Reassign an order's
+attribution. Cancel a paid order. Presign an image upload. CSV export,
+including a payroll export of sales per staff per period.
+
+Every owner-only route checks the role held in the session. Never trust a
+role, a staff id or a shift id sent by the client — all three decide what
+somebody is paid.
 
 ### Sharing the contract with the frontend repo
 
@@ -282,7 +397,8 @@ builds. Backend leads by one phase throughout.
 Repository layout, TypeScript config, linting. Prisma schema covering every
 model above, including the dormant delivery columns, with naming mapping
 applied from the first model. Initial migration. Seed script with
-categories, products, variants, a default settings row and an admin user.
+categories, products, variants, a default settings row and an owner
+account.
 Express skeleton with CORS allowlist, cookie configuration, Zod error
 handling and a health check. Railway deploying with migrations as a release
 step. Sentry wired.
@@ -310,13 +426,19 @@ Slot availability function and the settings that drive it. Order creation,
 transactional, with revalidation, idempotency, code and token generation.
 Phone normalisation. Turnstile verification and the per-phone daily cap.
 Tracking by token. Lookup by code and phone, rate-limited. Customer
-self-cancel while New. Admin auth, session middleware, protected routes.
-Order listing with filters, and detail with timeline. Status transitions and
-payment flag, each writing an event. Availability toggles.
+self-cancel while New. Staff auth with per-person accounts and the two roles,
+session middleware, role-checked routes. Shift open and close, with the
+one-open-shift rule. Order listing with filters, and detail with timeline.
+Status transitions and payment flag, each writing an event carrying the staff
+member and the shift. Sales attribution written at the moment of payment.
+Availability toggles.
 
 *Done when:* two rapid identical submissions create one order; a full slot is
 rejected server-side even when the client offers it; the tracking response
-contains no internal identifiers.
+contains no internal identifiers; an order marked paid records who marked it
+and on which shift; marking paid with no open shift is refused; and a staff
+role is refused a price change even when the request is sent straight to the
+API.
 
 ### B3 — Staff tooling
 
@@ -328,8 +450,15 @@ CRUD. Dashboard aggregates. Nightly availability reset job. Order line
 editing while New or Accepted, recalculating totals server-side and logging
 the change, leaving price snapshots untouched.
 
+Staff account management. Sales per staff member for a date range, and per
+shift with opening float, attributed sales and expected cash. Attribution
+reassignment and shift correction, both owner-only and both writing events.
+Nightly auto-close of forgotten shifts. Payroll CSV export.
+
 *Done when:* a product created through the API with an uploaded image
-appears on the storefront with no direct database access.
+appears on the storefront with no direct database access; and two staff
+working an overlapping lunch each see only their own sales, the two figures
+summing to the day's takings with nothing double-counted.
 
 ### B4 — Operational
 
@@ -366,6 +495,17 @@ evidenced does not count.
 and abandoned orders deleted sooner. Confirm both periods with an accountant
 and keep them consistent with the published notice.
 
+**Staff data is personal data too.** Names, usernames and the sales figures
+used to calculate pay are personal data about employees and fall under the
+same Act. Staff should be told what is recorded about them and why, and no
+staff member can read another's figures.
+
+**Wage records outlast order records.** Malaysian employment law requires an
+employer to keep wage records for a set period, and the orders behind a
+commission figure are the evidence for one. The retention rule above must
+therefore never delete an order that still supports a pay calculation.
+Confirm both periods with an accountant and apply the longer one.
+
 **Write a data breach incident procedure before taking real orders.** It
 cannot be invented inside a 72-hour deadline. One page: who is contacted
 first, what is recorded and when, who assesses the harm threshold, who
@@ -375,12 +515,14 @@ files, how customers are told.
 
 No delivery, no online payment, no customer accounts, no automatic customer
 notifications, no stock counts or ingredient tracking, no multi-outlet
-support, no per-staff admin logins.
+support, no payroll calculation, and no attendance or leave management beyond
+the start and end of a shift.
 
 A notify-customer function is stubbed at the status-transition point. If
 email notifications are added later, that is where they attach, rather than
 threading a new concern through the order code.
 
 Deferred work the schema already accommodates: email notifications;
-delivery, using the dormant address and fee columns; per-staff logins, using
-the actor field on events; deposits or online payment.
+delivery, using the dormant address and fee columns; deposits or online
+payment. Online payment would move the moment of payment away from handover,
+so it means revisiting the attribution rule at the same time.
