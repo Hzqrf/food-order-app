@@ -48,6 +48,7 @@ export default function OrderPage() {
       <Stack align="center" mt="xl" gap="xs">
         <Text c="dimmed">{t("takeOrder.orderNumber")}</Text>
         <Title order={1}>{order.order_number}</Title>
+        <Text size="sm" c="dimmed">{t("order.idLabel", { code: order.order_code })}</Text>
         <Text>{t("tracking.wasCompleted")}</Text>
         <Button component={Link} to="/" variant="light" mt="md">{t("customer.browseMenu")}</Button>
       </Stack>
@@ -61,7 +62,7 @@ export default function OrderPage() {
         <Stack align="center" gap={4}>
           <Text size="sm" opacity={0.8}>{t("takeOrder.orderNumber")}</Text>
           <Title order={1} fz={56} lh={1}>{order.order_number}</Title>
-          {order.customer_name && <Text fw={600}>{order.customer_name}</Text>}
+          <Text size="sm" opacity={0.8}>{t("order.idLabel", { code: order.order_code })}</Text>
           {ready && (
             <Stack align="center" gap={2} mt="sm">
               <IconCircleCheck size={40} />

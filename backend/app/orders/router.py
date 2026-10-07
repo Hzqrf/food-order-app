@@ -21,7 +21,8 @@ def place_order(body: schemas.OnlineOrderIn, request: Request, response: Respons
     order, url, created = service.create_online_order(db, branch, body, key, client_ip(request))
     if not created:
         response.status_code = 200
-    return schemas.OnlineOrderOut(order_number=service.fmt_number(order.order_number), token=order.public_token,
+    return schemas.OnlineOrderOut(order_number=service.fmt_number(order.order_number), order_code=order.order_code,
+                                  token=order.public_token,
                                   status=order.status, total_sen=order.total_sen, payment_url=url,
                                   expires_at=expiry_of(order))
 

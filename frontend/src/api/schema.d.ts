@@ -999,6 +999,8 @@ export interface components {
             id: number;
             /** Order Number */
             order_number: string;
+            /** Order Code */
+            order_code: string;
             /** Business Date */
             business_date: string;
             /** Channel */
@@ -1196,9 +1198,9 @@ export interface components {
         /** OnlineOrderIn */
         OnlineOrderIn: {
             /** Customer Name */
-            customer_name: string;
+            customer_name?: string | null;
             /** Customer Phone */
-            customer_phone: string;
+            customer_phone?: string | null;
             /** Note */
             note?: string | null;
             /** Items */
@@ -1210,6 +1212,8 @@ export interface components {
         OnlineOrderOut: {
             /** Order Number */
             order_number: string;
+            /** Order Code */
+            order_code: string;
             /** Token */
             token: string;
             /** Status */
@@ -1302,6 +1306,8 @@ export interface components {
             id: number;
             /** Order Number */
             order_number: string;
+            /** Order Code */
+            order_code: string;
             /** Business Date */
             business_date: string;
             /** Channel */
@@ -1419,6 +1425,8 @@ export interface components {
             id: number;
             /** Order Number */
             order_number: string;
+            /** Order Code */
+            order_code: string;
             /** Business Date */
             business_date: string;
             /** Channel */
@@ -1709,6 +1717,8 @@ export interface components {
         TrackingOut: {
             /** Order Number */
             order_number: string;
+            /** Order Code */
+            order_code: string;
             /** Status */
             status: string;
             /** Payment Status */

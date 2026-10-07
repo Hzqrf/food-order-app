@@ -160,7 +160,8 @@
     "history": "History",
     "autoClosed": "Auto-closed",
     "cancel": "Cancel order",
-    "cancelReason": "Cancelled because"
+    "cancelReason": "Cancelled because",
+    "idLabel": "Order ID {{code}}"
   },
   "cancel": {
     "title": "Cancel order {{number}}",
@@ -208,7 +209,7 @@
     "giveChange": "Give {{amount}} change"
   },
   "search": {
-    "placeholder": "Order number, phone or name",
+    "placeholder": "Order number, order ID, phone or name",
     "hint": "Staff can search the last 7 days.",
     "none": "No orders found."
   },
@@ -346,21 +347,27 @@
     "cartChanged": "Something in your order changed. Check the items and total, then pay again.",
     "phoneInvalid": "Enter a Malaysian phone number, for example 012-345 6789.",
     "tooManyUnpaid": "You have unpaid orders. Pay for or cancel those first.",
-    "yourName": "Your name",
-    "yourNameHint": "We call this out when your order is ready.",
-    "nameRequired": "Enter your name.",
     "phone": "Phone number",
-    "phoneHint": "Only used if we need to reach you about this order.",
+    "phoneHint": "Optional. Only used if the shop needs to reach you about this order.",
     "phoneReadBack": "We'll use {{phone}}",
     "orderNote": "Note for the shop",
     "pickupOnly": "Pickup at the counter. Pay now online.",
     "pay": "Pay {{total}}",
-    "privacy": "Your name and phone are used only for this order, as described in the shop's privacy notice.",
+    "privacy": "If you give a phone number, it is used only for this order, as described in the shop's privacy notice.",
     "problem": {
       "unavailable": "No longer available",
       "sold_out": "Sold out",
       "option_sold_out": "An option has sold out",
       "invalid_options": "Choose the options again"
+    },
+    "recentStatus": {
+      "awaitingPayment": "Awaiting payment",
+      "received": "Received",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "paymentFailed": "Payment failed"
     }
   },
   "tracking": {

@@ -32,7 +32,8 @@ export default function SearchPage() {
                 <Text fw={800} size="lg">
                   {o.order_number}
                 </Text>
-                <Text>{o.customer_name}</Text>
+                <Text size="sm" ff="monospace" c="dimmed">{o.order_code}</Text>
+                {o.customer_name && <Text>{o.customer_name}</Text>}
                 <Badge color={STATUS_COLOR[o.status]} variant="light">
                   {t(`status.${o.status}`)}
                 </Badge>

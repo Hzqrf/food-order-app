@@ -22,7 +22,7 @@ export function writeJson(key: string, value: unknown): void {
 }
 
 export type GuestDetails = { name: string; phone: string };
-export type RecentOrder = { token: string; number: string; placedAt: string; totalSen: number };
+export type RecentOrder = { token: string; number: string; code?: string; placedAt: string; totalSen: number };
 
 const DETAILS = "guest";
 const RECENT = "recent-orders";
@@ -34,4 +34,8 @@ export const saveDetails = (d: GuestDetails) => writeJson(DETAILS, d);
 export const loadRecent = () => readJson<RecentOrder[]>(RECENT, []);
 export function rememberOrder(order: RecentOrder) {
   writeJson(RECENT, [order, ...loadRecent().filter((o) => o.token !== order.token)].slice(0, MAX_RECENT));
+}
+
+export function forgetOrder(token: string) {
+  writeJson(RECENT, loadRecent().filter((o) => o.token !== token));
 }

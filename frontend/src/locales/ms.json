@@ -159,7 +159,8 @@
     "history": "Sejarah",
     "autoClosed": "Ditutup automatik",
     "cancel": "Batalkan pesanan",
-    "cancelReason": "Dibatalkan kerana"
+    "cancelReason": "Dibatalkan kerana",
+    "idLabel": "ID pesanan {{code}}"
   },
   "cancel": {
     "title": "Batalkan pesanan {{number}}",
@@ -206,7 +207,7 @@
     "giveChange": "Beri baki {{amount}}"
   },
   "search": {
-    "placeholder": "Nombor pesanan, telefon atau nama",
+    "placeholder": "Nombor pesanan, ID pesanan, telefon atau nama",
     "hint": "Pekerja boleh mencari 7 hari terakhir.",
     "none": "Tiada pesanan dijumpai."
   },
@@ -344,21 +345,27 @@
     "cartChanged": "Ada perubahan pada pesanan anda. Semak item dan jumlah, kemudian bayar semula.",
     "phoneInvalid": "Masukkan nombor telefon Malaysia, contohnya 012-345 6789.",
     "tooManyUnpaid": "Anda ada pesanan yang belum dibayar. Bayar atau batalkannya dahulu.",
-    "yourName": "Nama anda",
-    "yourNameHint": "Kami panggil nama ini apabila pesanan siap.",
-    "nameRequired": "Masukkan nama anda.",
     "phone": "Nombor telefon",
-    "phoneHint": "Hanya digunakan jika kami perlu menghubungi anda tentang pesanan ini.",
+    "phoneHint": "Pilihan. Hanya digunakan jika kedai perlu menghubungi anda tentang pesanan ini.",
     "phoneReadBack": "Kami akan guna {{phone}}",
     "orderNote": "Nota untuk kedai",
     "pickupOnly": "Ambil di kaunter. Bayar dalam talian sekarang.",
     "pay": "Bayar {{total}}",
-    "privacy": "Nama dan telefon anda hanya digunakan untuk pesanan ini, seperti dalam notis privasi kedai.",
+    "privacy": "Jika anda beri nombor telefon, ia hanya digunakan untuk pesanan ini, seperti dalam notis privasi kedai.",
     "problem": {
       "unavailable": "Tidak lagi tersedia",
       "sold_out": "Sudah habis",
       "option_sold_out": "Satu pilihan sudah habis",
       "invalid_options": "Pilih semula pilihan anda"
+    },
+    "recentStatus": {
+      "awaitingPayment": "Menunggu bayaran",
+      "received": "Diterima",
+      "preparing": "Disediakan",
+      "ready": "Siap",
+      "done": "Selesai",
+      "cancelled": "Dibatalkan",
+      "paymentFailed": "Bayaran gagal"
     }
   },
   "tracking": {

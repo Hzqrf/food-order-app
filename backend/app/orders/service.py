@@ -122,8 +122,23 @@ def check_idempotency_key(key: str | None) -> str:
     return key
 
 
+# No 0/O, 1/I/L: easy to read out over the phone and to type.
+CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+CODE_LENGTH = 6
+
+
+def new_order_code() -> str:
+    return "".join(secrets.choice(CODE_ALPHABET) for _ in range(CODE_LENGTH))
+
+
+def looks_like_code(q: str) -> bool:
+    q = q.upper()
+    return len(q) == CODE_LENGTH and all(c in CODE_ALPHABET for c in q)
+
+
 def _build_order(branch: Branch, result: pricing.PriceResult, **fields) -> Order:
-    order = Order(branch_id=branch.id, public_token=secrets.token_urlsafe(24), subtotal_sen=result.subtotal_sen,
+    order = Order(branch_id=branch.id, public_token=secrets.token_urlsafe(24), order_code=new_order_code(),
+                  subtotal_sen=result.subtotal_sen,
                   discount_sen=0, tax_sen=0, total_sen=result.subtotal_sen, version=1, **fields)
     for line in result.lines:
         item = OrderItem(menu_item_id=line.menu_item_id, item_name=line.item_name,
@@ -146,15 +161,21 @@ def _insert_numbered(db: Session, branch: Branch, result: pricing.PriceResult, i
     counter.last_number += 1
     order = _build_order(branch, result, business_date=day, order_number=counter.last_number,
                          idempotency_key=idempotency_key, **fields)
-    try:
-        with db.begin_nested():
-            db.add(order)
-            db.flush()
-    except IntegrityError:
-        if existing := find_by_idempotency_key(db, idempotency_key):
-            return existing, False
-        raise
-    return order, True
+    for attempt in range(3):
+        try:
+            with db.begin_nested():
+                db.add(order)
+                db.flush()
+            return order, True
+        except IntegrityError:
+            if existing := find_by_idempotency_key(db, idempotency_key):
+                return existing, False
+            if attempt == 2:
+                raise
+            # One in a billion: the random order code is taken. Draw another.
+            order = _build_order(branch, result, business_date=day, order_number=counter.last_number,
+                                 idempotency_key=idempotency_key, **fields)
+    raise AssertionError("unreachable")
 
 
 def create_counter_order(db: Session, branch: Branch, user: User, body: schemas.CounterOrderIn,
@@ -206,14 +227,17 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
     if not (is_open(branch) and branch.is_accepting_online_orders):
         raise AppError("shop_closed", "The shop is not taking online orders right now.", 409)
     limiter.hit("online-order", ip, limit=10, window_seconds=600)
-    phone = normalize_my_phone(body.customer_phone)
-    if phone is None:
-        raise AppError("invalid_phone", "Enter a Malaysian phone number, for example 012-345 6789.", 422,
-                       [{"field": "customer_phone", "message": "invalid phone number"}])
-    unpaid = db.scalar(select(func.count(Order.id)).where(Order.customer_phone == phone,
-                                                          Order.status == sm.PENDING_PAYMENT))
-    if unpaid >= MAX_UNPAID_PER_PHONE:
-        raise AppError("too_many_unpaid", "Finish paying for your earlier orders first.", 429)
+    # The phone number is optional. When given it must be a real number, since the shop may call it.
+    phone = None
+    if body.customer_phone:
+        phone = normalize_my_phone(body.customer_phone)
+        if phone is None:
+            raise AppError("invalid_phone", "Enter a Malaysian phone number, for example 012-345 6789.", 422,
+                           [{"field": "customer_phone", "message": "invalid phone number"}])
+        unpaid = db.scalar(select(func.count(Order.id)).where(Order.customer_phone == phone,
+                                                              Order.status == sm.PENDING_PAYMENT))
+        if unpaid >= MAX_UNPAID_PER_PHONE:
+            raise AppError("too_many_unpaid", "Finish paying for your earlier orders first.", 429)
 
     result = priced_or_conflict(db, body.items, body.expected_total_sen)
     order, created = _insert_numbered(
@@ -253,7 +277,7 @@ def _expired(order: Order) -> bool:
 
 
 def tracking(order: Order, branch: Branch) -> schemas.TrackingOut:
-    base = dict(order_number=fmt_number(order.order_number), status=order.status,
+    base = dict(order_number=fmt_number(order.order_number), order_code=order.order_code, status=order.status,
                 payment_status=order.payment_status, shop_name=branch.name)
     if order.completed_at and utcnow() - order.completed_at > DETAIL_VISIBLE_FOR:
         return schemas.TrackingOut(**base, detail_hidden=True)
@@ -261,7 +285,7 @@ def tracking(order: Order, branch: Branch) -> schemas.TrackingOut:
     return schemas.TrackingOut(
         **base,
         # First name only, and never the phone number.
-        customer_name=(order.customer_name or "").split(" ")[0] or None,
+        customer_name=(order.customer_name or "").split(" ")[0] or None,  # counter orders may have one
         channel=order.channel,
         items=[schemas.TrackingLine(menu_item_id=i.menu_item_id, item_name=i.item_name, quantity=i.quantity,
                                     line_total_sen=i.line_total_sen, note=i.note,
@@ -330,12 +354,15 @@ def search(db: Session, q: str, user: User, branch: Branch) -> list[Order]:
     stmt = select(Order).where(Order.branch_id == branch.id, Order.status != sm.PENDING_PAYMENT)
     if user.role != "admin":
         stmt = stmt.where(Order.business_date >= _staff_cutoff(branch))
+    name_match = Order.customer_name.ilike(f"%{q.replace('%', '').replace('_', '')}%")
     if q.isdigit() and len(q) <= 4:
         stmt = stmt.where(Order.order_number == int(q))
+    elif looks_like_code(q):
+        stmt = stmt.where((Order.order_code == q.upper()) | name_match)
     elif phone := normalize_my_phone(q):
         stmt = stmt.where(Order.customer_phone == phone)
     elif len(q) >= 2:
-        stmt = stmt.where(Order.customer_name.ilike(f"%{q.replace('%', '').replace('_', '')}%"))
+        stmt = stmt.where(name_match)
     else:
         return []
     return list(db.scalars(stmt.options(*_LOAD).order_by(Order.id.desc()).limit(50)))
@@ -420,7 +447,8 @@ def fmt_number(n: int) -> str:
 
 def summary(order: Order) -> dict:
     return dict(
-        id=order.id, order_number=fmt_number(order.order_number), business_date=order.business_date.isoformat(),
+        id=order.id, order_number=fmt_number(order.order_number), order_code=order.order_code,
+        business_date=order.business_date.isoformat(),
         channel=order.channel, status=order.status, payment_status=order.payment_status,
         customer_name=order.customer_name, note=order.note, subtotal_sen=order.subtotal_sen,
         total_sen=order.total_sen, version=order.version, auto_closed=order.auto_closed,

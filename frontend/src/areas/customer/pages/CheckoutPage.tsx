@@ -14,7 +14,7 @@ import { loadDetails, rememberOrder, saveDetails } from "../../../lib/storage";
 import { useCart } from "../cart";
 import { CartLines } from "../components/CartLines";
 
-/** One screen: who you are, a note, the summary, and one button. */
+/** One screen: an optional phone number, a note, the summary, and one button. */
 export default function CheckoutPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ export default function CheckoutPage() {
   const place = usePlaceOrder();
 
   const saved = loadDetails();
-  const [name, setName] = useState(saved.name);
   const [phone, setPhone] = useState(saved.phone);
   const [note, setNote] = useState("");
   const [touched, setTouched] = useState(false);
@@ -48,10 +47,12 @@ export default function CheckoutPage() {
   }
   if (cart.count === 0) return <Navigate to="/cart" replace />;
 
+  // Phone is optional; an empty field is fine, a half-typed number is not.
   const normalized = normalizeMyPhone(phone);
+  const phoneOk = phone.trim() === "" || normalized !== null;
   const total = quote.data?.total_sen;
   const problems = quote.data?.problems.length ?? 0;
-  const canSubmit = name.trim() && normalized && total !== undefined && problems === 0 && shop?.can_order_online;
+  const canSubmit = phoneOk && total !== undefined && problems === 0 && shop?.can_order_online;
 
   const submit = () => {
     setTouched(true);
@@ -60,13 +61,14 @@ export default function CheckoutPage() {
     place.mutate(
       {
         key,
-        body: { customer_name: name.trim(), customer_phone: normalized!, note: note.trim() || null,
+        body: { customer_phone: normalized, note: note.trim() || null,
           items: cart.requestLines, expected_total_sen: total },
       },
       {
         onSuccess: (order) => {
-          saveDetails({ name: name.trim(), phone });
-          rememberOrder({ token: order.token, number: order.order_number, placedAt: new Date().toISOString(),
+          saveDetails({ name: "", phone });
+          rememberOrder({ token: order.token, number: order.order_number, code: order.order_code,
+            placedAt: new Date().toISOString(),
             totalSen: order.total_sen });
           setLeaving(true);
           cart.clear();
@@ -99,14 +101,11 @@ export default function CheckoutPage() {
       {error && <Alert color="red">{error}</Alert>}
       <Paper withBorder p="md">
         <Stack>
-          <TextInput label={t("customer.yourName")} description={t("customer.yourNameHint")} required maxLength={50}
-            autoComplete="given-name" value={name} onChange={(e) => setName(e.currentTarget.value)}
-            error={touched && !name.trim() ? t("customer.nameRequired") : undefined} />
-          <TextInput label={t("customer.phone")} required type="tel" inputMode="tel" autoComplete="tel" maxLength={20}
-            placeholder="012-345 6789" value={phone} onChange={(e) => setPhone(e.currentTarget.value)}
+          <TextInput label={t("customer.phone")} type="tel" inputMode="tel" autoComplete="tel" maxLength={20}
+            placeholder={t("common.optional")} value={phone} onChange={(e) => setPhone(e.currentTarget.value)}
             onBlur={() => setTouched(true)}
             description={normalized ? t("customer.phoneReadBack", { phone: formatMyPhone(normalized) }) : t("customer.phoneHint")}
-            error={touched && phone && !normalized ? t("customer.phoneInvalid") : undefined} />
+            error={touched && !phoneOk ? t("customer.phoneInvalid") : undefined} />
           <Textarea label={t("customer.orderNote")} placeholder={t("common.optional")} maxLength={200} autosize
             minRows={1} value={note} onChange={(e) => setNote(e.currentTarget.value)} />
         </Stack>

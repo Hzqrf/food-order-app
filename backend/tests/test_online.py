@@ -213,3 +213,28 @@ def test_fake_gateway_hosted_page(client, menu, db):
     r = client.post(page.url.path, data={"action": "pay"}, follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"].endswith(f"/t/{body['token']}")
     assert db.scalar(select(Order.status)) == "placed"
+
+
+def test_checkout_needs_no_name_or_phone(client, menu, db):
+    body = {"items": [{"menu_item_id": menu["tender"], "quantity": 1, "option_ids": [menu["Regular"]]}],
+            "expected_total_sen": 1000}
+    r = client.post(f"{API}/orders", json=body, headers={"Idempotency-Key": new_key()})
+    assert r.status_code == 201, r.text
+    order = db.scalar(select(Order))
+    assert (order.customer_name, order.customer_phone) == (None, None)
+    track = client.get(f"{API}/t/{r.json()['token']}").json()
+    assert track["customer_name"] is None and track["order_code"] == r.json()["order_code"]
+    # An empty phone field counts as no phone, not as an invalid one.
+    r = client.post(f"{API}/orders", json={**body, "customer_phone": "  "}, headers={"Idempotency-Key": new_key()})
+    assert r.status_code == 201
+
+
+def test_every_order_has_a_permanent_code_staff_can_search(client, staff, menu, db):
+    online = place(client, menu).json()
+    login(client, staff.username)
+    counter = counter_order(client, [{"menu_item_id": menu["milo"], "quantity": 1}]).json()
+    codes = [online["order_code"], counter["order_code"]]
+    assert len(set(codes)) == 2
+    assert all(len(c) == 6 and not set(c) & set("01ILO") for c in codes)
+    found = client.get(f"{API}/staff/orders/search", params={"q": counter["order_code"].lower()}).json()
+    assert [o["id"] for o in found] == [counter["id"]]

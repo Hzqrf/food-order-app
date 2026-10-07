@@ -220,6 +220,9 @@ class Order(TimestampMixin, Base):
     branch_id: Mapped[int] = mapped_column(BigId, fk("branches.id"))
     business_date: Mapped[date] = mapped_column(Date)
     order_number: Mapped[int] = mapped_column(Integer)
+    # A permanent ID for the order, e.g. "7Q2M9X". The daily number above is for calling out and
+    # repeats every day; this one never repeats. Not a secret: the tracking link uses public_token.
+    order_code: Mapped[str] = mapped_column(String(12), unique=True)
     public_token: Mapped[str] = mapped_column(String(64), unique=True)
     channel: Mapped[str] = mapped_column(String(20))  # online, counter, phone
     created_by_user_id: Mapped[int | None] = mapped_column(BigId, fk("users.id"))

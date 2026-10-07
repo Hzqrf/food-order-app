@@ -60,10 +60,10 @@ export function OrderDetailDrawer({
             </Badge>
             {order.auto_closed && <Badge color="yellow">{t("order.autoClosed")}</Badge>}
           </Group>
-          {order.customer_name && (
+          <Text size="sm" ff="monospace">{t("order.idLabel", { code: order.order_code })}</Text>
+          {(order.customer_name || order.customer_phone) && (
             <Text>
-              {order.customer_name}
-              {order.customer_phone ? ` · ${order.customer_phone}` : ""}
+              {[order.customer_name, order.customer_phone].filter(Boolean).join(" · ")}
             </Text>
           )}
           {order.created_by_name && (

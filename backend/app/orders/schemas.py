@@ -74,18 +74,20 @@ class CounterOrderIn(BaseModel):
 
 
 class OnlineOrderIn(BaseModel):
-    customer_name: str = Field(min_length=1, max_length=50)
-    customer_phone: str = Field(min_length=8, max_length=20)
+    # Checkout asks for neither: the order ID identifies the order. Both are kept for API callers.
+    customer_name: str | None = Field(default=None, max_length=50)
+    customer_phone: str | None = Field(default=None, max_length=20)
     note: str | None = Field(default=None, max_length=200)
     items: list[CartLineIn] = Field(min_length=1, max_length=50)
     # The total the customer saw. If the server's total differs, the order is refused for review.
     expected_total_sen: int
 
-    _clean = field_validator("customer_name", "note")(_strip)
+    _clean = field_validator("customer_name", "customer_phone", "note")(_strip)
 
 
 class OnlineOrderOut(BaseModel):
     order_number: str
+    order_code: str
     token: str
     status: str
     total_sen: int
@@ -110,6 +112,7 @@ class TrackingLine(BaseModel):
 
 class TrackingOut(BaseModel):
     order_number: str
+    order_code: str
     status: str
     payment_status: str
     shop_name: str
@@ -172,6 +175,8 @@ class OrderLine(BaseModel):
 class OrderSummary(BaseModel):
     id: int
     order_number: str
+    # Permanent order ID, unique across all days. order_number repeats daily.
+    order_code: str
     business_date: str
     channel: str
     status: str

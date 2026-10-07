@@ -254,6 +254,7 @@ export default function TakeOrderPage() {
             <Title order={1} fz={72}>
               {done.order_number}
             </Title>
+            <Text size="sm" c="dimmed" ff="monospace">{t("order.idLabel", { code: done.order_code })}</Text>
             <Text>{formatSen(done.total_sen)}</Text>
             {done.change_sen !== null && done.change_sen > 0 && (
               <Text size="xl" fw={800} c="green.8">

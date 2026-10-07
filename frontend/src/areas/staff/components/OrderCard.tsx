@@ -55,11 +55,10 @@ export function OrderCard({
               {t("board.minutes", { count: waited })}
             </Text>
           </Group>
-          {order.customer_name && (
-            <Text size="sm" fw={600}>
-              {order.customer_name}
-            </Text>
-          )}
+          <Text size="xs" c="dimmed" ff="monospace">
+            {order.order_code}
+            {order.customer_name ? ` · ${order.customer_name}` : ""}
+          </Text>
           <Stack gap={2} mt={4}>
             {order.items.map((line) => (
               <div key={line.id}>
