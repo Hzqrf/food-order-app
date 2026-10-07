@@ -1,0 +1,394 @@
+{
+  "common": {
+    "add": "Add",
+    "back": "Back",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "language": "Language",
+    "loading": "Loading…",
+    "more": "More",
+    "optional": "Optional",
+    "save": "Save",
+    "total": "Total",
+    "tryAgain": "Try again",
+    "undo": "Undo"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "Check the connection and try again."
+  },
+  "apiError": {
+    "network_error": "Connection lost. Nothing was sent. Try again.",
+    "cart_changed": "Some items changed or sold out. Check the order and try again.",
+    "version_conflict": "Someone else just updated this order.",
+    "invalid_transition": "This order cannot be moved that way.",
+    "insufficient_cash": "The amount given is less than the total.",
+    "refund_required": "This order was paid. Choose how the money goes back.",
+    "not_refundable": "There is nothing left to refund on this order.",
+    "reason_required": "Give a reason.",
+    "weak_password": "Password must be at least 10 characters and not a common one.",
+    "username_taken": "That username is already used.",
+    "email_taken": "That email is already used.",
+    "email_required": "Owner accounts need an email address.",
+    "invalid_pin": "PIN must be 4 to 6 digits.",
+    "image_too_large": "Images must be 5 MB or smaller.",
+    "invalid_image": "Upload a JPEG, PNG or WebP photo.",
+    "forbidden": "You do not have access to do that.",
+    "not_authenticated": "Please sign in again.",
+    "too_many_requests": "Too many attempts. Wait a moment and try again.",
+    "account_locked": "Too many wrong attempts. Try again in 15 minutes.",
+    "invalid_totp": "That code is not right.",
+    "device_not_registered": "This device is not registered as the shop tablet.",
+    "validation_error": "Some fields are not valid.",
+    "internal_error": "Something went wrong on our side. Try again."
+  },
+  "shop": {
+    "open": "Open",
+    "closed": "Closed",
+    "prepTime": "Usually ready in {{minutes}} min",
+    "closedTitle": "We're closed right now",
+    "closedBody": "Have a look at the menu. Ordering opens when we do.",
+    "pausedTitle": "Online orders are paused",
+    "pausedBody": "We're very busy. Please order at the counter or try again shortly."
+  },
+  "menu": {
+    "empty": "The menu is being prepared.",
+    "soldOut": "Sold out",
+    "soldOutToday": "Sold out today"
+  },
+  "options": {
+    "chooseOne": "Choose 1",
+    "chooseRange": "Choose {{min}} to {{max}}",
+    "upTo": "Up to {{max}}"
+  },
+  "login": {
+    "title": "Sign in",
+    "username": "Username or email",
+    "password": "Password",
+    "totp": "Code from your authenticator app",
+    "submit": "Sign in",
+    "wrong": "Wrong username or password.",
+    "badCode": "That code is not right.",
+    "locked": "Too many wrong attempts. Try again in 15 minutes.",
+    "withPassword": "Sign in with a password instead"
+  },
+  "pin": {
+    "title": "Unlock",
+    "whoAreYou": "Who's working?",
+    "noStaff": "No staff have a PIN yet. The owner sets PINs on the Staff page.",
+    "enterPin": "{{name}}, enter your PIN",
+    "ok": "OK",
+    "wrong": "Wrong PIN. Try again.",
+    "locked": "Too many wrong PINs. Try again in 15 minutes."
+  },
+  "staff": {
+    "tabs": {
+      "board": "Board",
+      "takeOrder": "Take order",
+      "search": "Search",
+      "soldOut": "Sold out"
+    },
+    "onlineOn": "Online orders on",
+    "onlinePaused": "Online orders paused",
+    "onlineOrdersHint": "Pause during a rush. Orders already paid still come through.",
+    "lock": "Lock",
+    "signOut": "Sign out",
+    "tapToUnlock": "Tap to unlock",
+    "lockedBanner": "Locked. Showing orders only.",
+    "adminLink": "Owner settings"
+  },
+  "board": {
+    "columns": {
+      "new": "New",
+      "preparing": "Preparing",
+      "ready": "Ready"
+    },
+    "start": "Start",
+    "ready": "Ready",
+    "handedOver": "Handed over",
+    "moveTo": {
+      "preparing": "Start",
+      "ready": "Ready",
+      "completed": "Handed over"
+    },
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "note": "Note",
+    "emptyNew": "No new orders.",
+    "handedOverToast": "{{number}} handed over",
+    "changedElsewhere": "Order {{number}} was updated on another screen.",
+    "offline": "Offline. Showing orders as of {{time}}."
+  },
+  "channel": {
+    "online": "Online",
+    "counter": "Counter",
+    "phone": "Phone"
+  },
+  "status": {
+    "pending_payment": "Waiting for payment",
+    "placed": "New",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "completed": "Collected",
+    "cancelled": "Cancelled"
+  },
+  "paymentStatus": {
+    "unpaid": "Unpaid",
+    "paid": "Paid",
+    "refunded": "Refunded"
+  },
+  "paymentKind": {
+    "charge": "Paid",
+    "refund": "Refund"
+  },
+  "paymentMethod": {
+    "cash": "Cash",
+    "qr_counter": "QR",
+    "card_terminal": "Card",
+    "gateway": "Online"
+  },
+  "actor": {
+    "system": "System",
+    "customer": "Customer",
+    "staff": "Staff",
+    "admin": "Owner"
+  },
+  "order": {
+    "title": "Order {{number}}",
+    "keyedBy": "Keyed in by {{name}}",
+    "payments": "Payment",
+    "history": "History",
+    "autoClosed": "Auto-closed",
+    "cancel": "Cancel order",
+    "cancelReason": "Cancelled because"
+  },
+  "cancel": {
+    "title": "Cancel order {{number}}",
+    "reason": "Reason",
+    "reasons": {
+      "soldOut": "Sold out",
+      "changedMind": "Customer changed mind",
+      "duplicate": "Duplicate order"
+    },
+    "refundHow": "How does the {{amount}} go back?",
+    "refundCash": "Cash handed back now",
+    "refundOriginal": "Reversed on the {{method}} terminal",
+    "refundNote": "The refund is recorded and shown to the owner.",
+    "confirm": "Cancel order",
+    "refundLater": "The owner refunds it through the online payment",
+    "refundGatewayDone": "Already refunded in the payment gateway"
+  },
+  "takeOrder": {
+    "order": "Order",
+    "clear": "Clear",
+    "empty": "Tap items to add them.",
+    "unavailable": "No longer available",
+    "less": "One less",
+    "more": "One more",
+    "customerName": "Name to call out",
+    "note": "Order note",
+    "phoneOrder": "Phone order",
+    "charge": "Charge {{total}}",
+    "withOptions": "Add with options",
+    "addWithPrice": "Add · {{price}}",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "orderNumber": "Order number",
+    "nextOrder": "Next order"
+  },
+  "payment": {
+    "title": "Payment",
+    "amountGiven": "Amount given",
+    "exact": "Exact",
+    "change": "Change",
+    "notEnough": "Not enough",
+    "confirmReceived": "Confirm the payment went through on the terminal or QR before you tap.",
+    "cashReceived": "Cash received",
+    "paymentReceived": "Payment received",
+    "giveChange": "Give {{amount}} change"
+  },
+  "search": {
+    "placeholder": "Order number, phone or name",
+    "hint": "Staff can search the last 7 days.",
+    "none": "No orders found."
+  },
+  "soldOut": {
+    "hint": "Switch off anything that has run out. Everything comes back on automatically after closing.",
+    "on": "ON",
+    "off": "OFF",
+    "options": "Options and add-ons",
+    "blockedByOption": "Unavailable: a required option has run out"
+  },
+  "role": {
+    "admin": "Owner",
+    "staff": "Staff"
+  },
+  "days": {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday"
+  },
+  "admin": {
+    "saved": "Saved",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "nav": {
+      "menu": "Menu",
+      "staff": "Staff",
+      "settings": "Settings",
+      "board": "Order board"
+    },
+    "menu": {
+      "title": "Menu",
+      "items": "Items",
+      "optionGroups": "Option groups",
+      "optionGroupsHint": "Shown in the order you pick them.",
+      "categories": "Categories",
+      "categoriesHint": "A category with no visible items is hidden from customers automatically.",
+      "addItem": "Add item",
+      "editItem": "Edit item",
+      "addCategoryFirst": "Add a category first, on the Categories tab.",
+      "noItems": "No items yet.",
+      "hidden": "Hidden",
+      "visible": "Visible to customers",
+      "category": "Category",
+      "nameEn": "Name (English)",
+      "nameMs": "Name (Bahasa Malaysia)",
+      "descriptionEn": "Description (English)",
+      "descriptionMs": "Description (Bahasa Malaysia)",
+      "price": "Price",
+      "photo": "Photo",
+      "uploadPhoto": "Upload photo",
+      "replacePhoto": "Replace photo",
+      "photoAfterSave": "Save the item first, then add a photo.",
+      "newCategory": "New category"
+    },
+    "groups": {
+      "hint": "One group, like Sauces, can be used on many items. Marking an option sold out removes it everywhere.",
+      "add": "Add option group",
+      "edit": "Edit option group",
+      "min": "Minimum choices",
+      "minHint": "0 = optional",
+      "max": "Maximum choices",
+      "newOption": "New option",
+      "extraPrice": "Extra price"
+    },
+    "staff": {
+      "title": "Staff",
+      "add": "Add person",
+      "name": "Full name",
+      "position": "Position",
+      "access": "Access",
+      "email": "Email",
+      "phone": "Phone",
+      "pin": "Tablet PIN",
+      "pinHint": "4 to 6 digits, for the shop tablet.",
+      "usernameHint": "Lowercase letters, numbers, dots or dashes.",
+      "passwordHint": "At least 10 characters.",
+      "newPassword": "New password",
+      "inactive": "Inactive",
+      "setPin": "Set PIN",
+      "setPinFor": "Set PIN for {{name}}",
+      "resetPassword": "Reset password",
+      "resetPasswordFor": "Reset password for {{name}}",
+      "resetSignsOut": "They will be signed out everywhere.",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "deactivateTitle": "Deactivate {{name}}?",
+      "deactivateBody": "They are signed out immediately and cannot sign in. Their orders and history are kept."
+    },
+    "settings": {
+      "onlineOrders": "Online orders",
+      "onlineOrdersHint": "Pause new online orders at any time. Staff can do this from the board too.",
+      "shop": "Shop",
+      "shopName": "Shop name",
+      "prepMinutes": "Usual prep time (minutes)",
+      "prepHint": "Shown to customers. Cards on the board turn amber after this.",
+      "openingHours": "Opening hours",
+      "opens": "Opens",
+      "closes": "Closes",
+      "hoursHint": "A closing time earlier than the opening time means the shop closes after midnight. The same opening and closing time means open 24 hours.",
+      "tablet": "Shop tablet",
+      "tabletHint": "Register the shared counter tablet once. Staff then unlock it with their PIN instead of a password.",
+      "register": "Register this device as the shop tablet",
+      "tabletRegistered": "This device is the shop tablet.",
+      "unregister": "Unregister",
+      "security": "Your account",
+      "totpOn": "Two-step sign-in is on.",
+      "totpOffTitle": "Turn on two-step sign-in",
+      "totpOffBody": "Your account controls the menu, money and staff. Protect it with an authenticator app such as Google Authenticator.",
+      "totpStart": "Set up",
+      "totpStep1": "1. In your authenticator app, add an account and enter this key:",
+      "totpStep2": "2. Type the 6-digit code it shows:",
+      "totpConfirm": "Turn on",
+      "changePassword": "Change password",
+      "currentPassword": "Current password"
+    }
+  },
+  "customer": {
+    "viewCart": "View cart",
+    "removedItem": "No longer on the menu",
+    "itemNote": "Note for the kitchen",
+    "itemNotePlaceholder": "e.g. no onions",
+    "orderingClosed": "Ordering is closed",
+    "recentOrders": "Your recent orders",
+    "cartEmpty": "Your cart is empty.",
+    "browseMenu": "Browse the menu",
+    "yourOrder": "Your order",
+    "addMore": "Add more",
+    "someUnavailable": "Some items are no longer available. Remove them to continue.",
+    "checkout": "Checkout",
+    "toPayment": "Taking you to payment…",
+    "cartChanged": "Something in your order changed. Check the items and total, then pay again.",
+    "phoneInvalid": "Enter a Malaysian phone number, for example 012-345 6789.",
+    "tooManyUnpaid": "You have unpaid orders. Pay for or cancel those first.",
+    "yourName": "Your name",
+    "yourNameHint": "We call this out when your order is ready.",
+    "nameRequired": "Enter your name.",
+    "phone": "Phone number",
+    "phoneHint": "Only used if we need to reach you about this order.",
+    "phoneReadBack": "We'll use {{phone}}",
+    "orderNote": "Note for the shop",
+    "pickupOnly": "Pickup at the counter. Pay now online.",
+    "pay": "Pay {{total}}",
+    "privacy": "Your name and phone are used only for this order, as described in the shop's privacy notice.",
+    "problem": {
+      "unavailable": "No longer available",
+      "sold_out": "Sold out",
+      "option_sold_out": "An option has sold out",
+      "invalid_options": "Choose the options again"
+    }
+  },
+  "tracking": {
+    "readyTitle": "Ready to collect",
+    "readyBody": "Come to the counter and show this number.",
+    "notFound": "We couldn't find that order. Check the link.",
+    "wasCompleted": "This order was completed.",
+    "cancelledTitle": "Order cancelled",
+    "reason": {
+      "payment_expired": "Payment wasn't completed in time.",
+      "customer_cancelled": "You cancelled this order."
+    },
+    "reasonFromShop": "The shop says: {{reason}}",
+    "refundComing": "You paid for this order. The shop will refund you.",
+    "refunded": "Your payment has been refunded.",
+    "step": {
+      "placed": "Order received",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "completed": "Collected"
+    },
+    "usually": "Usually about {{minutes}} min",
+    "keepLink": "Keep this page. It updates by itself.",
+    "awaitingPayment": "Waiting for payment",
+    "justPaid": "Just paid? This page updates in a few seconds.",
+    "expiresIn": "Pay within {{time}} or the order is cancelled.",
+    "payNow": "Pay {{total}} now",
+    "cancelUnpaid": "Cancel this order",
+    "orderAgain": "Order again"
+  }
+}

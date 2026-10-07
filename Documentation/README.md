@@ -1,3 +1,8 @@
+> **Superseded (7 October 2026).** These documents describe an earlier design: Express and Prisma,
+> cash on collection, pickup slots, an "Accepted" step and commission on sales by staff. The build
+> now follows the MVP design of 6 October 2026: FastAPI and MySQL, prepaid online orders, six order
+> states and no sales-based commission. See the [project README](../README.md). They are kept for history.
+
 # food-order-app
 
 Online pickup ordering for a single dessert shop. Customers browse a menu,

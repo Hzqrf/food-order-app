@@ -1,0 +1,392 @@
+{
+  "common": {
+    "add": "Tambah",
+    "back": "Kembali",
+    "cancel": "Batal",
+    "edit": "Ubah",
+    "language": "Bahasa",
+    "loading": "Memuatkan…",
+    "more": "Lagi",
+    "optional": "Pilihan",
+    "save": "Simpan",
+    "total": "Jumlah",
+    "tryAgain": "Cuba lagi",
+    "undo": "Buat asal"
+  },
+  "error": {
+    "title": "Ada masalah",
+    "body": "Semak sambungan dan cuba lagi."
+  },
+  "apiError": {
+    "network_error": "Sambungan terputus. Tiada apa yang dihantar. Cuba lagi.",
+    "cart_changed": "Ada item yang berubah atau sudah habis. Semak pesanan dan cuba lagi.",
+    "version_conflict": "Pesanan ini baru dikemas kini oleh orang lain.",
+    "invalid_transition": "Pesanan ini tidak boleh dialihkan begitu.",
+    "insufficient_cash": "Wang yang diberi kurang daripada jumlah.",
+    "refund_required": "Pesanan ini sudah dibayar. Pilih cara wang dipulangkan.",
+    "not_refundable": "Tiada baki untuk dipulangkan bagi pesanan ini.",
+    "reason_required": "Nyatakan sebab.",
+    "weak_password": "Kata laluan mesti sekurang-kurangnya 10 aksara dan bukan yang biasa digunakan.",
+    "username_taken": "Nama pengguna itu sudah digunakan.",
+    "email_taken": "E-mel itu sudah digunakan.",
+    "email_required": "Akaun pemilik memerlukan alamat e-mel.",
+    "invalid_pin": "PIN mesti 4 hingga 6 digit.",
+    "image_too_large": "Gambar mesti 5 MB atau lebih kecil.",
+    "invalid_image": "Muat naik gambar JPEG, PNG atau WebP.",
+    "forbidden": "Anda tiada akses untuk berbuat demikian.",
+    "not_authenticated": "Sila log masuk semula.",
+    "too_many_requests": "Terlalu banyak cubaan. Tunggu sebentar dan cuba lagi.",
+    "account_locked": "Terlalu banyak cubaan salah. Cuba lagi dalam 15 minit.",
+    "invalid_totp": "Kod itu tidak betul.",
+    "device_not_registered": "Peranti ini belum didaftarkan sebagai tablet kedai.",
+    "validation_error": "Ada medan yang tidak sah.",
+    "internal_error": "Ada masalah di pihak kami. Cuba lagi."
+  },
+  "shop": {
+    "open": "Buka",
+    "closed": "Tutup",
+    "prepTime": "Biasanya siap dalam {{minutes}} minit",
+    "closedTitle": "Kami tutup sekarang",
+    "closedBody": "Lihat-lihat menu dahulu. Pesanan dibuka apabila kedai dibuka.",
+    "pausedTitle": "Pesanan dalam talian dihentikan seketika",
+    "pausedBody": "Kami sangat sibuk. Sila pesan di kaunter atau cuba sebentar lagi."
+  },
+  "menu": {
+    "empty": "Menu sedang disediakan.",
+    "soldOut": "Habis",
+    "soldOutToday": "Habis hari ini"
+  },
+  "options": {
+    "chooseOne": "Pilih 1",
+    "chooseRange": "Pilih {{min}} hingga {{max}}",
+    "upTo": "Sehingga {{max}}"
+  },
+  "login": {
+    "title": "Log masuk",
+    "username": "Nama pengguna atau e-mel",
+    "password": "Kata laluan",
+    "totp": "Kod daripada aplikasi pengesah",
+    "submit": "Log masuk",
+    "wrong": "Nama pengguna atau kata laluan salah.",
+    "badCode": "Kod itu tidak betul.",
+    "locked": "Terlalu banyak cubaan salah. Cuba lagi dalam 15 minit.",
+    "withPassword": "Log masuk dengan kata laluan"
+  },
+  "pin": {
+    "title": "Buka kunci",
+    "whoAreYou": "Siapa yang bertugas?",
+    "noStaff": "Belum ada pekerja yang mempunyai PIN. Pemilik menetapkan PIN di halaman Pekerja.",
+    "enterPin": "{{name}}, masukkan PIN anda",
+    "ok": "OK",
+    "wrong": "PIN salah. Cuba lagi.",
+    "locked": "Terlalu banyak PIN salah. Cuba lagi dalam 15 minit."
+  },
+  "staff": {
+    "tabs": {
+      "board": "Papan",
+      "takeOrder": "Ambil pesanan",
+      "search": "Cari",
+      "soldOut": "Habis"
+    },
+    "onlineOn": "Pesanan dalam talian dibuka",
+    "onlinePaused": "Pesanan dalam talian dihentikan",
+    "onlineOrdersHint": "Hentikan seketika ketika sibuk. Pesanan yang sudah dibayar tetap masuk.",
+    "lock": "Kunci",
+    "signOut": "Log keluar",
+    "tapToUnlock": "Ketik untuk buka",
+    "lockedBanner": "Dikunci. Paparan pesanan sahaja.",
+    "adminLink": "Tetapan pemilik"
+  },
+  "board": {
+    "columns": {
+      "new": "Baru",
+      "preparing": "Sedang disediakan",
+      "ready": "Siap"
+    },
+    "start": "Mula",
+    "ready": "Siap",
+    "handedOver": "Sudah diserah",
+    "moveTo": {
+      "preparing": "Mula",
+      "ready": "Siap",
+      "completed": "Sudah diserah"
+    },
+    "minutes_other": "{{count}} min",
+    "note": "Nota",
+    "emptyNew": "Tiada pesanan baru.",
+    "handedOverToast": "{{number}} sudah diserah",
+    "changedElsewhere": "Pesanan {{number}} dikemas kini di skrin lain.",
+    "offline": "Luar talian. Pesanan setakat {{time}}."
+  },
+  "channel": {
+    "online": "Dalam talian",
+    "counter": "Kaunter",
+    "phone": "Telefon"
+  },
+  "status": {
+    "pending_payment": "Menunggu bayaran",
+    "placed": "Baru",
+    "preparing": "Sedang disediakan",
+    "ready": "Siap",
+    "completed": "Sudah diambil",
+    "cancelled": "Dibatalkan"
+  },
+  "paymentStatus": {
+    "unpaid": "Belum dibayar",
+    "paid": "Dibayar",
+    "refunded": "Dipulangkan"
+  },
+  "paymentKind": {
+    "charge": "Dibayar",
+    "refund": "Pulangan"
+  },
+  "paymentMethod": {
+    "cash": "Tunai",
+    "qr_counter": "QR",
+    "card_terminal": "Kad",
+    "gateway": "Dalam talian"
+  },
+  "actor": {
+    "system": "Sistem",
+    "customer": "Pelanggan",
+    "staff": "Pekerja",
+    "admin": "Pemilik"
+  },
+  "order": {
+    "title": "Pesanan {{number}}",
+    "keyedBy": "Dimasukkan oleh {{name}}",
+    "payments": "Bayaran",
+    "history": "Sejarah",
+    "autoClosed": "Ditutup automatik",
+    "cancel": "Batalkan pesanan",
+    "cancelReason": "Dibatalkan kerana"
+  },
+  "cancel": {
+    "title": "Batalkan pesanan {{number}}",
+    "reason": "Sebab",
+    "reasons": {
+      "soldOut": "Sudah habis",
+      "changedMind": "Pelanggan ubah fikiran",
+      "duplicate": "Pesanan berganda"
+    },
+    "refundHow": "Bagaimana {{amount}} dipulangkan?",
+    "refundCash": "Tunai diserahkan sekarang",
+    "refundOriginal": "Dibatalkan pada terminal {{method}}",
+    "refundNote": "Pulangan direkodkan dan ditunjukkan kepada pemilik.",
+    "confirm": "Batalkan pesanan",
+    "refundLater": "Pemilik memulangkan melalui bayaran dalam talian",
+    "refundGatewayDone": "Sudah dipulangkan di gerbang pembayaran"
+  },
+  "takeOrder": {
+    "order": "Pesanan",
+    "clear": "Kosongkan",
+    "empty": "Ketik item untuk menambah.",
+    "unavailable": "Tidak lagi tersedia",
+    "less": "Kurang satu",
+    "more": "Tambah satu",
+    "customerName": "Nama untuk dipanggil",
+    "note": "Nota pesanan",
+    "phoneOrder": "Pesanan telefon",
+    "charge": "Caj {{total}}",
+    "withOptions": "Tambah dengan pilihan",
+    "addWithPrice": "Tambah · {{price}}",
+    "itemCount_other": "{{count}} item",
+    "orderNumber": "Nombor pesanan",
+    "nextOrder": "Pesanan seterusnya"
+  },
+  "payment": {
+    "title": "Bayaran",
+    "amountGiven": "Wang diberi",
+    "exact": "Tepat",
+    "change": "Baki",
+    "notEnough": "Tidak cukup",
+    "confirmReceived": "Pastikan bayaran berjaya pada terminal atau QR sebelum mengetik.",
+    "cashReceived": "Tunai diterima",
+    "paymentReceived": "Bayaran diterima",
+    "giveChange": "Beri baki {{amount}}"
+  },
+  "search": {
+    "placeholder": "Nombor pesanan, telefon atau nama",
+    "hint": "Pekerja boleh mencari 7 hari terakhir.",
+    "none": "Tiada pesanan dijumpai."
+  },
+  "soldOut": {
+    "hint": "Tutup apa-apa yang sudah habis. Semua dibuka semula secara automatik selepas kedai tutup.",
+    "on": "ADA",
+    "off": "HABIS",
+    "options": "Pilihan dan tambahan",
+    "blockedByOption": "Tidak tersedia: pilihan wajib sudah habis"
+  },
+  "role": {
+    "admin": "Pemilik",
+    "staff": "Pekerja"
+  },
+  "days": {
+    "mon": "Isnin",
+    "tue": "Selasa",
+    "wed": "Rabu",
+    "thu": "Khamis",
+    "fri": "Jumaat",
+    "sat": "Sabtu",
+    "sun": "Ahad"
+  },
+  "admin": {
+    "saved": "Disimpan",
+    "moveUp": "Naik",
+    "moveDown": "Turun",
+    "nav": {
+      "menu": "Menu",
+      "staff": "Pekerja",
+      "settings": "Tetapan",
+      "board": "Papan pesanan"
+    },
+    "menu": {
+      "title": "Menu",
+      "items": "Item",
+      "optionGroups": "Kumpulan pilihan",
+      "optionGroupsHint": "Dipaparkan mengikut susunan yang anda pilih.",
+      "categories": "Kategori",
+      "categoriesHint": "Kategori tanpa item yang kelihatan disembunyikan daripada pelanggan secara automatik.",
+      "addItem": "Tambah item",
+      "editItem": "Ubah item",
+      "addCategoryFirst": "Tambah kategori dahulu di tab Kategori.",
+      "noItems": "Belum ada item.",
+      "hidden": "Disembunyikan",
+      "visible": "Kelihatan kepada pelanggan",
+      "category": "Kategori",
+      "nameEn": "Nama (Bahasa Inggeris)",
+      "nameMs": "Nama (Bahasa Malaysia)",
+      "descriptionEn": "Keterangan (Bahasa Inggeris)",
+      "descriptionMs": "Keterangan (Bahasa Malaysia)",
+      "price": "Harga",
+      "photo": "Gambar",
+      "uploadPhoto": "Muat naik gambar",
+      "replacePhoto": "Tukar gambar",
+      "photoAfterSave": "Simpan item dahulu, kemudian tambah gambar.",
+      "newCategory": "Kategori baru"
+    },
+    "groups": {
+      "hint": "Satu kumpulan, seperti Sos, boleh digunakan pada banyak item. Menanda pilihan sebagai habis membuangnya di semua tempat.",
+      "add": "Tambah kumpulan pilihan",
+      "edit": "Ubah kumpulan pilihan",
+      "min": "Pilihan minimum",
+      "minHint": "0 = tidak wajib",
+      "max": "Pilihan maksimum",
+      "newOption": "Pilihan baru",
+      "extraPrice": "Harga tambahan"
+    },
+    "staff": {
+      "title": "Pekerja",
+      "add": "Tambah orang",
+      "name": "Nama penuh",
+      "position": "Jawatan",
+      "access": "Akses",
+      "email": "E-mel",
+      "phone": "Telefon",
+      "pin": "PIN tablet",
+      "pinHint": "4 hingga 6 digit, untuk tablet kedai.",
+      "usernameHint": "Huruf kecil, nombor, titik atau sengkang.",
+      "passwordHint": "Sekurang-kurangnya 10 aksara.",
+      "newPassword": "Kata laluan baru",
+      "inactive": "Tidak aktif",
+      "setPin": "Tetapkan PIN",
+      "setPinFor": "Tetapkan PIN untuk {{name}}",
+      "resetPassword": "Set semula kata laluan",
+      "resetPasswordFor": "Set semula kata laluan untuk {{name}}",
+      "resetSignsOut": "Mereka akan dilog keluar di semua peranti.",
+      "deactivate": "Nyahaktifkan",
+      "reactivate": "Aktifkan semula",
+      "deactivateTitle": "Nyahaktifkan {{name}}?",
+      "deactivateBody": "Mereka dilog keluar serta-merta dan tidak boleh log masuk. Pesanan dan sejarah mereka disimpan."
+    },
+    "settings": {
+      "onlineOrders": "Pesanan dalam talian",
+      "onlineOrdersHint": "Hentikan pesanan dalam talian baru pada bila-bila masa. Pekerja juga boleh berbuat demikian dari papan.",
+      "shop": "Kedai",
+      "shopName": "Nama kedai",
+      "prepMinutes": "Masa penyediaan biasa (minit)",
+      "prepHint": "Dipaparkan kepada pelanggan. Kad di papan bertukar kuning selepas tempoh ini.",
+      "openingHours": "Waktu operasi",
+      "opens": "Buka",
+      "closes": "Tutup",
+      "hoursHint": "Waktu tutup yang lebih awal daripada waktu buka bermaksud kedai tutup selepas tengah malam. Waktu buka dan tutup yang sama bermaksud buka 24 jam.",
+      "tablet": "Tablet kedai",
+      "tabletHint": "Daftarkan tablet kaunter bersama sekali sahaja. Pekerja kemudian membukanya dengan PIN, bukan kata laluan.",
+      "register": "Daftarkan peranti ini sebagai tablet kedai",
+      "tabletRegistered": "Peranti ini ialah tablet kedai.",
+      "unregister": "Batal daftar",
+      "security": "Akaun anda",
+      "totpOn": "Log masuk dua langkah dihidupkan.",
+      "totpOffTitle": "Hidupkan log masuk dua langkah",
+      "totpOffBody": "Akaun anda mengawal menu, wang dan pekerja. Lindunginya dengan aplikasi pengesah seperti Google Authenticator.",
+      "totpStart": "Sediakan",
+      "totpStep1": "1. Dalam aplikasi pengesah, tambah akaun dan masukkan kunci ini:",
+      "totpStep2": "2. Taip kod 6 digit yang dipaparkan:",
+      "totpConfirm": "Hidupkan",
+      "changePassword": "Tukar kata laluan",
+      "currentPassword": "Kata laluan semasa"
+    }
+  },
+  "customer": {
+    "viewCart": "Lihat troli",
+    "removedItem": "Tiada lagi dalam menu",
+    "itemNote": "Nota untuk dapur",
+    "itemNotePlaceholder": "cth. tanpa bawang",
+    "orderingClosed": "Pesanan ditutup",
+    "recentOrders": "Pesanan terkini anda",
+    "cartEmpty": "Troli anda kosong.",
+    "browseMenu": "Lihat menu",
+    "yourOrder": "Pesanan anda",
+    "addMore": "Tambah lagi",
+    "someUnavailable": "Ada item yang tidak lagi tersedia. Buang item itu untuk teruskan.",
+    "checkout": "Bayar",
+    "toPayment": "Membawa anda ke pembayaran…",
+    "cartChanged": "Ada perubahan pada pesanan anda. Semak item dan jumlah, kemudian bayar semula.",
+    "phoneInvalid": "Masukkan nombor telefon Malaysia, contohnya 012-345 6789.",
+    "tooManyUnpaid": "Anda ada pesanan yang belum dibayar. Bayar atau batalkannya dahulu.",
+    "yourName": "Nama anda",
+    "yourNameHint": "Kami panggil nama ini apabila pesanan siap.",
+    "nameRequired": "Masukkan nama anda.",
+    "phone": "Nombor telefon",
+    "phoneHint": "Hanya digunakan jika kami perlu menghubungi anda tentang pesanan ini.",
+    "phoneReadBack": "Kami akan guna {{phone}}",
+    "orderNote": "Nota untuk kedai",
+    "pickupOnly": "Ambil di kaunter. Bayar dalam talian sekarang.",
+    "pay": "Bayar {{total}}",
+    "privacy": "Nama dan telefon anda hanya digunakan untuk pesanan ini, seperti dalam notis privasi kedai.",
+    "problem": {
+      "unavailable": "Tidak lagi tersedia",
+      "sold_out": "Sudah habis",
+      "option_sold_out": "Satu pilihan sudah habis",
+      "invalid_options": "Pilih semula pilihan anda"
+    }
+  },
+  "tracking": {
+    "readyTitle": "Sedia untuk diambil",
+    "readyBody": "Datang ke kaunter dan tunjukkan nombor ini.",
+    "notFound": "Pesanan itu tidak dijumpai. Semak pautan.",
+    "wasCompleted": "Pesanan ini sudah selesai.",
+    "cancelledTitle": "Pesanan dibatalkan",
+    "reason": {
+      "payment_expired": "Bayaran tidak dibuat dalam masa yang ditetapkan.",
+      "customer_cancelled": "Anda telah membatalkan pesanan ini."
+    },
+    "reasonFromShop": "Kata kedai: {{reason}}",
+    "refundComing": "Anda sudah membayar pesanan ini. Kedai akan memulangkan wang anda.",
+    "refunded": "Bayaran anda telah dipulangkan.",
+    "step": {
+      "placed": "Pesanan diterima",
+      "preparing": "Sedang disediakan",
+      "ready": "Siap",
+      "completed": "Sudah diambil"
+    },
+    "usually": "Biasanya kira-kira {{minutes}} minit",
+    "keepLink": "Simpan halaman ini. Ia dikemas kini sendiri.",
+    "awaitingPayment": "Menunggu bayaran",
+    "justPaid": "Baru bayar? Halaman ini dikemas kini dalam beberapa saat.",
+    "expiresIn": "Bayar dalam {{time}} atau pesanan dibatalkan.",
+    "payNow": "Bayar {{total}} sekarang",
+    "cancelUnpaid": "Batalkan pesanan ini",
+    "orderAgain": "Pesan semula"
+  }
+}
