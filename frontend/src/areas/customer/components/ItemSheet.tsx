@@ -6,14 +6,12 @@ import { useTranslation } from "react-i18next";
 import type { MenuItem } from "../../../api/types";
 import { type Chosen, OptionPicker, choicesValid, chosenIds } from "../../../components/OptionPicker";
 import { unitPrice } from "../../../lib/cart";
-import { useLocalized } from "../../../lib/i18n";
 import { formatSen } from "../../../lib/money";
 import { useCart } from "../cart";
 
 /** A bottom sheet, not a new page: options, quantity, a note, and the live price on the button. */
 export function ItemSheet({ item, canOrder, onClose }: { item: MenuItem | null; canOrder: boolean; onClose: () => void }) {
   const { t } = useTranslation();
-  const loc = useLocalized();
   const cart = useCart();
   const [chosen, setChosen] = useState<Chosen>({});
   const [quantity, setQuantity] = useState(1);
@@ -30,11 +28,11 @@ export function ItemSheet({ item, canOrder, onClose }: { item: MenuItem | null; 
 
   return (
     <Drawer opened={item !== null} onClose={onClose} position="bottom" size="auto" radius="lg"
-      title={item ? loc.name(item) : ""} styles={{ content: { maxHeight: "92vh" } }}>
+      title={item ? item.name : ""} styles={{ content: { maxHeight: "92vh" } }}>
       {item && (
         <Stack gap="md" pb="md">
           {item.image_url_large && <Image src={item.image_url_large} alt="" radius="md" mah={240} fit="cover" />}
-          {loc.description(item) && <Text c="dimmed">{loc.description(item)}</Text>}
+          {item.description && <Text c="dimmed">{item.description}</Text>}
           <OptionPicker item={item} chosen={chosen} onChange={setChosen} />
           <TextInput label={t("customer.itemNote")} placeholder={t("customer.itemNotePlaceholder")} maxLength={200}
             value={note} onChange={(e) => setNote(e.currentTarget.value)} />

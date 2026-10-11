@@ -38,14 +38,12 @@ import {
   toRequestLines,
   unitPrice,
 } from "../../../lib/cart";
-import { useLocalized } from "../../../lib/i18n";
 import { formatSen } from "../../../lib/money";
 import { OptionsModal } from "../components/OptionsModal";
 import { PaymentModal } from "../components/PaymentModal";
 
 export default function TakeOrderPage() {
   const { t } = useTranslation();
-  const loc = useLocalized();
   const { data: menu, isPending, isError, refetch } = useMenu();
   const create = useCreateCounterOrder();
   const wide = useMediaQuery("(min-width: 62em)", true);
@@ -130,7 +128,7 @@ export default function TakeOrderPage() {
           <Tabs.List style={{ flexWrap: "nowrap" }}>
             {menu.categories.map((c) => (
               <Tabs.Tab key={c.id} value={String(c.id)} fz="md">
-                {loc.name(c)}
+                {c.name}
               </Tabs.Tab>
             ))}
           </Tabs.List>
@@ -142,7 +140,7 @@ export default function TakeOrderPage() {
             <UnstyledButton w="100%" p="md" mih={92} disabled={item.is_sold_out}
               onClick={() => (needsOptionsSheet(item) ? setOptionsFor(item) : add(item, []))}>
               <Text fw={700} lineClamp={2}>
-                {loc.name(item)}
+                {item.name}
               </Text>
               <Text size="sm" c="dimmed">
                 {item.is_sold_out ? t("menu.soldOut") : formatSen(item.price_sen)}
@@ -180,11 +178,11 @@ export default function TakeOrderPage() {
               <Group justify="space-between" wrap="nowrap" align="flex-start">
                 <Box miw={0}>
                   <Text fw={600} truncate>
-                    {loc.name(item)}
+                    {item.name}
                   </Text>
                   {l.optionIds.length > 0 && (
                     <Text size="xs" c="dimmed">
-                      {optionNames(item, l.optionIds, loc.name)}
+                      {optionNames(item, l.optionIds)}
                     </Text>
                   )}
                   {problemLines.has(i) && (

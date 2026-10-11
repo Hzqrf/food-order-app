@@ -18,6 +18,7 @@ from app.orders.admin_router import router as orders_admin_router
 from app.orders.router import router as orders_router
 from app.orders.staff_router import router as orders_staff_router
 from app.payments.webhook_router import router as webhook_router
+from app.reports.admin_router import router as reports_router
 from app.shop.router import router as shop_router
 from app.staff.admin_router import router as staff_admin_router
 
@@ -91,7 +92,7 @@ def create_app() -> FastAPI:
         return response
 
     for router in (auth_router, shop_router, menu_router, menu_admin_router, orders_router,
-                   orders_staff_router, orders_admin_router, staff_admin_router, webhook_router):
+                   orders_staff_router, orders_admin_router, staff_admin_router, webhook_router, reports_router):
         app.include_router(router, prefix=API_PREFIX)
     if settings.payment_gateway == "fake" and not settings.is_production:
         from app.payments.fake_router import router as fake_gateway_router

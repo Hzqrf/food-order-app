@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { initReactI18next, useTranslation } from "react-i18next";
+import { initReactI18next } from "react-i18next";
 
 import en from "../locales/en.json";
 import ms from "../locales/ms.json";
@@ -38,17 +38,6 @@ export function setLanguage(lang: Lang) {
   } catch {
     /* storage unavailable */
   }
-}
-
-/** Menu content carries an optional Malay name; fall back to English when it is missing. */
-export function useLocalized() {
-  const { i18n: inst } = useTranslation();
-  const ms = inst.language === "ms";
-  return {
-    name: (o: { name: string; name_ms?: string | null }) => (ms && o.name_ms ? o.name_ms : o.name),
-    description: (o: { description?: string | null; description_ms?: string | null }) =>
-      (ms && o.description_ms ? o.description_ms : o.description) ?? "",
-  };
 }
 
 export default i18n;

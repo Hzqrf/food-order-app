@@ -241,7 +241,11 @@
       "menu": "Menu",
       "staff": "Staff",
       "settings": "Settings",
-      "board": "Order board"
+      "board": "Order board",
+      "today": "Today",
+      "orders": "Orders",
+      "reports": "Reports",
+      "audit": "Audit log"
     },
     "menu": {
       "title": "Menu",
@@ -257,16 +261,14 @@
       "hidden": "Hidden",
       "visible": "Visible to customers",
       "category": "Category",
-      "nameEn": "Name (English)",
-      "nameMs": "Name (Bahasa Malaysia)",
-      "descriptionEn": "Description (English)",
-      "descriptionMs": "Description (Bahasa Malaysia)",
       "price": "Price",
       "photo": "Photo",
       "uploadPhoto": "Upload photo",
       "replacePhoto": "Replace photo",
       "photoAfterSave": "Save the item first, then add a photo.",
-      "newCategory": "New category"
+      "newCategory": "New category",
+      "name": "Name",
+      "description": "Description"
     },
     "groups": {
       "hint": "One group, like Sauces, can be used on many items. Marking an option sold out removes it everywhere.",
@@ -328,6 +330,123 @@
       "totpConfirm": "Turn on",
       "changePassword": "Change password",
       "currentPassword": "Current password"
+    },
+    "loadMore": "Load more",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "status": "Status",
+      "payment": "Payment",
+      "channel": "Channel",
+      "staff": "Keyed in by",
+      "search": "Search",
+      "any": "Any"
+    },
+    "orders": {
+      "number": "No.",
+      "id": "Order ID",
+      "time": "Time",
+      "keyedBy": "Keyed in by"
+    },
+    "today": {
+      "title": "Today",
+      "sales": "Sales",
+      "orders": "Orders",
+      "avgOrder": "Average order",
+      "online": "Online share",
+      "onlineHint": "{{online}} online · {{counter}} counter",
+      "live": "Right now",
+      "closedNow": "The shop is closed by its opening hours.",
+      "attention": "Needs attention",
+      "allClear": "Nothing needs you. All good.",
+      "last14": "Sales, last 14 days",
+      "topItems": "Top items today"
+    },
+    "attention": {
+      "paid_but_cancelled": "Paid but cancelled: refund {{amount}}",
+      "duplicate_payment": "Paid twice: refund the extra {{amount}}",
+      "ready_too_long": "Ready for over 30 minutes",
+      "auto_closed": "Closed automatically at day close: was it collected?",
+      "amount_mismatch": "Payment amount did not match the bill",
+      "open": "Open"
+    },
+    "reports": {
+      "csv": "Download CSV",
+      "presets": {
+        "today": "Today",
+        "7d": "7 days",
+        "30d": "30 days",
+        "month": "This month",
+        "custom": "Custom"
+      },
+      "byDay": "Day",
+      "byWeek": "Week",
+      "byMonth": "Month",
+      "salesBy": {
+        "day": "Sales by day",
+        "week": "Sales by week",
+        "month": "Sales by month"
+      },
+      "sales": "Sales",
+      "salesDefinition": "Sales count paid orders that were not cancelled or refunded.",
+      "weekOf": "Week of {{day}}",
+      "ordersCount_one": "{{count}} order",
+      "ordersCount_other": "{{count}} orders",
+      "byHour": "Sales by hour (average per day)",
+      "avgPerDay": "Average per day",
+      "items": "Items sold",
+      "item": "Item",
+      "qty": "Qty",
+      "notSold": "Not sold",
+      "channels": "Online vs counter",
+      "payments": "Payment methods",
+      "paymentsHint": "Money that moved in this period, by method. Use the cash row to check the drawer.",
+      "method": "Method",
+      "in": "In",
+      "refunded": "Refunded",
+      "net": "Net",
+      "cancellations": "Cancellations and refunds",
+      "cancelledByShop": "cancelled by the shop ({{value}})",
+      "refundsMade": "refunds made ({{value}})",
+      "unpaidOnline": "online orders never paid",
+      "by": "By",
+      "notRefunded": "Not refunded"
+    },
+    "audit": {
+      "hint": "Every change to prices, refunds, cancellations, staff and settings, with who made it. Entries cannot be edited or deleted.",
+      "action": "Action",
+      "who": "Who",
+      "what": "What",
+      "changes": "Change",
+      "empty": "Nothing logged yet.",
+      "actions": {
+        "menu_item_created": "Menu item added",
+        "menu_item_changed": "Menu item changed",
+        "category_active_changed": "Category shown or hidden",
+        "option_group_active_changed": "Option group shown or hidden",
+        "option_created": "Option added",
+        "option_changed": "Option changed",
+        "order_status_corrected": "Order status corrected",
+        "order_cancelled_after_payment": "Paid order cancelled",
+        "refund_recorded": "Refund recorded",
+        "staff_created": "Staff added",
+        "staff_role_changed": "Staff role changed",
+        "staff_deactivated": "Staff deactivated",
+        "staff_reactivated": "Staff reactivated",
+        "password_reset": "Password reset",
+        "pin_reset": "PIN set",
+        "password_changed": "Password changed",
+        "totp_enabled": "Two-step sign-in turned on",
+        "admin_login": "Owner signed in",
+        "admin_login_failed": "Owner sign-in failed",
+        "device_registered": "Shop tablet registered",
+        "online_orders_paused": "Online orders paused",
+        "online_orders_resumed": "Online orders resumed",
+        "settings_changed": "Settings changed",
+        "payment_amount_mismatch": "Payment amount mismatch",
+        "duplicate_payment": "Duplicate payment",
+        "paid_after_cancel": "Paid after cancelling"
+      }
     }
   },
   "customer": {
@@ -397,5 +516,21 @@
     "payNow": "Pay {{total}} now",
     "cancelUnpaid": "Cancel this order",
     "orderAgain": "Order again"
+  },
+  "charts": {
+    "chart": "Chart",
+    "table": "Table"
+  },
+  "refund": {
+    "button": "Record refund",
+    "title": "Refund order {{number}}",
+    "which": "Which payment?",
+    "all": "Everything still paid ({{amount}})",
+    "one": "Payment {{n}}: {{method}}, {{amount}}",
+    "how": "How did the {{amount}} go back?",
+    "original": "Refunded on the terminal or in the payment gateway's dashboard",
+    "note": "Send the money back first, then record it here. The refund is logged with your name.",
+    "confirm": "Record {{amount}} refund",
+    "done": "Refund of {{amount}} recorded"
   }
 }

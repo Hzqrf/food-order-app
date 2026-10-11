@@ -368,6 +368,39 @@ def search(db: Session, q: str, user: User, branch: Branch) -> list[Order]:
     return list(db.scalars(stmt.options(*_LOAD).order_by(Order.id.desc()).limit(50)))
 
 
+def admin_list(db: Session, branch: Branch, f: schemas.OrderFilter) -> tuple[list[Order], int | None]:
+    """All orders, newest first, filtered. Cursor pagination on id."""
+    stmt = select(Order).where(Order.branch_id == branch.id)
+    if f.date_from:
+        stmt = stmt.where(Order.business_date >= f.date_from)
+    if f.date_to:
+        stmt = stmt.where(Order.business_date <= f.date_to)
+    if f.status:
+        stmt = stmt.where(Order.status == f.status)
+    if f.payment_status:
+        stmt = stmt.where(Order.payment_status == f.payment_status)
+    if f.channel:
+        stmt = stmt.where(Order.channel == f.channel)
+    if f.staff_id:
+        stmt = stmt.where(Order.created_by_user_id == f.staff_id)
+    if f.q and (q := f.q.strip()):
+        name_match = Order.customer_name.ilike(f"%{q.replace('%', '').replace('_', '')}%")
+        if q.isdigit() and len(q) <= 4:
+            stmt = stmt.where(Order.order_number == int(q))
+        elif looks_like_code(q):
+            stmt = stmt.where((Order.order_code == q.upper()) | name_match)
+        elif phone := normalize_my_phone(q):
+            stmt = stmt.where(Order.customer_phone == phone)
+        else:
+            stmt = stmt.where(name_match)
+    if f.cursor:
+        stmt = stmt.where(Order.id < f.cursor)
+    rows = list(db.scalars(stmt.options(*_LOAD).order_by(Order.id.desc()).limit(f.limit + 1)))
+    more = len(rows) > f.limit
+    rows = rows[:f.limit]
+    return rows, (rows[-1].id if more else None)
+
+
 # --- Changing orders -----------------------------------------------------------------------------
 
 
@@ -411,7 +444,7 @@ def refund(db: Session, order_id: int, admin: User, body: schemas.RefundIn, ip: 
     order = _locked(db, order_id)
     if order.payment_status != "paid":
         raise AppError("not_refundable", "Only paid orders can be refunded.", 409)
-    _record_refund(db, order, admin, body.refund_method, body.reason, ip)
+    _record_refund(db, order, admin, body.refund_method, body.reason, ip, payment_id=body.payment_id)
     return order
 
 
@@ -420,21 +453,41 @@ def _last_charge(db: Session, order: Order) -> Payment | None:
                                            Payment.status == "succeeded").order_by(Payment.id.desc()).limit(1))
 
 
-def _record_refund(db: Session, order: Order, user: User, refund_method: str, reason: str, ip: str) -> None:
-    payments = db.scalars(select(Payment).where(Payment.order_id == order.id, Payment.status == "succeeded")).all()
-    charges = [p for p in payments if p.kind == "charge"]
-    refunded = sum(p.amount_sen for p in payments if p.kind == "refund")
-    amount = sum(p.amount_sen for p in charges) - refunded
-    if not charges or amount <= 0:
+def refundable_by_charge(db: Session, order: Order) -> list[tuple[Payment, int]]:
+    """Each succeeded charge with what is still unrefunded on it."""
+    payments = db.scalars(select(Payment).where(Payment.order_id == order.id, Payment.status == "succeeded")
+                          .order_by(Payment.id)).all()
+    refunded: dict[int | None, int] = {}
+    for p in payments:
+        if p.kind == "refund":
+            refunded[p.refund_of_payment_id] = refunded.get(p.refund_of_payment_id, 0) + p.amount_sen
+    return [(p, p.amount_sen - refunded.get(p.id, 0)) for p in payments if p.kind == "charge"]
+
+
+def _record_refund(db: Session, order: Order, user: User, refund_method: str, reason: str, ip: str,
+                   payment_id: int | None = None) -> None:
+    """Refund one charge (e.g. a duplicate online payment) or, by default, everything still paid.
+
+    The order shows as refunded once no money is left on it; refunding a duplicate leaves it paid.
+    """
+    open_charges = [(c, left) for c, left in refundable_by_charge(db, order) if left > 0]
+    if payment_id is not None:
+        open_charges = [(c, left) for c, left in open_charges if c.id == payment_id]
+    if not open_charges:
         raise AppError("not_refundable", "There is nothing left to refund on this order.", 409)
-    charge = charges[-1]
-    method = "cash" if refund_method == "cash" else charge.method
-    db.add(Payment(order_id=order.id, kind="refund", method=method, provider=charge.provider, amount_sen=amount,
-                   status="succeeded", paid_at=utcnow(), recorded_by_user_id=user.id,
-                   refund_of_payment_id=charge.id, raw_payload={"reason": reason}))
-    order.payment_status = "refunded"
+    total = 0
+    for charge, left in open_charges:
+        method = "cash" if refund_method == "cash" else charge.method
+        db.add(Payment(order_id=order.id, kind="refund", method=method, provider=charge.provider, amount_sen=left,
+                       status="succeeded", paid_at=utcnow(), recorded_by_user_id=user.id,
+                       refund_of_payment_id=charge.id, raw_payload={"reason": reason}))
+        total += left
+    db.flush()
+    if sum(left for _, left in refundable_by_charge(db, order)) <= 0:
+        order.payment_status = "refunded"
     audit(db, user.id, "refund_recorded", "order", order.id, None,
-          {"amount_sen": amount, "method": method, "reason": reason}, ip)
+          {"amount_sen": total, "method": "cash" if refund_method == "cash" else open_charges[0][0].method,
+           "reason": reason, "payment_id": payment_id}, ip)
     db.flush()
 
 
@@ -469,6 +522,7 @@ def summary(order: Order) -> dict:
 def detail(db: Session, order: Order) -> schemas.OrderDetail:
     names = {u.id: u.full_name for u in db.scalars(select(User).where(
         User.id.in_({p.recorded_by_user_id for p in order.payments if p.recorded_by_user_id})))}
+    left = {c.id: amount for c, amount in refundable_by_charge(db, order)}
     return schemas.OrderDetail(
         **summary(order), customer_phone=order.customer_phone,
         events=[schemas.OrderEvent(from_status=e.from_status, to_status=e.to_status, actor_type=e.actor_type,
@@ -476,6 +530,7 @@ def detail(db: Session, order: Order) -> schemas.OrderDetail:
                                    created_at=e.created_at) for e in order.events],
         payments=[schemas.OrderPayment(id=p.id, kind=p.kind, method=p.method, amount_sen=p.amount_sen,
                                        status=p.status, paid_at=p.paid_at,
-                                       recorded_by_name=names.get(p.recorded_by_user_id))
+                                       recorded_by_name=names.get(p.recorded_by_user_id),
+                                       refundable_sen=left.get(p.id, 0))
                   for p in order.payments],
     )

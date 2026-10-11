@@ -12,6 +12,7 @@ the MVP design of 6 October 2026. The older specs in [Documentation/](Documentat
 earlier cash-on-collection, commission-based design and are superseded.
 
 - [What works today](#what-works-today)
+- [Test credentials](#test-credentials)
 - [Installation](#installation)
 - [Getting around: customer, staff and owner](#getting-around-customer-staff-and-owner)
 - [Payments](#payments)
@@ -21,14 +22,15 @@ earlier cash-on-collection, commission-based design and are superseded.
 
 ## What works today
 
-Release 1, roadmap steps 1–4:
+Release 1, roadmap steps 1–5:
 
 | Step | What works |
 | --- | --- |
 | 1. Foundations | Database migrations, owner and staff accounts, server-side sessions in httpOnly cookies, owner two-step sign-in (authenticator app), lockout and rate limits, protection against cross-site requests, audit log, JSON logging |
-| 2. Menu | Categories, items, reusable option groups ("Size: choose 1", "Add-ons: up to 3"), English and Malay names, photo upload, sold-out and hidden switches, customer menu in English and Bahasa Malaysia |
+| 2. Menu | Categories, items, reusable option groups ("Size: choose 1", "Add-ons: up to 3"), photo upload, sold-out and hidden switches. Menu content is entered once, in English; the app's own buttons and messages switch between English and Bahasa Malaysia |
 | 3. Counter and kitchen | Server-side pricing, the order life cycle (New → Preparing → Ready → Collected, or Cancelled), counter orders paid by cash, QR or card, the staff board with a new-order chime and a 5-second undo, cancelling with a required refund decision, order search, sold-out page, the shop tablet with PIN unlock, the nightly day close |
 | 4. Online ordering | Cart kept on the customer's phone, options and notes per item, a one-screen checkout, prepaid orders through the payment gateway, a private tracking page that updates itself, pay again or cancel while unpaid, order again, recent orders with their live status, the pause switch and opening hours |
+| 5. Owner tools | **Today**: sales, orders, average order and online share, live order counts, top items, a 14-day sales chart, and a **Needs attention** panel (paid but cancelled, paid twice, ready for over 30 minutes, closed automatically, payment amount mismatch). **Orders**: every order with filters and search, refunds of a whole order or of one duplicate payment. **Reports**: sales by day, week or month and by hour, items sold including unsold ones, online vs counter, payment methods for checking the cash drawer, cancellations and refunds, CSV export for the accountant. **Audit log**: who changed prices, refunds, staff and settings |
 
 Recent changes:
 
@@ -37,11 +39,36 @@ Recent changes:
 - **Every order has a permanent order ID**, such as `PM4WS7`, as well as the 3-digit number called
   out at the counter. The number restarts every day; the ID never repeats. Customers see the ID on
   their tracking page; staff see it on the board and can search by it.
+- **Menu content is English only.** The owner no longer fills in Bahasa Malaysia names and
+  descriptions. The EN / BM switch still translates the app's own text.
 - **"Your recent orders" shows each order's status** on the customer menu page: Awaiting payment,
   Received, Preparing, Ready, Done, Payment failed or Cancelled, updated while the order is in progress.
 
-Next: step 5 (the owner's Today dashboard with a "Needs attention" panel, the orders list, reports
-and the audit log screen), then hardening and a pilot in the shop.
+Next: step 6, hardening and a pilot in the shop: nightly backups with a tested restore, an error
+tracker, the staff app installable on the tablet, a production server with HTTPS, then a week of
+counter-only use before switching on online ordering. After that, Release 2: shift roster, clock-in,
+timesheets and optional customer accounts.
+
+## Test credentials
+
+For a local demo set up with the commands in [Installation](#installation). Sign in at
+<http://localhost:5173/login>.
+
+| Role | Sign in with | Password | Tablet PIN |
+| --- | --- | --- | --- |
+| Owner | `owner@example.com` (or username `owner`) | `ownerpassword1` | none |
+| Staff: Aina | `aina` | `staffpassword1` | `1111` |
+| Staff: Farid | `farid` | `staffpassword1` | `2222` |
+
+- The owner lands on **Today** (`/admin/today`); staff land on the order board at `/staff`.
+- Staff PINs only work on a browser registered as the shop tablet
+  (owner: **Settings → Shop tablet → Register this device as the shop tablet**). Anywhere else, staff
+  sign in with their username and password.
+- Customers need no account: open <http://localhost:5173/>.
+- Five wrong passwords or PINs lock that account for 15 minutes.
+
+These are test passwords for a development machine only. Never use them on a real shop: set the owner's
+own password at setup (leave out `--admin-password` to be asked for one), and don't run `seed-demo`.
 
 ## Installation
 
@@ -85,24 +112,20 @@ uv sync                       # installs Python packages into backend/.venv
 uv run alembic upgrade head   # creates the tables
 ```
 
-Create the shop and the owner account. You are asked for the owner's password (10 characters or
-more):
+Create the shop and the owner account. For a local demo, this uses the test password from
+[Test credentials](#test-credentials):
 
 ```sh
-uv run python -m app.cli setup --shop "Kedai Demo" --admin-email owner@example.com --admin-name "Shop Owner"
+uv run python -m app.cli setup --shop "Kedai Demo" --admin-email owner@example.com --admin-name "Shop Owner" --admin-password ownerpassword1
 ```
 
-Optionally, load a demo menu and two staff members to try things out:
+For a real shop, leave out `--admin-password` and you are asked for one (10 characters or more).
+
+Optionally, load a demo menu and the two test staff members, Aina and Farid:
 
 ```sh
 uv run python -m app.cli seed-demo
 ```
-
-| Demo account | Sign in with |
-| --- | --- |
-| Owner | `owner@example.com` (or username `owner`) and the password you chose |
-| Staff: Aina | PIN `1111` on the shop tablet, or username `aina` / password `staffpassword1` |
-| Staff: Farid | PIN `2222` on the shop tablet, or username `farid` / password `staffpassword1` |
 
 Start the API:
 
@@ -162,7 +185,7 @@ All three use the same address. What you see depends on the page and on who is s
 | --- | --- | --- |
 | Customer | <http://localhost:5173/> | Browse the menu, add to cart, check out and pay, follow the order |
 | Staff | <http://localhost:5173/staff> | Run the order board, take counter orders, search orders, mark items sold out |
-| Owner | <http://localhost:5173/admin> | Manage the menu, staff and shop settings; the owner can also use every staff screen |
+| Owner | <http://localhost:5173/admin> | See today's numbers and what needs attention, look up and refund orders, read reports, manage the menu, staff and settings; the owner can also use every staff screen |
 
 Signing in for staff and owner happens at <http://localhost:5173/login>. Going to `/staff` or
 `/admin` while signed out sends you there.
@@ -209,13 +232,23 @@ The **Online orders** switch at the top left pauses new online orders during a r
 
 ### Owner
 
-Sign in at `/login` with the owner email and password. The owner lands on `/admin`:
+Sign in at `/login` with the owner email and password. The owner lands on **Today**. The left sidebar
+holds every owner page:
 
 | Page | What it does |
 | --- | --- |
-| **Menu** | Items (with photos, prices, English and Malay names), option groups, categories, order of display |
+| **Today** | Today's sales, orders, average order and online share; what is happening right now, with the pause switch; top items; sales over the last 14 days; and **Needs attention**, which lists anything the owner must act on and is empty on a good day. Click an entry to open the order |
+| **Orders** | Every order, newest first. Filter by date, status, payment, channel or who keyed it in, or search by number, order ID, phone or name. Click an order for its details, history and payments, and **Record refund** after sending money back |
+| **Reports** | Pick a range (today, 7 days, 30 days, this month or custom) and group by day, week or month. Sales by period and by hour, items sold (unsold items included), online vs counter, payment methods, cancellations and refunds. **Download CSV** gives one row per order for the accountant. Every chart has a **Table** view |
+| **Menu** | Items (with photos and prices), option groups, categories, order of display |
 | **Staff** | Add people, set their tablet PIN, reset passwords, deactivate leavers (their history is kept) |
+| **Audit log** | Who changed what and when: prices, refunds, cancellations of paid orders, staff changes, settings, owner sign-ins. Filter by date or action. Nobody can edit or delete entries |
 | **Settings** | Shop name, usual prep time, opening hours, pausing online orders, registering the shop tablet, two-step sign-in, changing your password |
+
+**How sales are counted:** paid orders that were not cancelled or refunded, by business day (a day
+runs from 4 am to 4 am, so a late-night sale counts towards the evening before). The payment-methods
+table is different on purpose: it shows money that actually moved in the period, including payments
+for orders later cancelled, so the cash row can be checked against the drawer.
 
 **Switching between owner and staff screens:**
 
@@ -313,10 +346,11 @@ backend/
                 counter and online orders, the board, the tracking page, order IDs
     payments/   gateway.py (the swappable gateway boundary and FakePay), webhook, lost-payment
                 check, expiry
+    reports/    the owner's Today dashboard, needs attention, reports, CSV export, audit log
     shop/       opening hours, pause switch, business date
     staff/      staff accounts and PINs
   alembic/      database migrations
-  tests/        pricing, order life cycle, counter and online orders, sign-in, menu
+  tests/        pricing, order life cycle, counter and online orders, sign-in, menu, reports
 frontend/
   src/
     api/        fetch client, generated API types, data hooks

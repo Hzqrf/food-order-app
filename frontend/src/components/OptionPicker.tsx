@@ -2,7 +2,6 @@ import { Checkbox, Group, Radio, Stack, Text, Title } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 
 import type { MenuGroup, MenuItem } from "../api/types";
-import { useLocalized } from "../lib/i18n";
 import { formatSen } from "../lib/money";
 
 export type Chosen = Record<number, number[]>;
@@ -31,7 +30,6 @@ export function OptionPicker({ item, chosen, onChange }: {
   onChange: (next: Chosen) => void;
 }) {
   const { t } = useTranslation();
-  const loc = useLocalized();
 
   const price = (o: { is_sold_out: boolean; price_delta_sen: number }) =>
     o.is_sold_out ? t("menu.soldOut") : o.price_delta_sen ? `+${formatSen(o.price_delta_sen)}` : " ";
@@ -44,7 +42,7 @@ export function OptionPicker({ item, chosen, onChange }: {
         return (
           <Stack key={g.id} gap="xs">
             <Group gap="xs">
-              <Title order={5}>{loc.name(g)}</Title>
+              <Title order={5}>{g.name}</Title>
               <Text size="sm" c={g.min_select > 0 ? "orange.8" : "dimmed"}>
                 {ruleLabel(t, g)}
               </Text>
@@ -56,7 +54,7 @@ export function OptionPicker({ item, chosen, onChange }: {
                   {g.options.map((o) => (
                     <Radio.Card key={o.id} value={String(o.id)} disabled={o.is_sold_out} p="sm" w="auto" miw={110}
                       style={{ opacity: o.is_sold_out ? 0.5 : 1 }}>
-                      <Text fw={600}>{loc.name(o)}</Text>
+                      <Text fw={600}>{o.name}</Text>
                       <Text size="sm" c="dimmed">{price(o)}</Text>
                     </Radio.Card>
                   ))}
@@ -75,7 +73,7 @@ export function OptionPicker({ item, chosen, onChange }: {
                         if (disabled) return;
                         onChange({ ...chosen, [g.id]: on ? picked.filter((x) => x !== o.id) : [...picked, o.id] });
                       }}>
-                      <Text fw={600}>{loc.name(o)}</Text>
+                      <Text fw={600}>{o.name}</Text>
                       <Text size="sm" c="dimmed">{price(o)}</Text>
                     </Checkbox.Card>
                   );

@@ -65,12 +65,12 @@ function useMenuMutation<V, R = unknown>(fn: (v: V) => Promise<R>) {
 }
 
 export const useCreateCategory = () =>
-  useMenuMutation((body: { name: string; name_ms?: string | null }) =>
+  useMenuMutation((body: { name: string }) =>
     api("/admin/menu/categories", { body }),
   );
 
 export const useUpdateCategory = () =>
-  useMenuMutation(({ id, ...body }: { id: number; name?: string; name_ms?: string | null; is_active?: boolean }) =>
+  useMenuMutation(({ id, ...body }: { id: number; name?: string; is_active?: boolean }) =>
     api(`/admin/menu/categories/${id}`, { method: "PATCH", body }),
   );
 

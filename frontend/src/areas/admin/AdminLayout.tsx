@@ -1,6 +1,6 @@
 import { AppShell, Burger, Button, Group, NavLink, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconClipboardList, IconSettings, IconToolsKitchen2, IconUsers } from "@tabler/icons-react";
+import { IconChartBar, IconClipboardList, IconGauge, IconHistory, IconReceipt, IconSettings, IconToolsKitchen2, IconUsers } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Link, Outlet, useLocation } from "react-router";
 
@@ -9,8 +9,12 @@ import { LanguageSwitch } from "../../components/LanguageSwitch";
 import { PoweredBy } from "../../components/PoweredBy";
 
 const LINKS = [
+  { to: "/admin/today", label: "admin.nav.today", icon: IconGauge },
+  { to: "/admin/orders", label: "admin.nav.orders", icon: IconReceipt },
+  { to: "/admin/reports", label: "admin.nav.reports", icon: IconChartBar },
   { to: "/admin/menu", label: "admin.nav.menu", icon: IconToolsKitchen2 },
   { to: "/admin/staff", label: "admin.nav.staff", icon: IconUsers },
+  { to: "/admin/audit", label: "admin.nav.audit", icon: IconHistory },
   { to: "/admin/settings", label: "admin.nav.settings", icon: IconSettings },
 ];
 

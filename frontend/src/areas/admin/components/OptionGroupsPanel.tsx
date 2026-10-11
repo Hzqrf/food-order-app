@@ -38,7 +38,6 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
   const createOption = useCreateOption();
   const sort = useSort();
   const [name, setName] = useState("");
-  const [nameMs, setNameMs] = useState("");
   const [price, setPrice] = useState<number | null>(0);
   const onError = (e: unknown) => notifyError(t, e);
   const ids = group.options.map((o) => o.id);
@@ -48,7 +47,6 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
       <Group justify="space-between" mb="xs">
         <Group gap="xs">
           <Title order={4}>{group.name}</Title>
-          {group.name_ms && <Text c="dimmed">/ {group.name_ms}</Text>}
           <Badge variant="light">{ruleLabel(t, group)}</Badge>
           {!group.is_active && <Badge color="gray">{t("admin.menu.hidden")}</Badge>}
         </Group>
@@ -61,15 +59,9 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
           {group.options.map((o, idx) => (
             <Table.Tr key={o.id} style={{ opacity: o.is_active ? 1 : 0.5 }}>
               <Table.Td>
-                <TextInput size="xs" defaultValue={o.name} aria-label={t("admin.menu.nameEn")}
+                <TextInput size="xs" defaultValue={o.name} aria-label={t("admin.menu.name")}
                   onBlur={(e) => e.currentTarget.value.trim() && e.currentTarget.value !== o.name &&
                     updateOption.mutate({ id: o.id, name: e.currentTarget.value.trim() }, { onError })} />
-              </Table.Td>
-              <Table.Td>
-                <TextInput size="xs" defaultValue={o.name_ms ?? ""} placeholder={t("admin.menu.nameMs")}
-                  aria-label={t("admin.menu.nameMs")}
-                  onBlur={(e) => e.currentTarget.value !== (o.name_ms ?? "") &&
-                    updateOption.mutate({ id: o.id, name_ms: e.currentTarget.value.trim() || null }, { onError })} />
               </Table.Td>
               <Table.Td w={130}>
                 <PriceCell valueSen={o.price_delta_sen}
@@ -91,13 +83,11 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
       <Group mt="xs" wrap="nowrap" align="flex-end">
         <TextInput size="xs" placeholder={t("admin.groups.newOption")} value={name} maxLength={100}
           onChange={(e) => setName(e.currentTarget.value)} style={{ flex: 1 }} />
-        <TextInput size="xs" placeholder={t("admin.menu.nameMs")} value={nameMs} maxLength={100}
-          onChange={(e) => setNameMs(e.currentTarget.value)} style={{ flex: 1 }} />
         <MoneyInput size="xs" w={130} valueSen={price} onChangeSen={setPrice} aria-label={t("admin.groups.extraPrice")} />
         <Button size="xs" disabled={!name.trim()} loading={createOption.isPending}
           onClick={() => createOption.mutate(
-            { option_group_id: group.id, name: name.trim(), name_ms: nameMs.trim() || null, price_delta_sen: price ?? 0, is_active: true },
-            { onSuccess: () => { setName(""); setNameMs(""); setPrice(0); }, onError },
+            { option_group_id: group.id, name: name.trim(), price_delta_sen: price ?? 0, is_active: true },
+            { onSuccess: () => { setName(""); setPrice(0); }, onError },
           )}>
           {t("common.add")}
         </Button>
@@ -121,21 +111,21 @@ function GroupModal({ group, onClose }: { group: AdminOptionGroup | "new" | null
   const create = useCreateGroup();
   const update = useUpdateGroup();
   const existing = group && group !== "new" ? group : null;
-  const [form, setForm] = useState<OptionGroupIn>({ name: "", name_ms: "", min_select: 0, max_select: 1, is_active: true });
+  const [form, setForm] = useState<OptionGroupIn>({ name: "", min_select: 0, max_select: 1, is_active: true });
   const [lastGroup, setLastGroup] = useState<typeof group>(null);
 
   if (group !== lastGroup) {
     setLastGroup(group);
     setForm(existing
-      ? { name: existing.name, name_ms: existing.name_ms ?? "", min_select: existing.min_select, max_select: existing.max_select, is_active: existing.is_active }
-      : { name: "", name_ms: "", min_select: 0, max_select: 1, is_active: true });
+      ? { name: existing.name, min_select: existing.min_select, max_select: existing.max_select, is_active: existing.is_active }
+      : { name: "", min_select: 0, max_select: 1, is_active: true });
   }
   if (!group) return null;
 
   const min = form.min_select ?? 0;
   const max = form.max_select ?? 1;
   const valid = form.name.trim() && min <= max && max >= 1;
-  const body = { ...form, name: form.name.trim(), name_ms: form.name_ms?.trim() || null };
+  const body = { ...form, name: form.name.trim() };
   const save = () => {
     const opts = { onSuccess: onClose, onError: (e: unknown) => notifyError(t, e) };
     if (existing) update.mutate({ id: existing.id, ...body }, opts);
@@ -145,10 +135,8 @@ function GroupModal({ group, onClose }: { group: AdminOptionGroup | "new" | null
   return (
     <Modal opened onClose={onClose} title={existing ? t("admin.groups.edit") : t("admin.groups.add")} centered>
       <Stack>
-        <TextInput label={t("admin.menu.nameEn")} required value={form.name} maxLength={100}
+        <TextInput label={t("admin.menu.name")} required value={form.name} maxLength={100}
           onChange={(e) => setForm({ ...form, name: e.currentTarget.value })} />
-        <TextInput label={t("admin.menu.nameMs")} value={form.name_ms ?? ""} maxLength={100}
-          onChange={(e) => setForm({ ...form, name_ms: e.currentTarget.value })} />
         <Group grow>
           <NumberInput label={t("admin.groups.min")} description={t("admin.groups.minHint")} min={0} max={20}
             value={min} onChange={(v) => setForm({ ...form, min_select: Number(v) || 0 })} />

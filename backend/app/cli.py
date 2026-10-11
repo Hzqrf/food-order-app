@@ -38,39 +38,39 @@ def seed_demo(_args) -> None:
     with SessionLocal() as db, db.begin():
         if db.scalar(select(MenuItem.id)):
             sys.exit("Menu already has items; not seeding.")
-        size = OptionGroup(name="Size", name_ms="Saiz", min_select=1, max_select=1)
-        size.options = [Option(name="Regular", name_ms="Biasa", price_delta_sen=0, sort_order=10),
-                        Option(name="Large", name_ms="Besar", price_delta_sen=400, sort_order=20)]
-        addons = OptionGroup(name="Add-ons", name_ms="Tambahan", min_select=0, max_select=3)
-        addons.options = [Option(name="Cheese", name_ms="Keju", price_delta_sen=200, sort_order=10),
-                          Option(name="Spicy Sauce", name_ms="Sos Pedas", price_delta_sen=100, sort_order=20),
-                          Option(name="Extra Chicken", name_ms="Ayam Tambahan", price_delta_sen=500, sort_order=30)]
-        sauce = OptionGroup(name="Sauce", name_ms="Sos", min_select=0, max_select=2)
-        sauce.options = [Option(name="Chilli", name_ms="Cili", price_delta_sen=0, sort_order=10),
-                         Option(name="Mayo", name_ms="Mayo", price_delta_sen=0, sort_order=20)]
+        size = OptionGroup(name="Size", min_select=1, max_select=1)
+        size.options = [Option(name="Regular", price_delta_sen=0, sort_order=10),
+                        Option(name="Large", price_delta_sen=400, sort_order=20)]
+        addons = OptionGroup(name="Add-ons", min_select=0, max_select=3)
+        addons.options = [Option(name="Cheese", price_delta_sen=200, sort_order=10),
+                          Option(name="Spicy Sauce", price_delta_sen=100, sort_order=20),
+                          Option(name="Extra Chicken", price_delta_sen=500, sort_order=30)]
+        sauce = OptionGroup(name="Sauce", min_select=0, max_select=2)
+        sauce.options = [Option(name="Chilli", price_delta_sen=0, sort_order=10),
+                         Option(name="Mayo", price_delta_sen=0, sort_order=20)]
         db.add_all([size, addons, sauce])
 
-        chicken = MenuCategory(name="Chicken", name_ms="Ayam", sort_order=10)
-        snacks = MenuCategory(name="Snacks", name_ms="Snek", sort_order=20)
-        sweet = MenuCategory(name="Sweet Bites", name_ms="Manisan", sort_order=30)
-        drinks = MenuCategory(name="Drinks", name_ms="Minuman", sort_order=40)
+        chicken = MenuCategory(name="Chicken", sort_order=10)
+        snacks = MenuCategory(name="Snacks", sort_order=20)
+        sweet = MenuCategory(name="Sweet Bites", sort_order=30)
+        drinks = MenuCategory(name="Drinks", sort_order=40)
         db.add_all([chicken, snacks, sweet, drinks])
 
-        def item(cat, name, name_ms, price, sort, desc=None, groups=()):
-            it = MenuItem(category=cat, name=name, name_ms=name_ms, price_sen=price, sort_order=sort,
+        def item(cat, name, price, sort, desc=None, groups=()):
+            it = MenuItem(category=cat, name=name, price_sen=price, sort_order=sort,
                           description=desc)
             it.group_links = [MenuItemOptionGroup(group=g, sort_order=i * 10) for i, g in enumerate(groups)]
             db.add(it)
 
-        item(chicken, "Chicken Tender", "Tender Ayam", 1000, 10, "Crispy strips, cooked to order",
+        item(chicken, "Chicken Tender", 1000, 10, "Crispy strips, cooked to order",
              (size, addons))
-        item(chicken, "Popcorn Chicken", "Ayam Popcorn", 800, 20, None, (size, sauce))
-        item(snacks, "Keropok Lekor", "Keropok Lekor", 500, 10, None, (sauce,))
-        item(snacks, "Fries", "Kentang Goreng", 600, 20, None, (size, sauce))
-        item(sweet, "Kaya Ball", "Bebola Kaya", 400, 10)
-        item(sweet, "Waffle", "Wafel", 700, 20, None, (addons,))
-        item(drinks, "Iced Milo", "Milo Ais", 450, 10)
-        item(drinks, "Teh Tarik", "Teh Tarik", 350, 20)
+        item(chicken, "Popcorn Chicken", 800, 20, None, (size, sauce))
+        item(snacks, "Keropok Lekor", 500, 10, None, (sauce,))
+        item(snacks, "Fries", 600, 20, None, (size, sauce))
+        item(sweet, "Kaya Ball", 400, 10)
+        item(sweet, "Waffle", 700, 20, None, (addons,))
+        item(drinks, "Iced Milo", 450, 10)
+        item(drinks, "Teh Tarik", 350, 20)
 
         for username, name, pin in (("aina", "Aina", "1111"), ("farid", "Farid", "2222")):
             if not db.scalar(select(User.id).where(User.username == username)):

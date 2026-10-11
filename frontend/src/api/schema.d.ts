@@ -659,6 +659,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Orders */
+        get: operations["list_orders_api_v1_admin_orders_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/orders/{order_id}/cancel": {
         parameters: {
             query?: never;
@@ -816,6 +833,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dashboard
+         * @description Everything on the owner's Today screen in one call.
+         */
+        get: operations["dashboard_api_v1_admin_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Report */
+        get: operations["report_api_v1_admin_reports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/reports/orders.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders Csv
+         * @description The accountant's export: one row per order in the range.
+         */
+        get: operations["orders_csv_api_v1_admin_reports_orders_csv_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit Logs */
+        get: operations["audit_logs_api_v1_admin_audit_logs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -843,8 +934,6 @@ export interface components {
             id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Sort Order */
             sort_order: number;
             /** Is Active */
@@ -858,12 +947,8 @@ export interface components {
             category_id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Description */
             description: string | null;
-            /** Description Ms */
-            description_ms: string | null;
             /** Price Sen */
             price_sen: number;
             /** Image Url */
@@ -894,8 +979,6 @@ export interface components {
             option_group_id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Price Delta Sen */
             price_delta_sen: number;
             /** Sort Order */
@@ -911,8 +994,6 @@ export interface components {
             id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Min Select */
             min_select: number;
             /** Max Select */
@@ -921,6 +1002,76 @@ export interface components {
             is_active: boolean;
             /** Options */
             options: components["schemas"]["AdminOption"][];
+        };
+        /** Attention */
+        Attention: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "paid_but_cancelled" | "duplicate_payment" | "ready_too_long" | "auto_closed" | "amount_mismatch";
+            order: components["schemas"]["AttentionOrder"];
+            /** Amount Sen */
+            amount_sen?: number | null;
+            /** Since */
+            since?: string | null;
+        };
+        /** AttentionOrder */
+        AttentionOrder: {
+            /** Id */
+            id: number;
+            /** Order Number */
+            order_number: string;
+            /** Order Code */
+            order_code: string;
+            /**
+             * Business Date
+             * Format: date
+             */
+            business_date: string;
+            /** Status */
+            status: string;
+            /** Payment Status */
+            payment_status: string;
+            /** Total Sen */
+            total_sen: number;
+        };
+        /** AuditPage */
+        AuditPage: {
+            /** Rows */
+            rows: components["schemas"]["AuditRow"][];
+            /** Next Cursor */
+            next_cursor: number | null;
+            /** Actions */
+            actions: string[];
+        };
+        /** AuditRow */
+        AuditRow: {
+            /** Id */
+            id: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Actor Name */
+            actor_name: string | null;
+            /** Action */
+            action: string;
+            /** Entity Type */
+            entity_type: string;
+            /** Entity Id */
+            entity_id: number | null;
+            /** Before */
+            before: {
+                [key: string]: unknown;
+            } | null;
+            /** After */
+            after: {
+                [key: string]: unknown;
+            } | null;
+            /** Ip */
+            ip: string | null;
         };
         /** Body_upload_image_api_v1_admin_menu_items__item_id__image_post */
         Body_upload_image_api_v1_admin_menu_items__item_id__image_post: {
@@ -935,6 +1086,33 @@ export interface components {
             reason: string;
             /** Refund Method */
             refund_method?: ("cash" | "original" | "later") | null;
+        };
+        /** CancellationRow */
+        CancellationRow: {
+            order: components["schemas"]["AttentionOrder"];
+            /** Reason */
+            reason: string | null;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            /** Cancelled By */
+            cancelled_by: string | null;
+            /** Was Paid */
+            was_paid: boolean;
+        };
+        /** Cancellations */
+        Cancellations: {
+            /** By Shop */
+            by_shop: number;
+            /** By Shop Value Sen */
+            by_shop_value_sen: number;
+            /** Unpaid */
+            unpaid: number;
+            /** Refunds */
+            refunds: number;
+            /** Refunded Sen */
+            refunded_sen: number;
+            /** Rows */
+            rows: components["schemas"]["CancellationRow"][];
         };
         /** CartLineIn */
         CartLineIn: {
@@ -951,8 +1129,6 @@ export interface components {
         CategoryIn: {
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms?: string | null;
             /**
              * Is Active
              * @default true
@@ -963,8 +1139,6 @@ export interface components {
         CategoryPatch: {
             /** Name */
             name?: string | null;
-            /** Name Ms */
-            name_ms?: string | null;
             /** Is Active */
             is_active?: boolean | null;
         };
@@ -974,6 +1148,15 @@ export interface components {
             current_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** ChannelRow */
+        ChannelRow: {
+            /** Channel */
+            channel: string;
+            /** Orders */
+            orders: number;
+            /** Sales Sen */
+            sales_sen: number;
         };
         /** CounterOrderIn */
         CounterOrderIn: {
@@ -1053,6 +1236,38 @@ export interface components {
             /** Tendered Sen */
             tendered_sen?: number | null;
         };
+        /** Dashboard */
+        Dashboard: {
+            /**
+             * Business Date
+             * Format: date
+             */
+            business_date: string;
+            today: components["schemas"]["Totals"];
+            live: components["schemas"]["LiveCounts"];
+            /** Accepting Online Orders */
+            accepting_online_orders: boolean;
+            /** Is Open */
+            is_open: boolean;
+            /** Top Items */
+            top_items: components["schemas"]["TopItem"][];
+            /** Last 14 Days */
+            last_14_days: components["schemas"]["DayPoint"][];
+            /** Needs Attention */
+            needs_attention: components["schemas"]["Attention"][];
+        };
+        /** DayPoint */
+        DayPoint: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Sales Sen */
+            sales_sen: number;
+            /** Orders */
+            orders: number;
+        };
         /** DeviceStaff */
         DeviceStaff: {
             /** Id */
@@ -1064,6 +1279,17 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HourRow */
+        HourRow: {
+            /** Hour */
+            hour: number;
+            /** Orders */
+            orders: number;
+            /** Sales Sen */
+            sales_sen: number;
+            /** Avg Daily Sales Sen */
+            avg_daily_sales_sen: number;
         };
         /**
          * ItemGroupsIn
@@ -1079,12 +1305,8 @@ export interface components {
             category_id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms?: string | null;
             /** Description */
             description?: string | null;
-            /** Description Ms */
-            description_ms?: string | null;
             /** Price Sen */
             price_sen: number;
             /**
@@ -1099,18 +1321,40 @@ export interface components {
             category_id?: number | null;
             /** Name */
             name?: string | null;
-            /** Name Ms */
-            name_ms?: string | null;
             /** Description */
             description?: string | null;
-            /** Description Ms */
-            description_ms?: string | null;
             /** Price Sen */
             price_sen?: number | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Is Sold Out */
             is_sold_out?: boolean | null;
+        };
+        /** ItemRow */
+        ItemRow: {
+            /** Menu Item Id */
+            menu_item_id: number;
+            /** Name */
+            name: string;
+            /** Category */
+            category: string | null;
+            /** Quantity */
+            quantity: number;
+            /** Sales Sen */
+            sales_sen: number;
+            /** Is Active */
+            is_active: boolean;
+        };
+        /** LiveCounts */
+        LiveCounts: {
+            /** Placed */
+            placed: number;
+            /** Preparing */
+            preparing: number;
+            /** Ready */
+            ready: number;
+            /** Awaiting Payment */
+            awaiting_payment: number;
         };
         /** LoginIn */
         LoginIn: {
@@ -1130,8 +1374,6 @@ export interface components {
             id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Items */
             items: components["schemas"]["MenuItemOut"][];
         };
@@ -1141,8 +1383,6 @@ export interface components {
             id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Min Select */
             min_select: number;
             /** Max Select */
@@ -1158,12 +1398,8 @@ export interface components {
             category_id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Description */
             description: string | null;
-            /** Description Ms */
-            description_ms: string | null;
             /** Price Sen */
             price_sen: number;
             /** Image Url */
@@ -1183,8 +1419,6 @@ export interface components {
             id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms: string | null;
             /** Price Delta Sen */
             price_delta_sen: number;
             /** Is Sold Out */
@@ -1237,8 +1471,6 @@ export interface components {
         OptionGroupIn: {
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms?: string | null;
             /**
              * Min Select
              * @default 0
@@ -1259,8 +1491,6 @@ export interface components {
         OptionGroupPatch: {
             /** Name */
             name?: string | null;
-            /** Name Ms */
-            name_ms?: string | null;
             /** Min Select */
             min_select?: number | null;
             /** Max Select */
@@ -1274,8 +1504,6 @@ export interface components {
             option_group_id: number;
             /** Name */
             name: string;
-            /** Name Ms */
-            name_ms?: string | null;
             /**
              * Price Delta Sen
              * @default 0
@@ -1291,8 +1519,6 @@ export interface components {
         OptionPatch: {
             /** Name */
             name?: string | null;
-            /** Name Ms */
-            name_ms?: string | null;
             /** Price Delta Sen */
             price_delta_sen?: number | null;
             /** Is Active */
@@ -1402,6 +1628,13 @@ export interface components {
             /** Price Sen */
             price_sen: number;
         };
+        /** OrderPage */
+        OrderPage: {
+            /** Orders */
+            orders: components["schemas"]["OrderSummary"][];
+            /** Next Cursor */
+            next_cursor: number | null;
+        };
         /** OrderPayment */
         OrderPayment: {
             /** Id */
@@ -1418,6 +1651,11 @@ export interface components {
             paid_at: string | null;
             /** Recorded By Name */
             recorded_by_name: string | null;
+            /**
+             * Refundable Sen
+             * @default 0
+             */
+            refundable_sen: number;
         };
         /** OrderSummary */
         OrderSummary: {
@@ -1476,6 +1714,40 @@ export interface components {
         PaymentLinkOut: {
             /** Payment Url */
             payment_url: string;
+        };
+        /**
+         * PaymentRow
+         * @description Money that actually moved, by method. Includes charges on orders later cancelled.
+         */
+        PaymentRow: {
+            /** Method */
+            method: string;
+            /** Charges */
+            charges: number;
+            /** Charged Sen */
+            charged_sen: number;
+            /** Refunds */
+            refunds: number;
+            /** Refunded Sen */
+            refunded_sen: number;
+            /** Net Sen */
+            net_sen: number;
+        };
+        /** PeriodRow */
+        PeriodRow: {
+            /** Period */
+            period: string;
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /** Sales Sen */
+            sales_sen: number;
+            /** Orders */
+            orders: number;
+            /** Avg Order Sen */
+            avg_order_sen: number;
         };
         /** Problem */
         Problem: {
@@ -1543,6 +1815,35 @@ export interface components {
              * @enum {string}
              */
             refund_method: "cash" | "original";
+            /** Payment Id */
+            payment_id?: number | null;
+        };
+        /** Report */
+        Report: {
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+            /** Group By */
+            group_by: string;
+            totals: components["schemas"]["Totals"];
+            /** Periods */
+            periods: components["schemas"]["PeriodRow"][];
+            /** Hours */
+            hours: components["schemas"]["HourRow"][];
+            /** Items */
+            items: components["schemas"]["ItemRow"][];
+            /** Channels */
+            channels: components["schemas"]["ChannelRow"][];
+            /** Payments */
+            payments: components["schemas"]["PaymentRow"][];
+            cancellations: components["schemas"]["Cancellations"];
         };
         /** SessionOut */
         SessionOut: {
@@ -1683,6 +1984,30 @@ export interface components {
             position?: string | null;
             /** Joined On */
             joined_on?: string | null;
+        };
+        /** TopItem */
+        TopItem: {
+            /** Menu Item Id */
+            menu_item_id: number;
+            /** Name */
+            name: string;
+            /** Quantity */
+            quantity: number;
+            /** Sales Sen */
+            sales_sen: number;
+        };
+        /** Totals */
+        Totals: {
+            /** Sales Sen */
+            sales_sen: number;
+            /** Orders */
+            orders: number;
+            /** Avg Order Sen */
+            avg_order_sen: number;
+            /** Online Orders */
+            online_orders: number;
+            /** Counter Orders */
+            counter_orders: number;
         };
         /** TotpCodeIn */
         TotpCodeIn: {
@@ -3107,6 +3432,45 @@ export interface operations {
             };
         };
     };
+    list_orders_api_v1_admin_orders_get: {
+        parameters: {
+            query?: {
+                date_from?: string | null;
+                date_to?: string | null;
+                status?: string | null;
+                payment_status?: string | null;
+                channel?: string | null;
+                staff_id?: number | null;
+                q?: string | null;
+                cursor?: number | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     cancel_api_v1_admin_orders__order_id__cancel_post: {
         parameters: {
             query?: never;
@@ -3411,6 +3775,129 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dashboard_api_v1_admin_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+        };
+    };
+    report_api_v1_admin_reports_get: {
+        parameters: {
+            query: {
+                date_from: string;
+                date_to: string;
+                group_by?: "day" | "week" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    orders_csv_api_v1_admin_reports_orders_csv_get: {
+        parameters: {
+            query: {
+                date_from: string;
+                date_to: string;
+                group_by?: "day" | "week" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    audit_logs_api_v1_admin_audit_logs_get: {
+        parameters: {
+            query?: {
+                date_from?: string | null;
+                date_to?: string | null;
+                action?: string | null;
+                entity_type?: string | null;
+                actor_id?: number | null;
+                cursor?: number | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditPage"];
                 };
             };
             /** @description Validation Error */

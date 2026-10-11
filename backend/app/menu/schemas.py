@@ -3,7 +3,6 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 Name = Field(min_length=1, max_length=100)
-OptName = Field(default=None, max_length=100)
 
 
 # --- Public menu ---------------------------------------------------------------------------------
@@ -12,7 +11,6 @@ OptName = Field(default=None, max_length=100)
 class MenuOptionOut(BaseModel):
     id: int
     name: str
-    name_ms: str | None
     price_delta_sen: int
     is_sold_out: bool
 
@@ -20,7 +18,6 @@ class MenuOptionOut(BaseModel):
 class MenuGroupOut(BaseModel):
     id: int
     name: str
-    name_ms: str | None
     min_select: int
     max_select: int
     options: list[MenuOptionOut]
@@ -30,9 +27,7 @@ class MenuItemOut(BaseModel):
     id: int
     category_id: int
     name: str
-    name_ms: str | None
     description: str | None
-    description_ms: str | None
     price_sen: int
     image_url: str | None
     image_url_large: str | None
@@ -46,7 +41,6 @@ class MenuItemOut(BaseModel):
 class MenuCategoryOut(BaseModel):
     id: int
     name: str
-    name_ms: str | None
     items: list[MenuItemOut]
 
 
@@ -63,22 +57,18 @@ class SoldOutIn(BaseModel):
 
 class CategoryIn(BaseModel):
     name: str = Name
-    name_ms: str | None = OptName
     is_active: bool = True
 
 
 class CategoryPatch(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
-    name_ms: str | None = OptName
     is_active: bool | None = None
 
 
 class ItemIn(BaseModel):
     category_id: int
     name: str = Name
-    name_ms: str | None = OptName
     description: str | None = Field(default=None, max_length=500)
-    description_ms: str | None = Field(default=None, max_length=500)
     price_sen: int = Field(ge=0, le=10_000_00)
     is_active: bool = True
 
@@ -86,9 +76,7 @@ class ItemIn(BaseModel):
 class ItemPatch(BaseModel):
     category_id: int | None = None
     name: str | None = Field(default=None, min_length=1, max_length=100)
-    name_ms: str | None = OptName
     description: str | None = Field(default=None, max_length=500)
-    description_ms: str | None = Field(default=None, max_length=500)
     price_sen: int | None = Field(default=None, ge=0, le=10_000_00)
     is_active: bool | None = None
     is_sold_out: bool | None = None
@@ -96,7 +84,6 @@ class ItemPatch(BaseModel):
 
 class OptionGroupIn(BaseModel):
     name: str = Name
-    name_ms: str | None = OptName
     min_select: int = Field(default=0, ge=0, le=20)
     max_select: int = Field(default=1, ge=1, le=20)
     is_active: bool = True
@@ -110,7 +97,6 @@ class OptionGroupIn(BaseModel):
 
 class OptionGroupPatch(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
-    name_ms: str | None = OptName
     min_select: int | None = Field(default=None, ge=0, le=20)
     max_select: int | None = Field(default=None, ge=1, le=20)
     is_active: bool | None = None
@@ -119,14 +105,12 @@ class OptionGroupPatch(BaseModel):
 class OptionIn(BaseModel):
     option_group_id: int
     name: str = Name
-    name_ms: str | None = OptName
     price_delta_sen: int = Field(default=0, ge=0, le=1_000_00)
     is_active: bool = True
 
 
 class OptionPatch(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
-    name_ms: str | None = OptName
     price_delta_sen: int | None = Field(default=None, ge=0, le=1_000_00)
     is_active: bool | None = None
     is_sold_out: bool | None = None
@@ -146,7 +130,6 @@ class SortIn(BaseModel):
 class AdminCategory(BaseModel):
     id: int
     name: str
-    name_ms: str | None
     sort_order: int
     is_active: bool
 
@@ -155,9 +138,7 @@ class AdminItem(BaseModel):
     id: int
     category_id: int
     name: str
-    name_ms: str | None
     description: str | None
-    description_ms: str | None
     price_sen: int
     image_url: str | None
     sort_order: int
@@ -170,7 +151,6 @@ class AdminOption(BaseModel):
     id: int
     option_group_id: int
     name: str
-    name_ms: str | None
     price_delta_sen: int
     sort_order: int
     is_active: bool
@@ -180,7 +160,6 @@ class AdminOption(BaseModel):
 class AdminOptionGroup(BaseModel):
     id: int
     name: str
-    name_ms: str | None
     min_select: int
     max_select: int
     is_active: bool

@@ -20,6 +20,10 @@ const SearchPage = lazy(() => import("./areas/staff/pages/SearchPage"));
 const SoldOutPage = lazy(() => import("./areas/staff/pages/SoldOutPage"));
 
 const AdminLayout = lazy(() => import("./areas/admin/AdminLayout"));
+const AdminTodayPage = lazy(() => import("./areas/admin/pages/TodayPage"));
+const AdminOrdersPage = lazy(() => import("./areas/admin/pages/OrdersPage"));
+const AdminReportsPage = lazy(() => import("./areas/admin/pages/ReportsPage"));
+const AdminAuditPage = lazy(() => import("./areas/admin/pages/AuditPage"));
 const AdminMenuPage = lazy(() => import("./areas/admin/pages/MenuPage"));
 const AdminStaffPage = lazy(() => import("./areas/admin/pages/StaffPage"));
 const AdminSettingsPage = lazy(() => import("./areas/admin/pages/SettingsPage"));
@@ -70,7 +74,11 @@ export const router = createBrowserRouter([
     element: <RequireRole role="admin"><Lazy><AdminLayout /></Lazy></RequireRole>,
     errorElement,
     children: [
-      { index: true, element: <Navigate to="menu" replace /> },
+      { index: true, element: <Navigate to="today" replace /> },
+      { path: "today", element: <Lazy><AdminTodayPage /></Lazy> },
+      { path: "orders", element: <Lazy><AdminOrdersPage /></Lazy> },
+      { path: "reports", element: <Lazy><AdminReportsPage /></Lazy> },
+      { path: "audit", element: <Lazy><AdminAuditPage /></Lazy> },
       { path: "menu", element: <Lazy><AdminMenuPage /></Lazy> },
       { path: "staff", element: <Lazy><AdminStaffPage /></Lazy> },
       { path: "settings", element: <Lazy><AdminSettingsPage /></Lazy> },

@@ -2,21 +2,19 @@ import { Badge, Box, Group, Image, Paper, Stack, Text, UnstyledButton } from "@m
 import { useTranslation } from "react-i18next";
 
 import type { MenuItem } from "../../../api/types";
-import { useLocalized } from "../../../lib/i18n";
 import { formatSen } from "../../../lib/money";
 
 export function ItemCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
   const { t } = useTranslation();
-  const loc = useLocalized();
   return (
-    <UnstyledButton onClick={onOpen} aria-label={loc.name(item)}>
+    <UnstyledButton onClick={onOpen} aria-label={item.name}>
       <Paper p="sm" withBorder style={{ opacity: item.is_sold_out ? 0.55 : 1 }}>
         <Group wrap="nowrap" align="flex-start" gap="sm">
           <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
-            <Text fw={600}>{loc.name(item)}</Text>
-            {loc.description(item) && (
+            <Text fw={600}>{item.name}</Text>
+            {item.description && (
               <Text size="sm" c="dimmed" lineClamp={2}>
-                {loc.description(item)}
+                {item.description}
               </Text>
             )}
             <Group gap="xs">

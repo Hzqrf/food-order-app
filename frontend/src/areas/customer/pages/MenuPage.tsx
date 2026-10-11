@@ -5,14 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useMenu, useShop } from "../../../api/menu";
 import type { MenuItem } from "../../../api/types";
 import { ErrorState } from "../../../components/ErrorState";
-import { useLocalized } from "../../../lib/i18n";
 import { ItemCard } from "../components/ItemCard";
 import { ItemSheet } from "../components/ItemSheet";
 import { RecentOrders } from "../components/RecentOrders";
 
 export default function MenuPage() {
   const { t } = useTranslation();
-  const loc = useLocalized();
   const { data: menu, isPending, isError, refetch } = useMenu();
   const { data: shop } = useShop();
   const [open, setOpen] = useState<MenuItem | null>(null);
@@ -56,7 +54,7 @@ export default function MenuPage() {
                 <Tabs.List style={{ flexWrap: "nowrap" }}>
                   {menu.categories.map((c) => (
                     <Tabs.Tab key={c.id} value={String(c.id)}>
-                      {loc.name(c)}
+                      {c.name}
                     </Tabs.Tab>
                   ))}
                 </Tabs.List>
@@ -71,7 +69,7 @@ export default function MenuPage() {
               return (
                 <Box key={c.id} id={`cat-${c.id}`} style={{ scrollMarginTop: 56 }}>
                   <Title order={4} mb="xs">
-                    {loc.name(c)}
+                    {c.name}
                   </Title>
                   <Stack gap="xs">
                     {items.map((item) => (

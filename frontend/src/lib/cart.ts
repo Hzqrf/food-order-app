@@ -24,11 +24,11 @@ export function unitPrice(item: MenuItem, optionIds: number[]): number {
   return item.price_sen + deltas.reduce((sum, o) => sum + o.price_delta_sen, 0);
 }
 
-export function optionNames(item: MenuItem, optionIds: number[], name: (o: { name: string; name_ms?: string | null }) => string) {
+export function optionNames(item: MenuItem, optionIds: number[]) {
   return item.groups
     .flatMap((g) => g.options)
     .filter((o) => optionIds.includes(o.id))
-    .map(name)
+    .map((o) => o.name)
     .join(", ");
 }
 

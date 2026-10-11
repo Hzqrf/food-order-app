@@ -51,7 +51,7 @@ def test_create_item_attach_groups_and_sort(admin_client, menu):
     menu_json = admin_client.get(f"{API}/admin/menu").json()
     cat_id = menu_json["categories"][0]["id"]
     r = admin_client.post(f"{API}/admin/menu/items",
-                          json={"category_id": cat_id, "name": "Wings", "name_ms": "Kepak", "price_sen": 900})
+                          json={"category_id": cat_id, "name": "Wings", "price_sen": 900})
     assert r.status_code == 201
     wings = r.json()["id"]
     r = admin_client.put(f"{API}/admin/menu/items/{wings}/option-groups",

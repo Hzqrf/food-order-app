@@ -73,21 +73,21 @@ def _build_public_menu(db: Session) -> schemas.MenuOut:
                 continue
             blocked = blocked or group_unavailable(g)
             groups.append(schemas.MenuGroupOut(
-                id=g.id, name=g.name, name_ms=g.name_ms, min_select=g.min_select, max_select=g.max_select,
-                options=[schemas.MenuOptionOut(id=o.id, name=o.name, name_ms=o.name_ms,
+                id=g.id, name=g.name, min_select=g.min_select, max_select=g.max_select,
+                options=[schemas.MenuOptionOut(id=o.id, name=o.name,
                                                price_delta_sen=o.price_delta_sen, is_sold_out=o.is_sold_out)
                          for o in g.options if o.is_active],
             ))
         small, large = image_urls(item.image_path)
         by_category.setdefault(item.category_id, []).append(schemas.MenuItemOut(
-            id=item.id, category_id=item.category_id, name=item.name, name_ms=item.name_ms,
-            description=item.description, description_ms=item.description_ms, price_sen=item.price_sen,
+            id=item.id, category_id=item.category_id, name=item.name,
+            description=item.description, price_sen=item.price_sen,
             image_url=small, image_url_large=large, is_sold_out=item.is_sold_out or blocked,
             item_sold_out=item.is_sold_out, groups=groups,
         ))
     # A category with no active items is hidden automatically.
     return schemas.MenuOut(categories=[
-        schemas.MenuCategoryOut(id=c.id, name=c.name, name_ms=c.name_ms, items=by_category[c.id])
+        schemas.MenuCategoryOut(id=c.id, name=c.name, items=by_category[c.id])
         for c in categories if by_category.get(c.id)
     ])
 
@@ -124,7 +124,7 @@ def admin_menu(db: Session) -> schemas.AdminMenuOut:
         categories=[schemas.AdminCategory.model_validate(c, from_attributes=True) for c in categories],
         items=[_admin_item(i) for i in items],
         option_groups=[schemas.AdminOptionGroup(
-            id=g.id, name=g.name, name_ms=g.name_ms, min_select=g.min_select, max_select=g.max_select,
+            id=g.id, name=g.name, min_select=g.min_select, max_select=g.max_select,
             is_active=g.is_active,
             options=[schemas.AdminOption.model_validate(o, from_attributes=True) for o in g.options],
         ) for g in groups],
@@ -133,8 +133,8 @@ def admin_menu(db: Session) -> schemas.AdminMenuOut:
 
 def _admin_item(item: MenuItem) -> schemas.AdminItem:
     return schemas.AdminItem(
-        id=item.id, category_id=item.category_id, name=item.name, name_ms=item.name_ms,
-        description=item.description, description_ms=item.description_ms, price_sen=item.price_sen,
+        id=item.id, category_id=item.category_id, name=item.name,
+        description=item.description, price_sen=item.price_sen,
         image_url=image_urls(item.image_path)[0], sort_order=item.sort_order, is_active=item.is_active,
         is_sold_out=item.is_sold_out, option_group_ids=[link.option_group_id for link in item.group_links],
     )

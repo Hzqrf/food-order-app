@@ -12,7 +12,7 @@ def _cat(c) -> schemas.AdminCategory:
 
 def _group(g) -> schemas.AdminOptionGroup:
     return schemas.AdminOptionGroup(
-        id=g.id, name=g.name, name_ms=g.name_ms, min_select=g.min_select, max_select=g.max_select,
+        id=g.id, name=g.name, min_select=g.min_select, max_select=g.max_select,
         is_active=g.is_active,
         options=[schemas.AdminOption.model_validate(o, from_attributes=True) for o in g.options],
     )

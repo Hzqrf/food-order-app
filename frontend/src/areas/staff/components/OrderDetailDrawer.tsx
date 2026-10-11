@@ -8,6 +8,7 @@ import type { OrderSummary } from "../../../api/types";
 import { formatDateTime, formatTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { CancelOrderModal } from "./CancelOrderModal";
+import { RefundModal } from "./RefundModal";
 
 export const STATUS_COLOR: Record<string, string> = {
   pending_payment: "gray",
@@ -38,6 +39,7 @@ export function OrderDetailDrawer({
   const { data: session } = useSession();
   const { data: order, isPending } = useOrder(orderId);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [refundOpen, setRefundOpen] = useState(false);
   const isAdmin = session?.user?.role === "admin";
 
   const canCancel =
@@ -153,7 +155,13 @@ export function OrderDetailDrawer({
               {t("order.cancel")}
             </Button>
           )}
+          {isAdmin && order.payment_status === "paid" && order.payments.some((p) => p.refundable_sen > 0) && (
+            <Button color="red" variant="light" onClick={() => setRefundOpen(true)}>
+              {t("refund.button")}
+            </Button>
+          )}
           <CancelOrderModal order={cancelOpen ? order : null} onClose={() => setCancelOpen(false)} />
+          <RefundModal order={refundOpen ? order : null} onClose={() => setRefundOpen(false)} />
         </Stack>
       )}
     </Drawer>

@@ -5,12 +5,10 @@ import { useMenu, useSetSoldOut } from "../../../api/menu";
 import type { MenuOption } from "../../../api/types";
 import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
-import { useLocalized } from "../../../lib/i18n";
 
 /** The person at the fryer knows first. Everything resets at day close. */
 export default function SoldOutPage() {
   const { t } = useTranslation();
-  const loc = useLocalized();
   const { data: menu, isPending, isError, refetch } = useMenu();
   const setSoldOut = useSetSoldOut();
 
@@ -20,7 +18,7 @@ export default function SoldOutPage() {
   // Option groups are shared between items; list each option once.
   const options = new Map<number, MenuOption & { group: string }>();
   menu.categories.forEach((c) =>
-    c.items.forEach((i) => i.groups.forEach((g) => g.options.forEach((o) => options.set(o.id, { ...o, group: loc.name(g) })))),
+    c.items.forEach((i) => i.groups.forEach((g) => g.options.forEach((o) => options.set(o.id, { ...o, group: g.name })))),
   );
 
   const toggle = (kind: "items" | "options", id: number, available: boolean) =>
@@ -34,13 +32,13 @@ export default function SoldOutPage() {
       {menu.categories.map((c) => (
         <Paper key={c.id} withBorder p="md">
           <Title order={5} mb="xs">
-            {loc.name(c)}
+            {c.name}
           </Title>
           <Stack gap="xs">
             {c.items.map((i) => (
               <Group key={i.id} justify="space-between">
                 <div>
-                  <Text c={i.is_sold_out ? "dimmed" : undefined}>{loc.name(i)}</Text>
+                  <Text c={i.is_sold_out ? "dimmed" : undefined}>{i.name}</Text>
                   {i.is_sold_out && !i.item_sold_out && (
                     <Text size="xs" c="orange.8">
                       {t("soldOut.blockedByOption")}
@@ -63,7 +61,7 @@ export default function SoldOutPage() {
             {[...options.values()].map((o) => (
               <Group key={o.id} justify="space-between">
                 <Text c={o.is_sold_out ? "dimmed" : undefined}>
-                  {loc.name(o)}{" "}
+                  {o.name}{" "}
                   <Text span size="xs" c="dimmed">
                     ({o.group})
                   </Text>

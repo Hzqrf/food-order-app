@@ -33,6 +33,13 @@ export type StaffOut = S["StaffOut"];
 export type StaffIn = S["StaffIn"];
 export type SettingsPatch = S["SettingsPatch"];
 export type TotpSetupOut = S["TotpSetupOut"];
+export type Dashboard = S["Dashboard"];
+export type Attention = S["Attention"];
+export type Report = S["Report"];
+export type OrderPage = S["OrderPage"];
+export type AuditPage = S["AuditPage"];
+export type AuditRow = S["AuditRow"];
+export type RefundIn = S["RefundIn"];
 
 export type OrderStatus = "pending_payment" | "placed" | "preparing" | "ready" | "completed" | "cancelled";
 export type PaymentMethod = CounterOrderIn["payment"]["method"];

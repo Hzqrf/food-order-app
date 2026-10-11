@@ -69,7 +69,6 @@ export default function MenuPage() {
                             </Table.Td>
                             <Table.Td>
                               <Text fw={600}>{item.name}</Text>
-                              {item.name_ms && <Text size="xs" c="dimmed">{item.name_ms}</Text>}
                             </Table.Td>
                             <Table.Td>{formatSen(item.price_sen)}</Table.Td>
                             <Table.Td visibleFrom="md">

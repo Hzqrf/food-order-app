@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -152,6 +152,20 @@ class CancelIn(BaseModel):
 class RefundIn(BaseModel):
     reason: str = Field(min_length=1, max_length=200)
     refund_method: Literal["cash", "original"]
+    # Refund just this charge, e.g. a duplicate online payment. Default: everything still paid.
+    payment_id: int | None = None
+
+
+class OrderFilter(BaseModel):
+    date_from: date | None = None
+    date_to: date | None = None
+    status: str | None = None
+    payment_status: str | None = None
+    channel: str | None = None
+    staff_id: int | None = None
+    q: str | None = Field(default=None, max_length=50)
+    cursor: int | None = None
+    limit: int = Field(default=50, ge=1, le=100)
 
 
 class OrderOption(BaseModel):
@@ -214,12 +228,19 @@ class OrderPayment(BaseModel):
     status: str
     paid_at: datetime | None
     recorded_by_name: str | None
+    # For succeeded charges: the part not yet refunded. 0 for refunds and unsuccessful attempts.
+    refundable_sen: int = 0
 
 
 class OrderDetail(OrderSummary):
     customer_phone: str | None
     events: list[OrderEvent]
     payments: list[OrderPayment]
+
+
+class OrderPage(BaseModel):
+    orders: list[OrderSummary]
+    next_cursor: int | None
 
 
 class CounterOrderOut(OrderSummary):

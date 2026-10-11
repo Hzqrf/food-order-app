@@ -11,9 +11,7 @@ import { MoneyInput } from "../../../components/MoneyInput";
 type Form = {
   category_id: string | null;
   name: string;
-  name_ms: string;
   description: string;
-  description_ms: string;
   price_sen: number | null;
   is_active: boolean;
   is_sold_out: boolean;
@@ -25,9 +23,7 @@ function initial(item: AdminItem | "new" | null, menu: AdminMenu): Form {
     return {
       category_id: String(item.category_id),
       name: item.name,
-      name_ms: item.name_ms ?? "",
       description: item.description ?? "",
-      description_ms: item.description_ms ?? "",
       price_sen: item.price_sen,
       is_active: item.is_active,
       is_sold_out: item.is_sold_out,
@@ -36,7 +32,7 @@ function initial(item: AdminItem | "new" | null, menu: AdminMenu): Form {
   }
   return {
     category_id: menu.categories[0] ? String(menu.categories[0].id) : null,
-    name: "", name_ms: "", description: "", description_ms: "",
+    name: "", description: "",
     price_sen: null, is_active: true, is_sold_out: false, groups: [],
   };
 }
@@ -67,9 +63,7 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
     const body = {
       category_id: Number(form.category_id),
       name: form.name.trim(),
-      name_ms: form.name_ms.trim() || null,
       description: form.description.trim() || null,
-      description_ms: form.description_ms.trim() || null,
       price_sen: form.price_sen!,
       is_active: form.is_active,
     };
@@ -95,14 +89,10 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
         <Select label={t("admin.menu.category")} required allowDeselect={false} value={form.category_id}
           onChange={(v) => set("category_id", v)}
           data={menu.categories.map((c) => ({ value: String(c.id), label: c.name }))} />
-        <TextInput label={t("admin.menu.nameEn")} required maxLength={100} value={form.name}
+        <TextInput label={t("admin.menu.name")} required maxLength={100} value={form.name}
           onChange={(e) => set("name", e.currentTarget.value)} />
-        <TextInput label={t("admin.menu.nameMs")} maxLength={100} value={form.name_ms}
-          onChange={(e) => set("name_ms", e.currentTarget.value)} />
-        <Textarea label={t("admin.menu.descriptionEn")} maxLength={500} autosize minRows={2} value={form.description}
+        <Textarea label={t("admin.menu.description")} maxLength={500} autosize minRows={2} value={form.description}
           onChange={(e) => set("description", e.currentTarget.value)} />
-        <Textarea label={t("admin.menu.descriptionMs")} maxLength={500} autosize minRows={2} value={form.description_ms}
-          onChange={(e) => set("description_ms", e.currentTarget.value)} />
         <MoneyInput label={t("admin.menu.price")} required valueSen={form.price_sen}
           onChangeSen={(v) => set("price_sen", v)} />
         <MultiSelect label={t("admin.menu.optionGroups")} description={t("admin.menu.optionGroupsHint")}

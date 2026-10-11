@@ -239,7 +239,11 @@
       "menu": "Menu",
       "staff": "Pekerja",
       "settings": "Tetapan",
-      "board": "Papan pesanan"
+      "board": "Papan pesanan",
+      "today": "Hari ini",
+      "orders": "Pesanan",
+      "reports": "Laporan",
+      "audit": "Log audit"
     },
     "menu": {
       "title": "Menu",
@@ -255,16 +259,14 @@
       "hidden": "Disembunyikan",
       "visible": "Kelihatan kepada pelanggan",
       "category": "Kategori",
-      "nameEn": "Nama (Bahasa Inggeris)",
-      "nameMs": "Nama (Bahasa Malaysia)",
-      "descriptionEn": "Keterangan (Bahasa Inggeris)",
-      "descriptionMs": "Keterangan (Bahasa Malaysia)",
       "price": "Harga",
       "photo": "Gambar",
       "uploadPhoto": "Muat naik gambar",
       "replacePhoto": "Tukar gambar",
       "photoAfterSave": "Simpan item dahulu, kemudian tambah gambar.",
-      "newCategory": "Kategori baru"
+      "newCategory": "Kategori baru",
+      "name": "Nama",
+      "description": "Keterangan"
     },
     "groups": {
       "hint": "Satu kumpulan, seperti Sos, boleh digunakan pada banyak item. Menanda pilihan sebagai habis membuangnya di semua tempat.",
@@ -326,6 +328,122 @@
       "totpConfirm": "Hidupkan",
       "changePassword": "Tukar kata laluan",
       "currentPassword": "Kata laluan semasa"
+    },
+    "loadMore": "Muat lagi",
+    "filters": {
+      "from": "Dari",
+      "to": "Hingga",
+      "status": "Status",
+      "payment": "Bayaran",
+      "channel": "Saluran",
+      "staff": "Dimasukkan oleh",
+      "search": "Cari",
+      "any": "Semua"
+    },
+    "orders": {
+      "number": "No.",
+      "id": "ID pesanan",
+      "time": "Masa",
+      "keyedBy": "Dimasukkan oleh"
+    },
+    "today": {
+      "title": "Hari ini",
+      "sales": "Jualan",
+      "orders": "Pesanan",
+      "avgOrder": "Purata pesanan",
+      "online": "Bahagian dalam talian",
+      "onlineHint": "{{online}} dalam talian · {{counter}} kaunter",
+      "live": "Sekarang",
+      "closedNow": "Kedai ditutup mengikut waktu operasi.",
+      "attention": "Perlu perhatian",
+      "allClear": "Tiada apa yang perlu anda buat. Semua baik.",
+      "last14": "Jualan, 14 hari lepas",
+      "topItems": "Item terlaris hari ini"
+    },
+    "attention": {
+      "paid_but_cancelled": "Dibayar tetapi dibatalkan: pulangkan {{amount}}",
+      "duplicate_payment": "Dibayar dua kali: pulangkan lebihan {{amount}}",
+      "ready_too_long": "Siap lebih 30 minit",
+      "auto_closed": "Ditutup automatik semasa tutup hari: adakah ia diambil?",
+      "amount_mismatch": "Jumlah bayaran tidak sepadan dengan bil",
+      "open": "Buka"
+    },
+    "reports": {
+      "csv": "Muat turun CSV",
+      "presets": {
+        "today": "Hari ini",
+        "7d": "7 hari",
+        "30d": "30 hari",
+        "month": "Bulan ini",
+        "custom": "Pilih"
+      },
+      "byDay": "Hari",
+      "byWeek": "Minggu",
+      "byMonth": "Bulan",
+      "salesBy": {
+        "day": "Jualan mengikut hari",
+        "week": "Jualan mengikut minggu",
+        "month": "Jualan mengikut bulan"
+      },
+      "sales": "Jualan",
+      "salesDefinition": "Jualan mengira pesanan berbayar yang tidak dibatalkan atau dipulangkan.",
+      "weekOf": "Minggu {{day}}",
+      "ordersCount_other": "{{count}} pesanan",
+      "byHour": "Jualan mengikut jam (purata sehari)",
+      "avgPerDay": "Purata sehari",
+      "items": "Item terjual",
+      "item": "Item",
+      "qty": "Kuantiti",
+      "notSold": "Tidak terjual",
+      "channels": "Dalam talian berbanding kaunter",
+      "payments": "Kaedah bayaran",
+      "paymentsHint": "Wang yang bergerak dalam tempoh ini, mengikut kaedah. Guna baris tunai untuk semak laci wang.",
+      "method": "Kaedah",
+      "in": "Masuk",
+      "refunded": "Dipulangkan",
+      "net": "Bersih",
+      "cancellations": "Pembatalan dan pulangan",
+      "cancelledByShop": "dibatalkan oleh kedai ({{value}})",
+      "refundsMade": "pulangan dibuat ({{value}})",
+      "unpaidOnline": "pesanan dalam talian tidak dibayar",
+      "by": "Oleh",
+      "notRefunded": "Belum dipulangkan"
+    },
+    "audit": {
+      "hint": "Setiap perubahan pada harga, pulangan, pembatalan, pekerja dan tetapan, dengan siapa yang membuatnya. Rekod tidak boleh diubah atau dipadam.",
+      "action": "Tindakan",
+      "who": "Siapa",
+      "what": "Apa",
+      "changes": "Perubahan",
+      "empty": "Belum ada rekod.",
+      "actions": {
+        "menu_item_created": "Item menu ditambah",
+        "menu_item_changed": "Item menu diubah",
+        "category_active_changed": "Kategori dipapar atau disembunyikan",
+        "option_group_active_changed": "Kumpulan pilihan dipapar atau disembunyikan",
+        "option_created": "Pilihan ditambah",
+        "option_changed": "Pilihan diubah",
+        "order_status_corrected": "Status pesanan dibetulkan",
+        "order_cancelled_after_payment": "Pesanan berbayar dibatalkan",
+        "refund_recorded": "Pulangan direkodkan",
+        "staff_created": "Pekerja ditambah",
+        "staff_role_changed": "Peranan pekerja diubah",
+        "staff_deactivated": "Pekerja dinyahaktifkan",
+        "staff_reactivated": "Pekerja diaktifkan semula",
+        "password_reset": "Kata laluan ditetapkan semula",
+        "pin_reset": "PIN ditetapkan",
+        "password_changed": "Kata laluan ditukar",
+        "totp_enabled": "Log masuk dua langkah dihidupkan",
+        "admin_login": "Pemilik log masuk",
+        "admin_login_failed": "Log masuk pemilik gagal",
+        "device_registered": "Tablet kedai didaftarkan",
+        "online_orders_paused": "Pesanan dalam talian dihentikan",
+        "online_orders_resumed": "Pesanan dalam talian disambung",
+        "settings_changed": "Tetapan diubah",
+        "payment_amount_mismatch": "Jumlah bayaran tidak sepadan",
+        "duplicate_payment": "Bayaran berganda",
+        "paid_after_cancel": "Dibayar selepas dibatalkan"
+      }
     }
   },
   "customer": {
@@ -395,5 +513,21 @@
     "payNow": "Bayar {{total}} sekarang",
     "cancelUnpaid": "Batalkan pesanan ini",
     "orderAgain": "Pesan semula"
+  },
+  "charts": {
+    "chart": "Carta",
+    "table": "Jadual"
+  },
+  "refund": {
+    "button": "Rekod pulangan",
+    "title": "Pulangan pesanan {{number}}",
+    "which": "Bayaran yang mana?",
+    "all": "Semua yang masih dibayar ({{amount}})",
+    "one": "Bayaran {{n}}: {{method}}, {{amount}}",
+    "how": "Bagaimana {{amount}} dipulangkan?",
+    "original": "Dipulangkan di terminal atau papan pemuka gerbang pembayaran",
+    "note": "Pulangkan wang dahulu, kemudian rekodkan di sini. Pulangan dilog dengan nama anda.",
+    "confirm": "Rekod pulangan {{amount}}",
+    "done": "Pulangan {{amount}} direkodkan"
   }
 }

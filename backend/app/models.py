@@ -129,7 +129,6 @@ class MenuCategory(TimestampMixin, Base):
     __tablename__ = "menu_categories"
 
     name: Mapped[str] = mapped_column(String(100))
-    name_ms: Mapped[str | None] = mapped_column(String(100))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
@@ -145,9 +144,7 @@ class MenuItem(TimestampMixin, Base):
 
     category_id: Mapped[int] = mapped_column(BigId, fk("menu_categories.id"))
     name: Mapped[str] = mapped_column(String(100))
-    name_ms: Mapped[str | None] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(500))
-    description_ms: Mapped[str | None] = mapped_column(String(500))
     price_sen: Mapped[int] = mapped_column(Integer)
     image_path: Mapped[str | None] = mapped_column(String(255))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
@@ -168,7 +165,6 @@ class OptionGroup(TimestampMixin, Base):
     )
 
     name: Mapped[str] = mapped_column(String(100))
-    name_ms: Mapped[str | None] = mapped_column(String(100))
     min_select: Mapped[int] = mapped_column(Integer, default=0)
     max_select: Mapped[int] = mapped_column(Integer, default=1)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -182,7 +178,6 @@ class Option(TimestampMixin, Base):
 
     option_group_id: Mapped[int] = mapped_column(BigId, fk("option_groups.id"))
     name: Mapped[str] = mapped_column(String(100))
-    name_ms: Mapped[str | None] = mapped_column(String(100))
     price_delta_sen: Mapped[int] = mapped_column(Integer, default=0)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

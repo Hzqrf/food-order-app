@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import type { MenuItem, QuoteOut } from "../../../api/types";
 import { optionNames, unitPrice } from "../../../lib/cart";
-import { useLocalized } from "../../../lib/i18n";
 import { formatSen } from "../../../lib/money";
 import { useCart } from "../cart";
 
@@ -15,7 +14,6 @@ export function CartLines({ items, quote, editable = true }: {
   editable?: boolean;
 }) {
   const { t } = useTranslation();
-  const loc = useLocalized();
   const { lines, setQuantity } = useCart();
   const problemAt = new Map((quote?.problems ?? []).map((p) => [p.line, p.reason]));
 
@@ -28,9 +26,9 @@ export function CartLines({ items, quote, editable = true }: {
           <Box key={l.key} p="xs" style={{ borderRadius: 8, background: problem ? "var(--mantine-color-red-0)" : undefined }}>
             <Group justify="space-between" wrap="nowrap" align="flex-start">
               <Box miw={0}>
-                <Text fw={600}>{item ? loc.name(item) : t("customer.removedItem")}</Text>
+                <Text fw={600}>{item ? item.name : t("customer.removedItem")}</Text>
                 {item && l.optionIds.length > 0 && (
-                  <Text size="sm" c="dimmed">{optionNames(item, l.optionIds, loc.name)}</Text>
+                  <Text size="sm" c="dimmed">{optionNames(item, l.optionIds)}</Text>
                 )}
                 {l.note && <Text size="sm" c="dimmed">“{l.note}”</Text>}
                 {problem && <Badge color="red" variant="light" mt={4}>{t(`customer.problem.${problem}`)}</Badge>}
