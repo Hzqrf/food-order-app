@@ -3,18 +3,19 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { useOrderSearch } from "../../../api/orders";
 import { formatDateTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
-import { OrderDetailDrawer, STATUS_COLOR } from "../components/OrderDetailDrawer";
+import { STATUS_COLOR } from "../console/StatusLabel";
 
 export default function SearchPage() {
   const { t } = useTranslation();
   const [q, setQ] = useState("");
   const [debounced] = useDebouncedValue(q.trim(), 300);
   const { data, isFetching } = useOrderSearch(debounced);
-  const [openId, setOpenId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   return (
     <Stack maw={720} mx="auto">
@@ -25,7 +26,7 @@ export default function SearchPage() {
       </Text>
       {debounced && !isFetching && data?.length === 0 && <Text c="dimmed">{t("search.none")}</Text>}
       {data?.map((o) => (
-        <UnstyledButton key={o.id} onClick={() => setOpenId(o.id)}>
+        <UnstyledButton key={o.id} onClick={() => navigate(`/staff/orders/${o.id}`)}>
           <Paper withBorder p="sm">
             <Group justify="space-between">
               <Group gap="sm">
@@ -46,7 +47,6 @@ export default function SearchPage() {
           </Paper>
         </UnstyledButton>
       ))}
-      <OrderDetailDrawer orderId={openId} onClose={() => setOpenId(null)} />
     </Stack>
   );
 }

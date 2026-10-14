@@ -608,6 +608,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/staff/orders/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Queue Metrics
+         * @description Numbers above the queue; readable on a locked shop tablet like the board itself.
+         */
+        get: operations["queue_metrics_api_v1_staff_orders_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/staff/orders/{order_id}": {
         parameters: {
             query?: never;
@@ -636,6 +656,23 @@ export interface paths {
         put?: never;
         /** Transition */
         post: operations["transition_api_v1_staff_orders__order_id__transition_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/orders/{order_id}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Claim */
+        post: operations["claim_api_v1_staff_orders__order_id__claim_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -845,6 +882,26 @@ export interface paths {
          * @description Everything on the owner's Today screen in one call.
          */
         get: operations["dashboard_api_v1_admin_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/menu/units-sold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Units Sold
+         * @description Units per item over the last N business days, for the Menu page's "sold in 7 days" column.
+         */
+        get: operations["units_sold_api_v1_admin_menu_units_sold_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1163,6 +1220,11 @@ export interface components {
             /** Sales Sen */
             sales_sen: number;
         };
+        /** ClaimIn */
+        ClaimIn: {
+            /** Version */
+            version: number;
+        };
         /** CounterOrderIn */
         CounterOrderIn: {
             /**
@@ -1213,6 +1275,10 @@ export interface components {
             cancel_reason: string | null;
             /** Created By Name */
             created_by_name: string | null;
+            /** Claimed By Name */
+            claimed_by_name: string | null;
+            /** Claimed At */
+            claimed_at: string | null;
             /**
              * Created At
              * Format: date-time
@@ -1220,6 +1286,8 @@ export interface components {
             created_at: string;
             /** Placed At */
             placed_at: string | null;
+            /** Preparing At */
+            preparing_at: string | null;
             /** Ready At */
             ready_at: string | null;
             /** Completed At */
@@ -1262,6 +1330,13 @@ export interface components {
             last_14_days: components["schemas"]["DayPoint"][];
             /** Needs Attention */
             needs_attention: components["schemas"]["Attention"][];
+            same_day_last_week: components["schemas"]["Totals"];
+            /** Cancelled Today */
+            cancelled_today: number;
+            /** Hours Today */
+            hours_today: components["schemas"]["HourRow"][];
+            /** Hours Same Day Last Week */
+            hours_same_day_last_week: components["schemas"]["HourRow"][];
         };
         /** DayPoint */
         DayPoint: {
@@ -1565,6 +1640,10 @@ export interface components {
             cancel_reason: string | null;
             /** Created By Name */
             created_by_name: string | null;
+            /** Claimed By Name */
+            claimed_by_name: string | null;
+            /** Claimed At */
+            claimed_at: string | null;
             /**
              * Created At
              * Format: date-time
@@ -1572,6 +1651,8 @@ export interface components {
             created_at: string;
             /** Placed At */
             placed_at: string | null;
+            /** Preparing At */
+            preparing_at: string | null;
             /** Ready At */
             ready_at: string | null;
             /** Completed At */
@@ -1696,6 +1777,10 @@ export interface components {
             cancel_reason: string | null;
             /** Created By Name */
             created_by_name: string | null;
+            /** Claimed By Name */
+            claimed_by_name: string | null;
+            /** Claimed At */
+            claimed_at: string | null;
             /**
              * Created At
              * Format: date-time
@@ -1703,6 +1788,8 @@ export interface components {
             created_at: string;
             /** Placed At */
             placed_at: string | null;
+            /** Preparing At */
+            preparing_at: string | null;
             /** Ready At */
             ready_at: string | null;
             /** Completed At */
@@ -1755,6 +1842,14 @@ export interface components {
             orders: number;
             /** Avg Order Sen */
             avg_order_sen: number;
+            /** Refunds Sen */
+            refunds_sen: number;
+            /** Methods */
+            methods: {
+                [key: string]: number;
+            };
+            /** Peak Hour */
+            peak_hour: number | null;
         };
         /** Problem */
         Problem: {
@@ -1768,6 +1863,21 @@ export interface components {
             option_id?: number | null;
             /** Option Group Id */
             option_group_id?: number | null;
+        };
+        /** QueueMetrics */
+        QueueMetrics: {
+            /** Open Orders */
+            open_orders: number;
+            /** Avg Prep Minutes */
+            avg_prep_minutes: number | null;
+            /** Avg Prep Minutes Last Week */
+            avg_prep_minutes_last_week: number | null;
+            /** Running Late */
+            running_late: number;
+            /** Orders Today */
+            orders_today: number;
+            /** Orders Same Day Last Week */
+            orders_same_day_last_week: number;
         };
         /** QuoteIn */
         QuoteIn: {
@@ -1851,6 +1961,7 @@ export interface components {
             /** Payments */
             payments: components["schemas"]["PaymentRow"][];
             cancellations: components["schemas"]["Cancellations"];
+            previous: components["schemas"]["Totals"];
         };
         /** SessionOut */
         SessionOut: {
@@ -2017,6 +2128,12 @@ export interface components {
             online_orders: number;
             /** Counter Orders */
             counter_orders: number;
+            /** Gross Sen */
+            gross_sen: number;
+            /** Refunds Sen */
+            refunds_sen: number;
+            /** Net Sen */
+            net_sen: number;
         };
         /** TotpCodeIn */
         TotpCodeIn: {
@@ -2115,6 +2232,13 @@ export interface components {
             version: number;
             /** Note */
             note?: string | null;
+        };
+        /** UnitsSoldRow */
+        UnitsSoldRow: {
+            /** Menu Item Id */
+            menu_item_id: number;
+            /** Units */
+            units: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -3340,6 +3464,26 @@ export interface operations {
             };
         };
     };
+    queue_metrics_api_v1_staff_orders_metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueueMetrics"];
+                };
+            };
+        };
+    };
     get_api_v1_staff_orders__order_id__get: {
         parameters: {
             query?: never;
@@ -3383,6 +3527,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TransitionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    claim_api_v1_staff_orders__order_id__claim_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimIn"];
             };
         };
         responses: {
@@ -3813,6 +3992,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+        };
+    };
+    units_sold_api_v1_admin_menu_units_sold_get: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnitsSoldRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

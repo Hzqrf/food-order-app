@@ -19,6 +19,7 @@ const ConsoleLayout = lazy(() => import("./areas/staff/console/ConsoleLayout"));
 const BoardPage = lazy(() => import("./areas/staff/pages/BoardPage"));
 const TakeOrderPage = lazy(() => import("./areas/staff/pages/TakeOrderPage"));
 const SearchPage = lazy(() => import("./areas/staff/pages/SearchPage"));
+const StaffOrderPage = lazy(() => import("./areas/staff/pages/OrderPage"));
 const SoldOutPage = lazy(() => import("./areas/staff/pages/SoldOutPage"));
 
 const AdminTodayPage = lazy(() => import("./areas/admin/pages/TodayPage"));
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Lazy><BoardPage /></Lazy> },
       { path: "take", element: <Lazy><TakeOrderPage /></Lazy> },
       { path: "search", element: <Lazy><SearchPage /></Lazy> },
+      { path: "orders/:id", element: <Lazy><StaffOrderPage /></Lazy> },
       { path: "menu", element: <Lazy><SoldOutPage /></Lazy> },
       { path: "sold-out", element: <LegacyRedirect /> },
       { path: "dashboard", element: owner(<AdminTodayPage />) },

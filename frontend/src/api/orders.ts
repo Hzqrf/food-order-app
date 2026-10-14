@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./client";
-import type { CancelIn, CounterOrderIn, CounterOrderOut, OrderDetail, OrderSummary } from "./types";
+import type { CancelIn, CounterOrderIn, CounterOrderOut, OrderDetail, OrderSummary, QueueMetrics } from "./types";
 
 export const boardKey = ["board"];
 
@@ -11,6 +11,15 @@ export function useBoard() {
     queryFn: () => api<OrderSummary[]>("/staff/orders", { poll: true }),
     refetchInterval: 5_000,
     refetchIntervalInBackground: true,
+  });
+}
+
+/** Numbers above the queue. Counts and minutes only, so the locked tablet can read them too. */
+export function useQueueMetrics() {
+  return useQuery({
+    queryKey: ["queue-metrics"],
+    queryFn: () => api<QueueMetrics>("/staff/orders/metrics", { poll: true }),
+    refetchInterval: 30_000,
   });
 }
 
@@ -57,5 +66,12 @@ export function useTransition() {
 export function useCancelOrder() {
   return useOrderMutation(({ id, ...body }: CancelIn & { id: number }) =>
     api<OrderSummary>(`/staff/orders/${id}/cancel`, { body }),
+  );
+}
+
+/** Take a ticket without starting it. Start Cooking also claims an unclaimed ticket. */
+export function useClaim() {
+  return useOrderMutation(({ id, version }: { id: number; version: number }) =>
+    api<OrderSummary>(`/staff/orders/${id}/claim`, { body: { version } }),
   );
 }

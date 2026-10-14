@@ -1,45 +1,86 @@
-import { Alert, Button, Group, SegmentedControl, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Alert, Button, Group, SegmentedControl, SimpleGrid, Stack, Text } from "@mantine/core";
 import { useInterval, useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { IconCircleCheck, IconPlus } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link, useLocation, useNavigate } from "react-router";
 
+import { useSession } from "../../../api/auth";
 import { isApiError } from "../../../api/client";
 import { useShop } from "../../../api/menu";
-import { useBoard, useTransition } from "../../../api/orders";
-import type { OrderSummary } from "../../../api/types";
+import { useBoard, useClaim, useQueueMetrics, useTransition } from "../../../api/orders";
+import type { OrderSummary, QueueMetrics } from "../../../api/types";
 import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
 import { useNewOrderAlert } from "../../../hooks/useNewOrderAlert";
 import { formatTime } from "../../../lib/dates";
 import { NEXT_STEP, OrderCard } from "../components/OrderCard";
-import { OrderDetailDrawer } from "../components/OrderDetailDrawer";
 import { useStaff } from "../console/lock";
+import { MetricCard } from "../console/MetricCard";
+import { PageHeader } from "../console/PageHeader";
+import { SectionCard } from "../console/SectionCard";
+import { StatusLabel } from "../console/StatusLabel";
+import { toast } from "../console/toast";
+import { tokens } from "../console/tokens";
 
 const COLUMNS = [
   { status: "placed", label: "board.columns.new" },
   { status: "preparing", label: "board.columns.preparing" },
-  { status: "ready", label: "board.columns.ready" },
+  { status: "ready", label: "console.queue.readyColumn" },
 ] as const;
 
 const UNDO_MS = 5_000;
+const CONFLICTS = ["version_conflict", "invalid_transition", "not_claimable"];
+
+export type SentNotice = { number: string; method: string };
+
+function Metrics({ m }: { m: QueueMetrics | undefined }) {
+  const { t } = useTranslation();
+  const prep = m?.avg_prep_minutes ?? null;
+  const prepBefore = m?.avg_prep_minutes_last_week ?? null;
+  const prepChange = prep !== null && prepBefore ? Math.round(((prep - prepBefore) / prepBefore) * 100) : null;
+  const orderChange = m ? m.orders_today - m.orders_same_day_last_week : null;
+  return (
+    <SimpleGrid cols={{ base: 2, md: 4 }} spacing={{ base: 12, sm: 20 }}>
+      <MetricCard label={t("console.queue.metrics.open")} value={m ? String(m.open_orders) : null}
+        deltaLabel={t("console.queue.metrics.openHint")} />
+      <MetricCard label={t("console.queue.metrics.prep")}
+        value={prep !== null ? t("console.queue.metrics.minutes", { count: Math.round(prep) }) : null}
+        delta={prepChange !== null ? `${Math.abs(prepChange)}%` : undefined}
+        direction={prepChange === null || prepChange === 0 ? undefined : prepChange < 0 ? "down" : "up"} good="down"
+        deltaLabel={prepBefore !== null ? t("console.vsLastWeek") : undefined} />
+      <MetricCard label={t("console.queue.metrics.late")} value={m ? String(m.running_late) : null}
+        deltaLabel={t("console.queue.metrics.lateHint")} />
+      <MetricCard label={t("console.queue.metrics.today")} value={m ? String(m.orders_today) : null}
+        delta={orderChange ? String(Math.abs(orderChange)) : undefined}
+        direction={orderChange ? (orderChange > 0 ? "up" : "down") : undefined}
+        deltaLabel={t("console.vsLastWeek")} />
+    </SimpleGrid>
+  );
+}
 
 export default function BoardPage() {
   const { t } = useTranslation();
   const { ensureUnlocked } = useStaff();
+  const navigate = useNavigate();
+  const location = useLocation();
   const board = useBoard();
+  const metrics = useQueueMetrics();
   const { data: shop } = useShop();
+  const { data: session } = useSession();
   const transition = useTransition();
+  const claim = useClaim();
   const { flashing, acknowledge } = useNewOrderAlert(board.data);
   const wide = useMediaQuery("(min-width: 62em)", true);
   const [column, setColumn] = useState<string>("placed");
-  const [openId, setOpenId] = useState<number | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   // "Handed over" waits 5 seconds before it is sent, so an Undo can simply cancel it.
   const [handingOver, setHandingOver] = useState<Set<number>>(new Set());
   const timers = useRef(new Map<number, { handle: number; send: () => void }>());
   const [now, setNow] = useState(Date.now());
   useInterval(() => setNow(Date.now()), 30_000, { autoInvoke: true });
+  const sent = (location.state as { sent?: SentNotice } | null)?.sent;
 
   // Leaving the board inside the undo window sends the hand-over straight away rather than losing it.
   useEffect(() => {
@@ -50,18 +91,28 @@ export default function BoardPage() {
     });
   }, []);
 
+  /** Someone else got there first: refresh, then say who, if the order shows a different taker. */
+  const explainConflict = async (order: OrderSummary) => {
+    const fresh = (await board.refetch()).data?.find((o) => o.id === order.id);
+    const me = session?.user?.full_name;
+    if (fresh?.claimed_by_name && fresh.claimed_by_name !== me) {
+      toast(t("console.queue.alreadyTaken", { name: fresh.claimed_by_name, number: order.order_number }), "error");
+    } else {
+      toast(t("board.changedElsewhere", { number: order.order_number }), "error");
+    }
+  };
+
+  const onError = (order: OrderSummary) => (e: Error) => {
+    if (CONFLICTS.some((code) => isApiError(e, code))) void explainConflict(order);
+    else notifyError(t, e);
+  };
+
   const send = (order: OrderSummary, to: string) => {
     setBusyId(order.id);
     transition.mutate(
       { id: order.id, to, version: order.version },
       {
-        onError: (e) => {
-          if (isApiError(e, "version_conflict") || isApiError(e, "invalid_transition")) {
-            notifications.show({ color: "yellow", message: t("board.changedElsewhere", { number: order.order_number }) });
-          } else {
-            notifyError(t, e);
-          }
-        },
+        onError: onError(order),
         onSettled: () => {
           setBusyId(null);
           setHandingOver((prev) => {
@@ -72,6 +123,13 @@ export default function BoardPage() {
         },
       },
     );
+  };
+
+  const take = (order: OrderSummary) => {
+    if (!ensureUnlocked()) return;
+    acknowledge(order.id);
+    setBusyId(order.id);
+    claim.mutate({ id: order.id, version: order.version }, { onError: onError(order), onSettled: () => setBusyId(null) });
   };
 
   const advance = (order: OrderSummary, to: string) => {
@@ -93,6 +151,7 @@ export default function BoardPage() {
     };
     notifications.show({
       id: notifId,
+      position: "bottom-right",
       autoClose: UNDO_MS,
       withCloseButton: false,
       message: (
@@ -111,20 +170,39 @@ export default function BoardPage() {
     timers.current.set(order.id, { handle: window.setTimeout(fire, UNDO_MS), send: fire });
   };
 
-  if (board.isPending) return <Text c="dimmed">{t("common.loading")}</Text>;
-  if (board.isError && !board.data) return <ErrorState onRetry={() => board.refetch()} />;
+  const header = (
+    <PageHeader title={t("console.queue.title")} subtitle={t("console.queue.subtitle")}
+      actions={
+        <Button component={Link} to="/staff/take" leftSection={<IconPlus size={18} />}>
+          {t("console.nav.addOrder")}
+        </Button>
+      } />
+  );
+
+  if (board.isPending) return <>{header}<Text c="dimmed">{t("common.loading")}</Text></>;
+  if (board.isError && !board.data) return <>{header}<ErrorState onRetry={() => board.refetch()} /></>;
 
   const orders = (board.data ?? []).filter((o) => !handingOver.has(o.id));
   const prep = shop?.prep_minutes ?? 15;
   const visible = wide ? COLUMNS : COLUMNS.filter((c) => c.status === column);
 
   return (
-    <Stack gap="sm">
+    <Stack gap={20}>
+      {header}
+      {sent && (
+        <Group gap={10} px={16} py={14} c={tokens.success} bg={tokens.successBg} style={{ borderRadius: 12 }}>
+          <IconCircleCheck size={20} />
+          <Text fz={14} fw={500} inherit>
+            {t("console.queue.sent", { number: sent.number, method: t(`paymentMethod.${sent.method}`) })}
+          </Text>
+        </Group>
+      )}
       {board.isError && (
         <Alert color="red" variant="light">
           {t("board.offline", { time: formatTime(new Date(board.dataUpdatedAt).toISOString()) })}
         </Alert>
       )}
+      <Metrics m={metrics.data} />
       {!wide && (
         <SegmentedControl
           fullWidth
@@ -136,44 +214,47 @@ export default function BoardPage() {
           }))}
         />
       )}
-      <SimpleGrid cols={wide ? 3 : 1} spacing="md">
+      <SimpleGrid cols={wide ? 3 : 1} spacing={20} style={{ alignItems: "start" }}>
         {visible.map((c) => {
           const list = orders.filter((o) => o.status === c.status);
           return (
-            <Stack key={c.status} gap="sm">
-              {wide && (
-                <Title order={5} c="dimmed">
-                  {t(c.label)} ({list.length})
-                </Title>
-              )}
-              {list.length === 0 && (
-                <Text size="sm" c="dimmed">
-                  {c.status === "placed" ? t("board.emptyNew") : "—"}
-                </Text>
-              )}
-              {list.map((o) => (
-                <OrderCard
-                  key={o.id}
-                  order={o}
-                  now={now}
-                  prepMinutes={prep}
-                  flashing={flashing.has(o.id)}
-                  busy={busyId === o.id}
-                  onAdvance={() => {
-                    const next = NEXT_STEP[o.status];
-                    if (next) advance(o, next.to);
-                  }}
-                  onOpen={() => {
-                    acknowledge(o.id);
-                    if (ensureUnlocked()) setOpenId(o.id);
-                  }}
-                />
-              ))}
-            </Stack>
+            <SectionCard key={c.status} padded={false}>
+              <Stack gap={12} p={20}>
+                <Group justify="space-between">
+                  <Text fz={16} lh="24px" fw={600} c={tokens.text}>
+                    {t(c.label)}
+                  </Text>
+                  <StatusLabel kind="count" value={String(list.length)} color={c.status === "ready" ? "green" : "orange"} />
+                </Group>
+                {list.length === 0 && (
+                  <Text size="sm" c="dimmed">
+                    {c.status === "placed" ? t("board.emptyNew") : "—"}
+                  </Text>
+                )}
+                {list.map((o) => (
+                  <OrderCard
+                    key={o.id}
+                    order={o}
+                    now={now}
+                    prepMinutes={prep}
+                    flashing={flashing.has(o.id)}
+                    busy={busyId === o.id}
+                    onAdvance={() => {
+                      const next = NEXT_STEP[o.status];
+                      if (next) advance(o, next.to);
+                    }}
+                    onTake={() => take(o)}
+                    onOpen={() => {
+                      acknowledge(o.id);
+                      if (ensureUnlocked()) navigate(`/staff/orders/${o.id}`);
+                    }}
+                  />
+                ))}
+              </Stack>
+            </SectionCard>
           );
         })}
       </SimpleGrid>
-      <OrderDetailDrawer orderId={openId} onClose={() => setOpenId(null)} onAdvance={advance} />
     </Stack>
   );
 }

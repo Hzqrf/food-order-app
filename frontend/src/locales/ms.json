@@ -574,6 +574,52 @@
       "soldOut": "Habis",
       "hidden": "Disembunyikan"
     },
-    "someone": "Seseorang"
+    "someone": "Seseorang",
+    "vsLastWeek": "berbanding hari sama minggu lepas",
+    "queue": {
+      "title": "Barisan Pesanan",
+      "subtitle": "Tiket semasa, yang paling lama dahulu. Tekan tiket untuk pesanan penuh.",
+      "readyColumn": "Sedia untuk diambil",
+      "startCooking": "Mula Masak",
+      "take": "Ambil",
+      "markReady": "Tanda Sedia",
+      "handOver": "Serah",
+      "takenBy": "Diambil oleh {{name}}",
+      "runningLate": "Lewat",
+      "justNow": "Baru sahaja",
+      "minutesAgo_one": "{{count}} minit lalu",
+      "minutesAgo_other": "{{count}} minit lalu",
+      "cookingFor_one": "Dimasak {{count}} minit",
+      "cookingFor_other": "Dimasak {{count}} minit",
+      "waiting_one": "Menunggu {{count}} minit",
+      "waiting_other": "Menunggu {{count}} minit",
+      "alreadyTaken": "{{name}} sudah mengambil #{{number}}",
+      "sent": "Pesanan kaunter #{{number}} dihantar ke dapur · dibayar {{method}}",
+      "metrics": {
+        "open": "Pesanan terbuka",
+        "openHint": "Baru, dimasak dan sedia",
+        "prep": "Purata masa masak",
+        "late": "Lewat",
+        "lateHint": "Melepasi masa yang dijanjikan",
+        "today": "Pesanan hari ini",
+        "minutes_one": "{{count}} minit",
+        "minutes_other": "{{count}} minit"
+      }
+    },
+    "order": {
+      "items": "Item",
+      "customerNote": "Nota daripada pelanggan",
+      "pickup": "Ambil",
+      "customer": "Pelanggan",
+      "phone": "Telefon",
+      "channel": "Saluran",
+      "code": "ID Pesanan",
+      "payment": "Bayaran",
+      "keyedBy": "Dimasukkan oleh",
+      "takenBy": "Diambil oleh",
+      "timeline": "Garis masa",
+      "notFound": "Pesanan ini tidak dijumpai, atau lebih lama daripada yang boleh dilihat pekerja.",
+      "moved": "#{{number}} kini {{status}}"
+    }
   }
 }

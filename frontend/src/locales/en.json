@@ -577,6 +577,52 @@
       "soldOut": "Sold out",
       "hidden": "Hidden"
     },
-    "someone": "Someone"
+    "someone": "Someone",
+    "vsLastWeek": "vs same day last week",
+    "queue": {
+      "title": "Order Queue",
+      "subtitle": "Live tickets, oldest first. Tap a ticket for the full order.",
+      "readyColumn": "Ready for pickup",
+      "startCooking": "Start Cooking",
+      "take": "Take",
+      "markReady": "Mark Ready",
+      "handOver": "Hand Over",
+      "takenBy": "Taken by {{name}}",
+      "runningLate": "Running late",
+      "justNow": "Just now",
+      "minutesAgo_one": "{{count}} min ago",
+      "minutesAgo_other": "{{count}} mins ago",
+      "cookingFor_one": "Cooking {{count}} min",
+      "cookingFor_other": "Cooking {{count}} mins",
+      "waiting_one": "Waiting {{count}} min",
+      "waiting_other": "Waiting {{count}} mins",
+      "alreadyTaken": "{{name}} already took #{{number}}",
+      "sent": "Counter order #{{number}} sent to the kitchen · paid {{method}}",
+      "metrics": {
+        "open": "Open orders",
+        "openHint": "New, preparing and ready",
+        "prep": "Avg prep time",
+        "late": "Running late",
+        "lateHint": "Past their promised time",
+        "today": "Orders today",
+        "minutes_one": "{{count}} min",
+        "minutes_other": "{{count}} min"
+      }
+    },
+    "order": {
+      "items": "Items",
+      "customerNote": "Note from the customer",
+      "pickup": "Pickup",
+      "customer": "Customer",
+      "phone": "Mobile",
+      "channel": "Channel",
+      "code": "Order ID",
+      "payment": "Payment",
+      "keyedBy": "Keyed in by",
+      "takenBy": "Taken by",
+      "timeline": "Timeline",
+      "notFound": "This order was not found, or is older than staff can see.",
+      "moved": "#{{number}} is now {{status}}"
+    }
   }
 }
