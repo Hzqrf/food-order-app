@@ -570,7 +570,8 @@
     },
     "ownerOnTablet": {
       "title": "Use your own device for owner tools",
-      "body": "Sales, reports, staff and settings never open on the shared shop tablet. Sign in on your phone or computer."
+      "body": "Sales, reports, staff and settings never open on the shared shop tablet. Sign in on your phone or computer.",
+      "unregister": "Unregister this tablet"
     },
     "availability": {
       "available": "Available",
@@ -706,6 +707,22 @@
       "date": "Date",
       "peakHour": "Peak hour",
       "moneyDefinition": "Gross is money taken on the day's orders that were not cancelled; refunds are money given back on them; net is what the shop kept. Methods show net."
+    },
+    "team": {
+      "title": "Staff & Roles",
+      "subtitle": "Who can open the console, and what each role may change.",
+      "summary_one": "{{count}} person, {{roles}} roles",
+      "summary_other": "{{count}} people, {{roles}} roles",
+      "role": "Role",
+      "status": "Status",
+      "active": "Active",
+      "passwordOnly": "Password only",
+      "editTitle": "Edit {{name}}",
+      "rolesHint": "Owners see sales, reports, staff and settings. Staff see the queue, orders, search and menu."
+    },
+    "settings": {
+      "subtitle": "Opening hours, prep time, pausing online orders, this tablet and your sign-in.",
+      "kitchen": "Kitchen"
     }
   }
 }

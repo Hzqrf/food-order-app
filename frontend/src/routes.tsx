@@ -25,9 +25,9 @@ const StaffMenuPage = lazy(() => import("./areas/staff/pages/MenuPage"));
 const DashboardPage = lazy(() => import("./areas/staff/pages/DashboardPage"));
 const SalesHistoryPage = lazy(() => import("./areas/staff/pages/SalesHistoryPage"));
 const SalesReportPage = lazy(() => import("./areas/staff/pages/SalesReportPage"));
-const AdminAuditPage = lazy(() => import("./areas/admin/pages/AuditPage"));
-const AdminStaffPage = lazy(() => import("./areas/admin/pages/StaffPage"));
-const AdminSettingsPage = lazy(() => import("./areas/admin/pages/SettingsPage"));
+const AuditPage = lazy(() => import("./areas/staff/pages/AuditPage"));
+const TeamPage = lazy(() => import("./areas/staff/pages/TeamPage"));
+const SettingsPage = lazy(() => import("./areas/staff/pages/SettingsPage"));
 
 function Lazy({ children }: { children: ReactNode }) {
   return (
@@ -82,9 +82,9 @@ export const router = createBrowserRouter([
       { path: "dashboard", element: owner(<DashboardPage />) },
       { path: "sales", element: owner(<SalesHistoryPage />) },
       { path: "reports", element: owner(<SalesReportPage />) },
-      { path: "team", element: owner(<AdminStaffPage />) },
-      { path: "audit", element: owner(<AdminAuditPage />) },
-      { path: "settings", element: owner(<AdminSettingsPage />) },
+      { path: "team", element: owner(<TeamPage />) },
+      { path: "audit", element: owner(<AuditPage />) },
+      { path: "settings", element: owner(<SettingsPage />) },
     ],
   },
   { path: "/admin/*", element: <LegacyRedirect /> },

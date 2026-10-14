@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Code, Group, NumberInput, Paper, PasswordInput, Stack, Switch, Text, TextInput, Title } from "@mantine/core";
+import { Alert, Button, Checkbox, Code, Group, NumberInput, PasswordInput, SimpleGrid, Stack, Switch, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,8 @@ import { useSetOnlineOrders } from "../../../api/menu";
 import type { TotpSetupOut } from "../../../api/types";
 import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
+import { PageHeader } from "../console/PageHeader";
+import { SectionCard } from "../console/SectionCard";
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 type Hours = Record<string, [string, string] | null>;
@@ -32,8 +34,9 @@ export default function SettingsPage() {
     })));
   }, [shop]);
 
-  if (isPending) return <Text c="dimmed">{t("common.loading")}</Text>;
-  if (isError) return <ErrorState onRetry={() => refetch()} />;
+  const header = <PageHeader title={t("console.nav.settings")} subtitle={t("console.settings.subtitle")} />;
+  if (isPending) return <>{header}<Text c="dimmed">{t("common.loading")}</Text></>;
+  if (isError) return <>{header}<ErrorState onRetry={() => refetch()} /></>;
 
   const hoursValid = Object.values(hours).every((r) => !r || (/^\d\d:\d\d$/.test(r[0]) && /^\d\d:\d\d$/.test(r[1])));
   const save = () => update.mutate({
@@ -46,63 +49,72 @@ export default function SettingsPage() {
   });
 
   return (
-    <Stack maw={720}>
-      <Title order={2}>{t("admin.nav.settings")}</Title>
+    <>
+      {header}
+      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing={20} style={{ alignItems: "start" }}>
+        <SectionCard title={t("admin.settings.shop")}>
+          <Stack>
+            <TextInput label={t("admin.settings.shopName")} value={name} onChange={(e) => setName(e.currentTarget.value)} maxLength={100} />
+            <Text fw={500} size="sm">{t("admin.settings.openingHours")}</Text>
+            {DAYS.map((d) => {
+              const range = hours[d];
+              return (
+                <Group key={d} wrap="nowrap">
+                  <Text w={90} size="sm">{t(`days.${d}`)}</Text>
+                  <Checkbox label={t("shop.open")} checked={!!range}
+                    onChange={(e) => setHours({ ...hours, [d]: e.currentTarget.checked ? ["10:00", "22:00"] : null })} />
+                  {range && (
+                    <>
+                      <TextInput type="time" size="xs" value={range[0]} aria-label={t("admin.settings.opens")}
+                        onChange={(e) => setHours({ ...hours, [d]: [e.currentTarget.value, range[1]] })} />
+                      <Text size="sm">–</Text>
+                      <TextInput type="time" size="xs" value={range[1]} aria-label={t("admin.settings.closes")}
+                        onChange={(e) => setHours({ ...hours, [d]: [range[0], e.currentTarget.value] })} />
+                    </>
+                  )}
+                </Group>
+              );
+            })}
+            <Text size="xs" c="dimmed">{t("admin.settings.hoursHint")}</Text>
+            <Group justify="flex-end">
+              <Button onClick={save} loading={update.isPending} disabled={!name.trim() || !hoursValid}>
+                {t("common.save")}
+              </Button>
+            </Group>
+          </Stack>
+        </SectionCard>
 
-      <Paper withBorder p="md">
-        <Group justify="space-between">
-          <div>
-            <Text fw={600}>{t("admin.settings.onlineOrders")}</Text>
-            <Text size="sm" c="dimmed">
-              {shop.online_payments_enabled ? t("admin.settings.onlineOrdersHint") : t("admin.settings.onlineOff")}
-            </Text>
-          </div>
-          <Switch size="lg" color="green" disabled={!shop.online_payments_enabled}
-            checked={shop.online_payments_enabled && shop.is_accepting_online_orders}
-            onChange={(e) => setOnline.mutate(e.currentTarget.checked, {
-              onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
-            })} />
-        </Group>
-      </Paper>
-
-      <Paper withBorder p="md">
-        <Stack>
-          <Title order={4}>{t("admin.settings.shop")}</Title>
-          <TextInput label={t("admin.settings.shopName")} value={name} onChange={(e) => setName(e.currentTarget.value)} maxLength={100} />
-          <NumberInput label={t("admin.settings.prepMinutes")} description={t("admin.settings.prepHint")} min={1} max={240}
-            value={prep} onChange={setPrep} w={200} />
-          <Text fw={500} size="sm">{t("admin.settings.openingHours")}</Text>
-          {DAYS.map((d) => {
-            const range = hours[d];
-            return (
-              <Group key={d} wrap="nowrap">
-                <Text w={90} size="sm">{t(`days.${d}`)}</Text>
-                <Checkbox label={t("shop.open")} checked={!!range}
-                  onChange={(e) => setHours({ ...hours, [d]: e.currentTarget.checked ? ["10:00", "22:00"] : null })} />
-                {range && (
-                  <>
-                    <TextInput type="time" size="xs" value={range[0]} aria-label={t("admin.settings.opens")}
-                      onChange={(e) => setHours({ ...hours, [d]: [e.currentTarget.value, range[1]] })} />
-                    <Text size="sm">–</Text>
-                    <TextInput type="time" size="xs" value={range[1]} aria-label={t("admin.settings.closes")}
-                      onChange={(e) => setHours({ ...hours, [d]: [range[0], e.currentTarget.value] })} />
-                  </>
-                )}
+        <Stack gap={20}>
+          <SectionCard title={t("console.settings.kitchen")}>
+            <Stack>
+              <NumberInput label={t("admin.settings.prepMinutes")} description={t("admin.settings.prepHint")} min={1} max={240}
+                value={prep} onChange={setPrep} w={220} />
+              <Group justify="flex-end">
+                <Button variant="light" onClick={save} loading={update.isPending} disabled={!name.trim() || !hoursValid}>
+                  {t("common.save")}
+                </Button>
               </Group>
-            );
-          })}
-          <Text size="xs" c="dimmed">{t("admin.settings.hoursHint")}</Text>
-          <Group justify="flex-end">
-            <Button onClick={save} loading={update.isPending} disabled={!name.trim() || !hoursValid}>
-              {t("common.save")}
-            </Button>
-          </Group>
+              <Group justify="space-between" wrap="nowrap" pt="xs">
+                <div>
+                  <Text fw={500} size="sm">{t("admin.settings.onlineOrders")}</Text>
+                  <Text size="xs" c="dimmed">
+                    {shop.online_payments_enabled ? t("admin.settings.onlineOrdersHint") : t("admin.settings.onlineOff")}
+                  </Text>
+                </div>
+                <Switch size="lg" color="green" disabled={!shop.online_payments_enabled}
+                  checked={shop.online_payments_enabled && shop.is_accepting_online_orders}
+                  aria-label={t("admin.settings.onlineOrders")}
+                  onChange={(e) => setOnline.mutate(e.currentTarget.checked, {
+                    onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
+                  })} />
+              </Group>
+            </Stack>
+          </SectionCard>
+          <DeviceSection />
+          <SecuritySection />
         </Stack>
-      </Paper>
-
-      <DeviceSection />
-      <SecuritySection />
-    </Stack>
+      </SimpleGrid>
+    </>
   );
 }
 
@@ -113,9 +125,8 @@ function DeviceSection() {
   const unregister = useUnregisterDevice();
   const registered = !!session?.device_registered;
   return (
-    <Paper withBorder p="md">
+    <SectionCard title={t("admin.settings.tablet")}>
       <Stack gap="xs">
-        <Title order={4}>{t("admin.settings.tablet")}</Title>
         <Text size="sm" c="dimmed">{t("admin.settings.tabletHint")}</Text>
         {registered ? (
           <Group>
@@ -132,7 +143,7 @@ function DeviceSection() {
           </Button>
         )}
       </Stack>
-    </Paper>
+    </SectionCard>
   );
 }
 
@@ -148,9 +159,8 @@ function SecuritySection() {
   const [next, setNext] = useState("");
 
   return (
-    <Paper withBorder p="md">
+    <SectionCard title={t("admin.settings.security")}>
       <Stack>
-        <Title order={4}>{t("admin.settings.security")}</Title>
         {session?.user?.totp_enabled ? (
           <Text size="sm" c="green.8" fw={600}>{t("admin.settings.totpOn")}</Text>
         ) : secret ? (
@@ -196,6 +206,6 @@ function SecuritySection() {
           </Button>
         </Group>
       </Stack>
-    </Paper>
+    </SectionCard>
   );
 }

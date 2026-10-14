@@ -567,7 +567,8 @@
     },
     "ownerOnTablet": {
       "title": "Guna peranti sendiri untuk alat pemilik",
-      "body": "Jualan, laporan, pekerja dan tetapan tidak dibuka pada tablet kedai yang dikongsi. Log masuk pada telefon atau komputer anda."
+      "body": "Jualan, laporan, pekerja dan tetapan tidak dibuka pada tablet kedai yang dikongsi. Log masuk pada telefon atau komputer anda.",
+      "unregister": "Nyahdaftar tablet ini"
     },
     "availability": {
       "available": "Ada",
@@ -703,6 +704,22 @@
       "date": "Tarikh",
       "peakHour": "Jam puncak",
       "moneyDefinition": "Kasar ialah wang yang diterima bagi pesanan hari itu yang tidak dibatalkan; bayaran balik ialah wang yang dipulangkan; bersih ialah yang disimpan oleh kedai. Kaedah menunjukkan jumlah bersih."
+    },
+    "team": {
+      "title": "Pekerja & Peranan",
+      "subtitle": "Siapa boleh membuka konsol, dan apa yang boleh diubah oleh setiap peranan.",
+      "summary_one": "{{count}} orang, {{roles}} peranan",
+      "summary_other": "{{count}} orang, {{roles}} peranan",
+      "role": "Peranan",
+      "status": "Status",
+      "active": "Aktif",
+      "passwordOnly": "Kata laluan sahaja",
+      "editTitle": "Ubah {{name}}",
+      "rolesHint": "Pemilik melihat jualan, laporan, pekerja dan tetapan. Pekerja melihat barisan, pesanan, carian dan menu."
+    },
+    "settings": {
+      "subtitle": "Waktu buka, masa penyediaan, jeda pesanan dalam talian, tablet ini dan log masuk anda.",
+      "kitchen": "Dapur"
     }
   }
 }

@@ -1,16 +1,18 @@
-import { Center, Loader, Stack, Text, ThemeIcon, Title } from "@mantine/core";
+import { Button, Center, Loader, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconDeviceTablet } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 
-import { useSession } from "../../../api/auth";
+import { useSession, useUnregisterDevice } from "../../../api/auth";
+import { notifyError } from "../../../components/errors";
 import { SectionCard } from "./SectionCard";
 
 /** Owner-only console pages. Never on the shared shop tablet, even for an owner unlocked by PIN. */
 export function OwnerRoute({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { data: session, isPending } = useSession();
+  const unregister = useUnregisterDevice();
 
   if (isPending) {
     return (
@@ -37,6 +39,11 @@ export function OwnerRoute({ children }: { children: ReactNode }) {
             <Text c="dimmed" size="sm">
               {t("console.ownerOnTablet.body")}
             </Text>
+            {/* Unregistering only works from the tablet itself, so it lives here rather than in Settings. */}
+            <Button variant="light" color="gray" mt="xs" loading={unregister.isPending}
+              onClick={() => unregister.mutate(undefined, { onError: (e) => notifyError(t, e) })}>
+              {t("console.ownerOnTablet.unregister")}
+            </Button>
           </Stack>
         </SectionCard>
       </Center>
