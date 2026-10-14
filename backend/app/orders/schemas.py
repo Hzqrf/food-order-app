@@ -141,6 +141,10 @@ class TransitionIn(BaseModel):
     note: str | None = Field(default=None, max_length=200)
 
 
+class ClaimIn(BaseModel):
+    version: int
+
+
 class CancelIn(BaseModel):
     version: int
     reason: str = Field(min_length=1, max_length=200)
@@ -203,8 +207,11 @@ class OrderSummary(BaseModel):
     auto_closed: bool
     cancel_reason: str | None
     created_by_name: str | None
+    claimed_by_name: str | None
+    claimed_at: datetime | None
     created_at: datetime
     placed_at: datetime | None
+    preparing_at: datetime | None
     ready_at: datetime | None
     completed_at: datetime | None
     cancelled_at: datetime | None

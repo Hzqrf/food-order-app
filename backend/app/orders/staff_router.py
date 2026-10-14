@@ -39,6 +39,11 @@ def transition(order_id: int, body: schemas.TransitionIn, user: StaffUser, db: D
     return service.summary(service.move(db, order_id, user, body, client_ip(request)))
 
 
+@router.post("/{order_id}/claim", response_model=schemas.OrderSummary)
+def claim(order_id: int, body: schemas.ClaimIn, user: StaffUser, db: DB, request: Request):
+    return service.summary(service.claim(db, order_id, user, body, client_ip(request)))
+
+
 @router.post("/{order_id}/cancel", response_model=schemas.OrderSummary)
 def cancel(order_id: int, body: schemas.CancelIn, user: StaffUser, db: DB, request: Request):
     return service.summary(service.cancel(db, order_id, user, body, client_ip(request)))

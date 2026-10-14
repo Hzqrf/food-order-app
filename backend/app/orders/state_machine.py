@@ -41,7 +41,8 @@ _BACKWARD = {
 }
 ALLOWED = {**_FORWARD, **_BACKWARD}
 
-_TIMESTAMP = {PLACED: "placed_at", READY: "ready_at", COMPLETED: "completed_at", CANCELLED: "cancelled_at"}
+_TIMESTAMP = {PLACED: "placed_at", PREPARING: "preparing_at", READY: "ready_at", COMPLETED: "completed_at",
+              CANCELLED: "cancelled_at"}
 
 
 def can_transition(from_status: str, to_status: str, actor: str) -> bool:
@@ -70,6 +71,10 @@ def transition(db: Session, order: Order, to_status: str, actor: str, actor_user
         values[field] = utcnow()
     if to_status == CANCELLED:
         values["cancel_reason"] = cancel_reason
+    # Start Cooking on a ticket nobody took claims it for whoever pressed it.
+    if to_status == PREPARING and order.claimed_by_user_id is None and actor_user_id:
+        values["claimed_by_user_id"] = actor_user_id
+        values["claimed_at"] = values["preparing_at"]
     result = db.execute(
         update(Order).where(Order.id == order.id, Order.version == version).values(**values)
         .execution_options(synchronize_session=False)

@@ -1,7 +1,7 @@
 import secrets
 from datetime import timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import IntegrityError
@@ -327,7 +327,8 @@ def _change_from(order: Order) -> int | None:
 
 # --- Reading orders ------------------------------------------------------------------------------
 
-_LOAD = (selectinload(Order.items).selectinload(OrderItem.options), selectinload(Order.created_by))
+_LOAD = (selectinload(Order.items).selectinload(OrderItem.options), selectinload(Order.created_by),
+         selectinload(Order.claimed_by))
 
 
 def board(db: Session, branch: Branch) -> list[Order]:
@@ -414,6 +415,31 @@ def _locked(db: Session, order_id: int) -> Order:
 def move(db: Session, order_id: int, user: User, body: schemas.TransitionIn, ip: str) -> Order:
     order = _locked(db, order_id)
     return sm.transition(db, order, body.to, actor_type(user), user.id, body.version, note=body.note, ip=ip)
+
+
+def claim(db: Session, order_id: int, user: User, body: schemas.ClaimIn, ip: str) -> Order:
+    """Take a ticket in the kitchen. Taking one someone else holds is allowed, and audited."""
+    order = _locked(db, order_id)
+    if body.version != order.version:
+        raise AppError("version_conflict", "This order was changed by someone else.", 409)
+    if order.status not in (sm.PLACED, sm.PREPARING):
+        raise AppError("not_claimable", "This order can no longer be taken.", 409)
+    if order.claimed_by_user_id == user.id:
+        return order
+    previous = order.claimed_by_user_id
+    result = db.execute(
+        update(Order).where(Order.id == order.id, Order.version == body.version)
+        .values(claimed_by_user_id=user.id, claimed_at=utcnow(), version=body.version + 1)
+        .execution_options(synchronize_session=False)
+    )
+    if result.rowcount != 1:
+        raise AppError("version_conflict", "This order was changed by someone else.", 409)
+    if previous is not None:
+        audit(db, user.id, "order_claim_takeover", "order", order.id,
+              {"claimed_by_user_id": previous}, {"claimed_by_user_id": user.id}, ip)
+    db.flush()
+    db.refresh(order)
+    return order
 
 
 def cancel(db: Session, order_id: int, user: User, body: schemas.CancelIn, ip: str) -> Order:
@@ -507,7 +533,9 @@ def summary(order: Order) -> dict:
         total_sen=order.total_sen, version=order.version, auto_closed=order.auto_closed,
         cancel_reason=order.cancel_reason,
         created_by_name=order.created_by.full_name if order.created_by else None,
-        created_at=order.created_at, placed_at=order.placed_at, ready_at=order.ready_at,
+        claimed_by_name=order.claimed_by.full_name if order.claimed_by else None, claimed_at=order.claimed_at,
+        created_at=order.created_at, placed_at=order.placed_at, preparing_at=order.preparing_at,
+        ready_at=order.ready_at,
         completed_at=order.completed_at, cancelled_at=order.cancelled_at,
         items=[schemas.OrderLine(
             id=i.id, menu_item_id=i.menu_item_id, item_name=i.item_name, quantity=i.quantity,

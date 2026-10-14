@@ -236,15 +236,20 @@ class Order(TimestampMixin, Base):
     version: Mapped[int] = mapped_column(Integer, default=1)
     idempotency_key: Mapped[str | None] = mapped_column(String(64), unique=True)
     placed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    preparing_at: Mapped[datetime | None] = mapped_column(UtcDateTime)  # when cooking started
     ready_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     completed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     cancelled_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     linked_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    # Who took the ticket in the kitchen. Optional: Start Cooking claims it for whoever pressed it.
+    claimed_by_user_id: Mapped[int | None] = mapped_column(BigId, fk("users.id"))
+    claimed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
 
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", order_by="OrderItem.id")
     events: Mapped[list["OrderStatusEvent"]] = relationship(order_by="OrderStatusEvent.id")
     payments: Mapped[list["Payment"]] = relationship(order_by="Payment.id")
-    created_by: Mapped[User | None] = relationship()
+    created_by: Mapped[User | None] = relationship(foreign_keys=[created_by_user_id])
+    claimed_by: Mapped[User | None] = relationship(foreign_keys=[claimed_by_user_id])
 
 
 class OrderItem(TimestampMixin, Base):
