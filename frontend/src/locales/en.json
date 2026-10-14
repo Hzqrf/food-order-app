@@ -644,6 +644,21 @@
       "number": "Order",
       "when": "Time",
       "status": "Status"
+    },
+    "menu": {
+      "title": "Menu & Prices",
+      "subtitleOwner": "Edit items, prices and availability. Changes reach the customer menu immediately.",
+      "subtitleStaff": "Switch off anything that has run out. Everything comes back on after closing.",
+      "addItem": "Add New Item",
+      "search": "Search items",
+      "summary": "{{items}} items across {{categories}} categories",
+      "item": "Item",
+      "sold7d": "Sold 7d",
+      "availability": "Availability",
+      "inStock": "In stock",
+      "onMenu": "On menu",
+      "inStockFor": "{{name}} in stock",
+      "onMenuFor": "Show {{name}} on the customer menu"
     }
   }
 }

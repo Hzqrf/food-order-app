@@ -641,6 +641,21 @@
       "number": "Pesanan",
       "when": "Masa",
       "status": "Status"
+    },
+    "menu": {
+      "title": "Menu & Harga",
+      "subtitleOwner": "Ubah item, harga dan ketersediaan. Perubahan terus sampai ke menu pelanggan.",
+      "subtitleStaff": "Matikan apa-apa yang sudah habis. Semuanya hidup semula selepas tutup kedai.",
+      "addItem": "Tambah Item Baharu",
+      "search": "Cari item",
+      "summary": "{{items}} item dalam {{categories}} kategori",
+      "item": "Item",
+      "sold7d": "Terjual 7h",
+      "availability": "Ketersediaan",
+      "inStock": "Ada stok",
+      "onMenu": "Dalam menu",
+      "inStockFor": "{{name}} ada stok",
+      "onMenuFor": "Tunjuk {{name}} dalam menu pelanggan"
     }
   }
 }

@@ -12,6 +12,7 @@ import type {
   OptionGroupIn,
   OptionIn,
   ShopOut,
+  UnitsSoldRow,
 } from "./types";
 
 export const menuKey = ["menu"];
@@ -48,8 +49,19 @@ export function useSetOnlineOrders() {
 
 // --- Admin ---------------------------------------------------------------------------------------
 
-export function useAdminMenu() {
-  return useQuery({ queryKey: adminMenuKey, queryFn: () => api<AdminMenu>("/admin/menu") });
+export function useAdminMenu(enabled = true) {
+  return useQuery({ queryKey: adminMenuKey, queryFn: () => api<AdminMenu>("/admin/menu"), enabled });
+}
+
+/** Units sold per item over the last `days` business days, for the owner's menu table. */
+export function useUnitsSold(days = 7, enabled = true) {
+  return useQuery({
+    queryKey: ["units-sold", days],
+    queryFn: () => api<UnitsSoldRow[]>(`/admin/menu/units-sold?days=${days}`),
+    select: (rows) => new Map(rows.map((r) => [r.menu_item_id, r.units])),
+    enabled,
+    staleTime: 60_000,
+  });
 }
 
 /** Every admin menu mutation refreshes the admin view and the public menu. */
