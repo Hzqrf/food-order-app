@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Header, Query, Request, Response
 
 from app.deps import DB, BoardAuth, BranchDep, StaffUser, client_ip
-from app.orders import schemas, service
+from app.orders import metrics, schemas, service
 
 router = APIRouter(prefix="/staff/orders", tags=["staff-orders"])
 
@@ -27,6 +27,12 @@ def create(body: schemas.CounterOrderIn, user: StaffUser, branch: BranchDep, db:
 @router.get("/search", response_model=list[schemas.OrderSummary])
 def search(user: StaffUser, branch: BranchDep, db: DB, q: Annotated[str, Query(min_length=1, max_length=50)]):
     return [service.summary(o) for o in service.search(db, q, user, branch)]
+
+
+@router.get("/metrics", response_model=schemas.QueueMetrics)
+def queue_metrics(_: BoardAuth, branch: BranchDep, db: DB):
+    """Numbers above the queue; readable on a locked shop tablet like the board itself."""
+    return metrics.queue_metrics(db, branch)
 
 
 @router.get("/{order_id}", response_model=schemas.OrderDetail)

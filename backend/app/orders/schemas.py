@@ -145,6 +145,15 @@ class ClaimIn(BaseModel):
     version: int
 
 
+class QueueMetrics(BaseModel):
+    open_orders: int
+    avg_prep_minutes: float | None  # cooking started to ready, today's orders
+    avg_prep_minutes_last_week: float | None  # the same weekday last week
+    running_late: int  # not ready yet and past placed_at + prep_minutes
+    orders_today: int
+    orders_same_day_last_week: int
+
+
 class CancelIn(BaseModel):
     version: int
     reason: str = Field(min_length=1, max_length=200)
