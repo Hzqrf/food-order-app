@@ -84,20 +84,12 @@
     "locked": "Too many wrong PINs. Try again in 15 minutes."
   },
   "staff": {
-    "tabs": {
-      "board": "Board",
-      "takeOrder": "Take order",
-      "search": "Search",
-      "soldOut": "Sold out"
-    },
     "onlineOn": "Online orders on",
     "onlinePaused": "Online orders paused",
     "onlineOrdersHint": "Pause during a rush. Orders already paid still come through.",
     "lock": "Lock",
-    "signOut": "Sign out",
     "tapToUnlock": "Tap to unlock",
     "lockedBanner": "Locked. Showing orders only.",
-    "adminLink": "Owner settings",
     "install": "Install app"
   },
   "board": {
@@ -240,18 +232,7 @@
     "saved": "Saved",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "nav": {
-      "menu": "Menu",
-      "staff": "Staff",
-      "settings": "Settings",
-      "board": "Order board",
-      "today": "Today",
-      "orders": "Orders",
-      "reports": "Reports",
-      "audit": "Audit log"
-    },
     "menu": {
-      "title": "Menu",
       "items": "Items",
       "optionGroups": "Option groups",
       "optionGroupsHint": "Shown in the order you pick them.",
@@ -284,7 +265,6 @@
       "extraPrice": "Extra price"
     },
     "staff": {
-      "title": "Staff",
       "add": "Add person",
       "name": "Full name",
       "position": "Position",
@@ -353,7 +333,6 @@
       "keyedBy": "Keyed in by"
     },
     "today": {
-      "title": "Today",
       "sales": "Sales",
       "orders": "Orders",
       "avgOrder": "Average order",

@@ -84,20 +84,12 @@
     "locked": "Terlalu banyak PIN salah. Cuba lagi dalam 15 minit."
   },
   "staff": {
-    "tabs": {
-      "board": "Papan",
-      "takeOrder": "Ambil pesanan",
-      "search": "Cari",
-      "soldOut": "Habis"
-    },
     "onlineOn": "Pesanan dalam talian dibuka",
     "onlinePaused": "Pesanan dalam talian dihentikan",
     "onlineOrdersHint": "Hentikan seketika ketika sibuk. Pesanan yang sudah dibayar tetap masuk.",
     "lock": "Kunci",
-    "signOut": "Log keluar",
     "tapToUnlock": "Ketik untuk buka",
     "lockedBanner": "Dikunci. Paparan pesanan sahaja.",
-    "adminLink": "Tetapan pemilik",
     "install": "Pasang aplikasi"
   },
   "board": {
@@ -238,18 +230,7 @@
     "saved": "Disimpan",
     "moveUp": "Naik",
     "moveDown": "Turun",
-    "nav": {
-      "menu": "Menu",
-      "staff": "Pekerja",
-      "settings": "Tetapan",
-      "board": "Papan pesanan",
-      "today": "Hari ini",
-      "orders": "Pesanan",
-      "reports": "Laporan",
-      "audit": "Log audit"
-    },
     "menu": {
-      "title": "Menu",
       "items": "Item",
       "optionGroups": "Kumpulan pilihan",
       "optionGroupsHint": "Dipaparkan mengikut susunan yang anda pilih.",
@@ -282,7 +263,6 @@
       "extraPrice": "Harga tambahan"
     },
     "staff": {
-      "title": "Pekerja",
       "add": "Tambah orang",
       "name": "Nama penuh",
       "position": "Jawatan",
@@ -351,7 +331,6 @@
       "keyedBy": "Dimasukkan oleh"
     },
     "today": {
-      "title": "Hari ini",
       "sales": "Jualan",
       "orders": "Pesanan",
       "avgOrder": "Purata pesanan",

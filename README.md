@@ -62,7 +62,8 @@ For a local demo set up with the commands in [Installation](#installation). Sign
 | Staff: Aina | `aina` | `staffpassword1` | `1111` |
 | Staff: Farid | `farid` | `staffpassword1` | `2222` |
 
-- The owner lands on **Today** (`/admin/today`); staff land on the order board at `/staff`.
+- Everyone lands on the **Order Queue** in the staff console at `/staff`. The owner also sees the
+  **Management** pages in the sidebar. Old `/admin/...` links still work and open the matching page.
 - Staff PINs only work on a browser registered as the shop tablet
   (owner: **Settings → Shop tablet → Register this device as the shop tablet**). Anywhere else, staff
   sign in with their username and password.
@@ -187,11 +188,12 @@ All three use the same address. What you see depends on the page and on who is s
 | Who | Start at | What they do there |
 | --- | --- | --- |
 | Customer | <http://localhost:5173/> | Browse the menu, add to cart, check out and pay, follow the order |
-| Staff | <http://localhost:5173/staff> | Run the order board, take counter orders, search orders, mark items sold out |
-| Owner | <http://localhost:5173/admin> | See today's numbers and what needs attention, look up and refund orders, read reports, manage the menu, staff and settings; the owner can also use every staff screen |
+| Staff | <http://localhost:5173/staff> | Run the order queue, take counter orders, search orders, mark items sold out |
+| Owner | <http://localhost:5173/staff> | Everything staff do, plus the **Management** pages: sales dashboard, sales history, sales report, staff and roles, audit log, settings |
 
-Signing in for staff and owner happens at <http://localhost:5173/login>. Going to `/staff` or
-`/admin` while signed out sends you there.
+Staff and the owner share one console with a sidebar: **Operations** for everyone, **Management** for
+the owner only. Signing in happens at <http://localhost:5173/login>. Going to `/staff` while signed
+out sends you there. Old `/admin/...` bookmarks redirect to the matching console page.
 
 ### Customer
 
@@ -216,56 +218,58 @@ for 30 days.
 
 **On the shared shop tablet** (set up once by the owner, see below): staff never type a password.
 
-1. The tablet shows the order board, locked: orders are visible, but nothing can be changed.
+1. The tablet shows the order queue, locked: orders are visible, but nothing can be changed.
 2. Tap **Tap to unlock**, tap your name, enter your PIN, then **OK**.
 3. Work. Your name stays at the top right so everyone can see who is signed in.
-4. Tap **Your name · Lock** when you step away. The tablet also locks itself after 5 minutes
-   without a touch.
+4. Tap **Lock** at the bottom of the sidebar when you step away. The tablet also locks itself after
+   5 minutes without a touch.
 
-The staff screens, along the bottom bar:
-
-| Tab | What it does |
-| --- | --- |
-| **Board** | Three columns: New, Preparing, Ready. One button per card moves it on: **Start**, **Ready**, **Handed over**. New online orders chime and flash until someone taps them. Cards turn amber after the usual prep time. Tap a card for full details, other moves and **Cancel order** |
-| **Take order** | Tap items to build a counter order, add an optional name to call out, then **Charge** and take cash (the change is shown), QR or card |
-| **Search** | Find an order by its number (`42`), order ID (`PM4WS7`), phone number or name. Staff see the last 7 days |
-| **Sold out** | Switch off anything that has run out. Everything switches back on automatically after closing |
-
-The **Online orders** switch at the top left pauses new online orders during a rush.
-
-### Owner
-
-Sign in at `/login` with the owner email and password. The owner lands on **Today**. The left sidebar
-holds every owner page:
+The **Operations** pages in the sidebar (an icon rail on a tablet, a menu button on a phone):
 
 | Page | What it does |
 | --- | --- |
-| **Today** | Today's sales, orders, average order and online share; what is happening right now, with the pause switch; top items; sales over the last 14 days; and **Needs attention**, which lists anything the owner must act on and is empty on a good day. Click an entry to open the order |
-| **Orders** | Every order, newest first. Filter by date, status, payment, channel or who keyed it in, or search by number, order ID, phone or name. Click an order for its details, history and payments, and **Record refund** after sending money back |
-| **Reports** | Pick a range (today, 7 days, 30 days, this month or custom) and group by day, week or month. Sales by period and by hour, items sold (unsold items included), online vs counter, payment methods, cancellations and refunds. **Download CSV** gives one row per order for the accountant. Every chart has a **Table** view |
-| **Menu** | Items (with photos and prices), option groups, categories, order of display |
-| **Staff** | Add people, set their tablet PIN, reset passwords, deactivate leavers (their history is kept) |
-| **Audit log** | Who changed what and when: prices, refunds, cancellations of paid orders, staff changes, settings, owner sign-ins. Filter by date or action. Nobody can edit or delete entries |
-| **Settings** | Shop name, usual prep time, opening hours, pausing online orders, registering the shop tablet, two-step sign-in, changing your password |
+| **Order Queue** | Numbers at the top: open orders, average prep time, orders running late, orders today against the same day last week. Then three columns: New, Preparing, Ready for pickup. **Start Cooking** moves a new ticket on and marks you as the one who took it; **Take** claims it without starting. Preparing tickets show a progress bar against the usual prep time and turn red when late; **Mark Ready**, then **Hand Over** (with a 5-second undo). New online orders chime and flash until someone taps them. Tap a ticket for its full page |
+| **Order detail** | Items, the customer's note, pickup details, a timeline of who did what and when, payments, other moves, **Cancel order**, and (owner) **Record refund** |
+| **Add Order** | Pick items (search or filter by category), build the counter ticket, choose how they paid, then **Send To Kitchen**: cash shows the change to give, QR and card ask you to confirm the payment went through |
+| **Search** | Find an order by its number (`42`), order ID (`PM4WS7`), phone number or name. Staff see the last 7 days |
+| **Menu** | Switch off anything that has run out, items and options alike. Everything switches back on automatically after closing |
 
-**How sales are counted:** paid orders that were not cancelled or refunded, by business day (a day
-runs from 4 am to 4 am, so a late-night sale counts towards the evening before). The payment-methods
-table is different on purpose: it shows money that actually moved in the period, including payments
-for orders later cancelled, so the cash row can be checked against the drawer.
+The **Online orders** switch at the bottom of the sidebar pauses new online orders during a rush.
 
-**Switching between owner and staff screens:**
+### Owner
 
-- From the owner pages, click **Order board** in the left sidebar to open the staff screens.
-- From the staff screens, the **gear icon** at the top right takes the owner back to `/admin`.
-  Staff don't see it.
-- **Sign out** is at the top right of the owner pages. On the shop tablet, signing out leaves the
-  locked board up for staff; anywhere else it returns to the sign-in page.
+Sign in at `/login` with the owner email and password. The owner uses every **Operations** page
+above; on **Menu** they also edit items (photos, prices, option groups, categories, order of
+display), hide items from the customer menu, and see units sold in the last 7 days. The
+**Management** pages:
+
+| Page | What it does |
+| --- | --- |
+| **Sales Dashboard** | Today's net sales, orders, average order and cancellations against the same day last week; sales by hour; top items; what is happening right now, with the pause switch; and **Needs attention**, which lists anything the owner must act on and is empty on a good day. Click an entry to open the order |
+| **Sales History** | Pick a day, a month or a date range. Gross sales, refunds and net sales against the previous period, sales by hour or by day, payment methods, then every order in the period with filters (status, payment, channel, who keyed it in) and search. **Download CSV** gives one row per order for the accountant |
+| **Sales Report** | Pick a day, a month or a date range. **By day**: orders, gross, refunds, net, each payment method and the peak hour. **By item** (unsold items included), **Online vs counter**, and **Cancellations and refunds** |
+| **Staff & Roles** | Add people, edit their details and role, set their tablet PIN, reset passwords, deactivate leavers (their history is kept) |
+| **Audit Log** | Who changed what and when: prices, refunds, cancellations of paid orders, staff changes, settings, owner sign-ins. Filter by date or action. Nobody can edit or delete entries |
+| **Settings** | Shop name and opening hours, usual prep time, pausing online orders, registering the shop tablet, two-step sign-in, changing your password |
+
+**How sales are counted:** by business day (a day runs from 4 am to 4 am, so a late-night sale counts
+towards the evening before). **Gross** is money taken on that day's orders that were not cancelled,
+**Refunds** is money given back on them, and **Net** is what the shop kept. The payment-methods
+table in Sales History is different on purpose: it shows money that actually moved in the period,
+including payments for orders later cancelled, so the cash row can be checked against the drawer.
+
+**On the shared shop tablet** the Management pages never open, even for the owner unlocked by
+PIN: use your own phone or computer. **Log Out** is at the bottom of the sidebar; on your own device
+it asks first and returns to the sign-in page, on the shop tablet **Lock** leaves the locked queue up
+for staff.
 
 **Setting up the shop tablet (once):**
 
 1. On the tablet, open `/login` and sign in as the owner.
 2. Go to **Settings → Shop tablet → Register this device as the shop tablet**.
-3. Click **Sign out**. The tablet now shows the locked board, and staff unlock it with their PINs.
+3. Tap **Lock** at the bottom of the sidebar. The tablet now shows the locked queue, and staff unlock
+   it with their PINs. To undo this later, sign in as the owner on the tablet, open any Management
+   page and tap **Unregister this tablet**.
 4. Install the staff app: tap the **download icon** at the top of the board (Chrome or Edge), or
    **Add to Home Screen** in the browser menu (Safari, Samsung Internet). It opens full screen
    straight onto the board, and the screen stays on while it is open. This needs HTTPS, so it works
@@ -453,7 +457,7 @@ backend/
                 counter and online orders, the board, the tracking page, order IDs
     payments/   gateway.py (the swappable gateway boundary and FakePay), webhook, lost-payment
                 check, expiry
-    reports/    the owner's Today dashboard, needs attention, reports, CSV export, audit log
+    reports/    the owner's sales dashboard, needs attention, reports, units sold, CSV export, audit log
     shop/       opening hours, pause switch, business date
     staff/      staff accounts and PINs
   alembic/      database migrations
@@ -461,7 +465,8 @@ backend/
 frontend/
   src/
     api/        fetch client, generated API types, data hooks
-    areas/      customer/, staff/, admin/: one lazily loaded section each
+    areas/      customer/ and staff/ (the one staff console; console/ holds its shell and shared pieces),
+                each lazily loaded
     components/ shared pieces
     locales/    en.json, ms.json
   scripts/      check-i18n.mjs

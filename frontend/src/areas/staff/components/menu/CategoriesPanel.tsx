@@ -2,9 +2,9 @@ import { Button, Group, Paper, Stack, Switch, Text, TextInput } from "@mantine/c
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCreateCategory, useSort, useUpdateCategory } from "../../../api/menu";
-import type { AdminCategory } from "../../../api/types";
-import { notifyError } from "../../../components/errors";
+import { useCreateCategory, useSort, useUpdateCategory } from "../../../../api/menu";
+import type { AdminCategory } from "../../../../api/types";
+import { notifyError } from "../../../../components/errors";
 import { SortButtons, moved } from "./SortButtons";
 
 export function CategoriesPanel({ categories }: { categories: AdminCategory[] }) {

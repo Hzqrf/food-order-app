@@ -3,10 +3,10 @@ import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCreateItem, useSetItemGroups, useUpdateItem, useUploadItemImage } from "../../../api/menu";
-import type { AdminItem, AdminMenu } from "../../../api/types";
-import { notifyError } from "../../../components/errors";
-import { MoneyInput } from "../../../components/MoneyInput";
+import { useCreateItem, useSetItemGroups, useUpdateItem, useUploadItemImage } from "../../../../api/menu";
+import type { AdminItem, AdminMenu } from "../../../../api/types";
+import { notifyError } from "../../../../components/errors";
+import { MoneyInput } from "../../../../components/MoneyInput";
 
 type Form = {
   category_id: string | null;

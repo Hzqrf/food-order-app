@@ -3,11 +3,11 @@ import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCreateGroup, useCreateOption, useSort, useUpdateGroup, useUpdateOption } from "../../../api/menu";
-import type { AdminOptionGroup, OptionGroupIn } from "../../../api/types";
-import { notifyError } from "../../../components/errors";
-import { MoneyInput } from "../../../components/MoneyInput";
-import { ruleLabel } from "../../../components/OptionPicker";
+import { useCreateGroup, useCreateOption, useSort, useUpdateGroup, useUpdateOption } from "../../../../api/menu";
+import type { AdminOptionGroup, OptionGroupIn } from "../../../../api/types";
+import { notifyError } from "../../../../components/errors";
+import { MoneyInput } from "../../../../components/MoneyInput";
+import { ruleLabel } from "../../../../components/OptionPicker";
 import { SortButtons, moved } from "./SortButtons";
 
 export function OptionGroupsPanel({ groups }: { groups: AdminOptionGroup[] }) {

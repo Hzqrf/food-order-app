@@ -25,7 +25,7 @@ export function MetricCard({ label, value, delta, direction, good = "up", deltaL
         {value ?? "—"}
       </Text>
       {(delta || deltaLabel) && (
-        <Group gap={6} mt={8} wrap="nowrap">
+        <Group gap={6} mt={8} wrap="nowrap" align="flex-start">
           {delta && direction && (
             <Group gap={2} wrap="nowrap" c={color}>
               <Arrow size={16} />
@@ -35,7 +35,7 @@ export function MetricCard({ label, value, delta, direction, good = "up", deltaL
             </Group>
           )}
           {deltaLabel && (
-            <Text fz={13} c={tokens.muted} truncate>
+            <Text fz={13} c={tokens.muted} lineClamp={2}>
               {deltaLabel}
             </Text>
           )}

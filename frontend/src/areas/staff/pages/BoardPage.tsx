@@ -25,9 +25,9 @@ import { toast } from "../console/toast";
 import { tokens } from "../console/tokens";
 
 const COLUMNS = [
-  { status: "placed", label: "board.columns.new" },
-  { status: "preparing", label: "board.columns.preparing" },
-  { status: "ready", label: "console.queue.readyColumn" },
+  { status: "placed", label: "board.columns.new", short: "board.columns.new" },
+  { status: "preparing", label: "board.columns.preparing", short: "board.columns.preparing" },
+  { status: "ready", label: "console.queue.readyColumn", short: "board.columns.ready" },
 ] as const;
 
 const UNDO_MS = 5_000;
@@ -210,7 +210,7 @@ export default function BoardPage() {
           onChange={setColumn}
           data={COLUMNS.map((c) => ({
             value: c.status,
-            label: `${t(c.label)} (${orders.filter((o) => o.status === c.status).length})`,
+            label: `${t(c.short)} (${orders.filter((o) => o.status === c.status).length})`,
           }))}
         />
       )}
