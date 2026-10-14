@@ -49,6 +49,17 @@ def _attention_order(o: Order) -> schemas.AttentionOrder:
 # --- Building blocks -----------------------------------------------------------------------------
 
 
+def _money(db: Session, branch: Branch, start: date, end: date):
+    """(business_date, method, kind, amount) for succeeded payments on non-cancelled orders of these dates."""
+    return db.execute(
+        select(Order.business_date, Payment.method, Payment.kind, func.coalesce(func.sum(Payment.amount_sen), 0))
+        .join(Order, Order.id == Payment.order_id)
+        .where(Order.branch_id == branch.id, Order.business_date >= start, Order.business_date <= end,
+               Order.status.in_(SALES_STATUSES), Payment.status == "succeeded")
+        .group_by(Order.business_date, Payment.method, Payment.kind)
+    ).all()
+
+
 def totals(db: Session, branch: Branch, start: date, end: date) -> schemas.Totals:
     count, sales, online = db.execute(
         select(func.count(Order.id), func.coalesce(func.sum(Order.total_sen), 0),
@@ -56,8 +67,15 @@ def totals(db: Session, branch: Branch, start: date, end: date) -> schemas.Total
         .where(*_sales(branch, start, end))
     ).one()
     count, sales, online = int(count), int(sales), int(online)
+    gross = refunds = 0
+    for _, _, kind, amount in _money(db, branch, start, end):
+        if kind == "charge":
+            gross += int(amount)
+        else:
+            refunds += int(amount)
     return schemas.Totals(sales_sen=sales, orders=count, avg_order_sen=sales // count if count else 0,
-                          online_orders=online, counter_orders=count - online)
+                          online_orders=online, counter_orders=count - online,
+                          gross_sen=gross, refunds_sen=refunds, net_sen=gross - refunds)
 
 
 def daily(db: Session, branch: Branch, start: date, end: date) -> dict[date, tuple[int, int]]:
@@ -96,8 +114,33 @@ def periods(db: Session, branch: Branch, start: date, end: date, group_by: str) 
         bucket[0] += sales
         bucket[1] += orders
         d += timedelta(days=1)
+
+    refunds: dict[date, int] = defaultdict(int)
+    methods: dict[date, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for day, method, kind, amount in _money(db, branch, start, end):
+        key = _period_start(day, group_by)
+        methods[key][method] += int(amount) if kind == "charge" else -int(amount)
+        if kind == "refund":
+            refunds[key] += int(amount)
+
+    tz = ZoneInfo(branch.timezone)
+    hour_sales: dict[date, dict[int, int]] = defaultdict(lambda: defaultdict(int))
+    for day, at, total in db.execute(select(Order.business_date, func.coalesce(Order.placed_at, Order.created_at),
+                                            Order.total_sen).where(*_sales(branch, start, end))).all():
+        hour_sales[_period_start(day, group_by)][_local_hour(at, tz)] += total
+
+    def peak(key: date) -> int | None:
+        by_hour = hour_sales.get(key)
+        return max(by_hour, key=lambda h: (by_hour[h], -h)) if by_hour else None
+
     return [schemas.PeriodRow(period=_period_label(k, group_by), start=k, sales_sen=s, orders=o,
-                              avg_order_sen=s // o if o else 0) for k, (s, o) in sorted(buckets.items())]
+                              avg_order_sen=s // o if o else 0, refunds_sen=refunds.get(k, 0),
+                              methods=dict(methods.get(k, {})), peak_hour=peak(k))
+            for k, (s, o) in sorted(buckets.items())]
+
+
+def _local_hour(at: datetime, tz: ZoneInfo) -> int:
+    return (at if at.tzinfo else at.replace(tzinfo=UTC)).astimezone(tz).hour
 
 
 def hours(db: Session, branch: Branch, start: date, end: date) -> list[schemas.HourRow]:
@@ -107,8 +150,7 @@ def hours(db: Session, branch: Branch, start: date, end: date) -> list[schemas.H
                       .where(*_sales(branch, start, end))).all()
     by_hour = defaultdict(lambda: [0, 0])
     for at, total in rows:
-        at = at if at.tzinfo else at.replace(tzinfo=UTC)
-        h = at.astimezone(tz).hour
+        h = _local_hour(at, tz)
         by_hour[h][0] += 1
         by_hour[h][1] += total
     days = (end - start).days + 1
@@ -203,6 +245,8 @@ def report(db: Session, branch: Branch, r: schemas.Range) -> schemas.Report:
         channels=channels(db, branch, r.date_from, r.date_to),
         payments=payments(db, branch, r.date_from, r.date_to),
         cancellations=cancellations(db, branch, r.date_from, r.date_to),
+        previous=totals(db, branch, r.date_from - timedelta(days=(r.date_to - r.date_from).days + 1),
+                        r.date_from - timedelta(days=1)),
     )
 
 
@@ -277,6 +321,7 @@ def dashboard(db: Session, branch: Branch) -> schemas.Dashboard:
         Order.branch_id == branch.id,
         Order.status.in_([sm.PENDING_PAYMENT, sm.PLACED, sm.PREPARING, sm.READY])).group_by(Order.status)).all())
     by_day = daily(db, branch, today - timedelta(days=13), today)
+    last_week = today - timedelta(days=7)
     return schemas.Dashboard(
         business_date=today,
         today=totals(db, branch, today, today),
@@ -291,7 +336,25 @@ def dashboard(db: Session, branch: Branch) -> schemas.Dashboard:
         last_14_days=[schemas.DayPoint(day=d, sales_sen=by_day.get(d, (0, 0))[0], orders=by_day.get(d, (0, 0))[1])
                       for d in (today - timedelta(days=13 - i) for i in range(14))],
         needs_attention=needs_attention(db, branch, today),
+        same_day_last_week=totals(db, branch, last_week, last_week),
+        cancelled_today=db.scalar(select(func.count(Order.id)).where(
+            Order.branch_id == branch.id, Order.business_date == today, Order.status == sm.CANCELLED)) or 0,
+        hours_today=hours(db, branch, today, today),
+        hours_same_day_last_week=hours(db, branch, last_week, last_week),
     )
+
+
+def units_sold(db: Session, branch: Branch, days: int) -> list[schemas.UnitsSoldRow]:
+    """Units per menu item over the last `days` business days, today included. Unsold items are left out."""
+    today = business_date(branch)
+    rows = db.execute(
+        select(OrderItem.menu_item_id, func.sum(OrderItem.quantity))
+        .join(Order, Order.id == OrderItem.order_id)
+        .where(Order.branch_id == branch.id, Order.status.in_(SALES_STATUSES),
+               Order.business_date >= today - timedelta(days=days - 1), Order.business_date <= today)
+        .group_by(OrderItem.menu_item_id)
+    ).all()
+    return [schemas.UnitsSoldRow(menu_item_id=mid, units=int(n)) for mid, n in rows]
 
 
 # --- CSV for the accountant ----------------------------------------------------------------------

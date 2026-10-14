@@ -29,6 +29,10 @@ class Totals(BaseModel):
     avg_order_sen: int
     online_orders: int
     counter_orders: int
+    # Money that actually moved on non-cancelled orders of these business dates.
+    gross_sen: int  # charges that succeeded
+    refunds_sen: int  # refunds that succeeded
+    net_sen: int  # gross - refunds
 
 
 class LiveCounts(BaseModel):
@@ -81,6 +85,10 @@ class Dashboard(BaseModel):
     top_items: list[TopItem]
     last_14_days: list[DayPoint]
     needs_attention: list[Attention]
+    same_day_last_week: Totals
+    cancelled_today: int
+    hours_today: list["HourRow"]
+    hours_same_day_last_week: list["HourRow"]
 
 
 # --- Reports -------------------------------------------------------------------------------------
@@ -92,6 +100,9 @@ class PeriodRow(BaseModel):
     sales_sen: int
     orders: int
     avg_order_sen: int
+    refunds_sen: int
+    methods: dict[str, int]  # net per payment method
+    peak_hour: int | None  # shop-time hour with the most sales
 
 
 class HourRow(BaseModel):
@@ -157,6 +168,7 @@ class Report(BaseModel):
     channels: list[ChannelRow]
     payments: list[PaymentRow]
     cancellations: Cancellations
+    previous: Totals  # the same number of days just before date_from
 
 
 # --- Audit log -----------------------------------------------------------------------------------
@@ -188,3 +200,11 @@ class AuditPage(BaseModel):
     rows: list[AuditRow]
     next_cursor: int | None
     actions: list[str]
+
+
+class UnitsSoldRow(BaseModel):
+    menu_item_id: int
+    units: int
+
+
+Dashboard.model_rebuild()  # it refers to HourRow, defined further down

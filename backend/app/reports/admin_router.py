@@ -15,6 +15,12 @@ def dashboard(_: AdminUser, branch: BranchDep, db: DB):
     return queries.dashboard(db, branch)
 
 
+@router.get("/menu/units-sold", response_model=list[schemas.UnitsSoldRow])
+def units_sold(_: AdminUser, branch: BranchDep, db: DB, days: Annotated[int, Query(ge=1, le=90)] = 7):
+    """Units per item over the last N business days, for the Menu page's "sold in 7 days" column."""
+    return queries.units_sold(db, branch, days)
+
+
 @router.get("/reports", response_model=schemas.Report)
 def report(_: AdminUser, branch: BranchDep, db: DB, r: Annotated[schemas.Range, Query()]):
     return queries.report(db, branch, r)

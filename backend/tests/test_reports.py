@@ -48,7 +48,7 @@ def test_dashboard_counts_only_paid_live_orders(client, staff, admin, menu, bran
     login(client, admin.username)
     d = client.get(f"{API}/admin/dashboard").json()
     assert d["today"] == {"sales_sen": 1450, "orders": 2, "avg_order_sen": 725, "online_orders": 1,
-                          "counter_orders": 1}
+                          "counter_orders": 1, "gross_sen": 1450, "refunds_sen": 0, "net_sen": 1450}
     assert d["live"] == {"placed": 2, "preparing": 0, "ready": 0, "awaiting_payment": 1}
     assert {(i["name"], i["quantity"]) for i in d["top_items"]} == {("Chicken Tender", 1), ("Iced Milo", 1)}
     assert len(d["last_14_days"]) == 14 and d["last_14_days"][-1]["sales_sen"] == 1450
@@ -182,3 +182,91 @@ def test_owner_screens_are_owner_only(staff_client):
     for path in ("/admin/dashboard", "/admin/orders", "/admin/audit-logs",
                  "/admin/reports?date_from=2026-10-01&date_to=2026-10-01"):
         assert staff_client.get(API + path).status_code == 403
+
+
+# --- Console additions: gross/refunds/net, comparisons, peak hour, units sold -------------------
+
+
+def report_for(client, start, end=None):
+    return client.get(f"{API}/admin/reports", params={"date_from": start, "date_to": end or start}).json()
+
+
+def complete(client, order):
+    url = f"{API}/staff/orders/{order['id']}/transition"
+    assert client.post(url, json={"to": "completed", "version": order["version"]}).status_code == 200
+
+
+def test_totals_gross_refunds_net(client, staff, admin, menu, branch):
+    login(client, staff.username)
+    a = counter_order(client, [tender(menu)]).json()  # 1000 cash, completed, then refunded in full
+    complete(client, a)
+    counter_order(client, [milo(menu)], method="qr_counter")  # 450 QR, kept
+    c = counter_order(client, [tender(menu)]).json()  # 1000 cash, cancelled with a refund: never a sale
+    client.post(f"{API}/staff/orders/{c['id']}/cancel", json={"version": 1, "reason": "Mistake", "refund_method": "cash"})
+    login(client, admin.username)
+    assert client.post(f"{API}/admin/orders/{a['id']}/refund",
+                       json={"reason": "Cold", "refund_method": "cash"}).status_code == 200
+
+    t = report_for(client, day(branch))["totals"]
+    assert (t["gross_sen"], t["refunds_sen"], t["net_sen"]) == (1450, 1000, 450)
+
+
+def test_report_previous_period_and_period_methods(client, staff, admin, menu, branch, db):
+    login(client, staff.username)
+    counter_order(client, [tender(menu)])  # 1000 cash
+    counter_order(client, [milo(menu)], method="qr_counter")  # 450 QR
+    old = counter_order(client, [milo(menu)]).json()
+    today = business_date(branch)
+    db.execute(update(Order).where(Order.id == old["id"]).values(business_date=today - timedelta(days=1)))
+    db.commit()
+
+    login(client, admin.username)
+    r = report_for(client, today.isoformat())
+    assert r["previous"]["orders"] == 1 and r["previous"]["gross_sen"] == 450
+    assert r["totals"]["orders"] == 2
+    period = r["periods"][0]
+    assert period["methods"] == {"cash": 1000, "qr_counter": 450}
+    assert period["refunds_sen"] == 0
+    busiest = max(r["hours"], key=lambda h: h["sales_sen"])["hour"]
+    assert period["peak_hour"] == busiest
+
+
+def test_period_without_sales_has_no_peak_hour(client, admin, branch):
+    login(client, admin.username)
+    period = report_for(client, day(branch))["periods"][0]
+    assert period["peak_hour"] is None and period["methods"] == {} and period["refunds_sen"] == 0
+
+
+def test_dashboard_last_week_and_cancelled(client, staff, admin, menu, branch, db):
+    login(client, staff.username)
+    counter_order(client, [milo(menu)])
+    last_week = counter_order(client, [tender(menu)]).json()
+    gone = counter_order(client, [milo(menu)]).json()
+    client.post(f"{API}/staff/orders/{gone['id']}/cancel", json={"version": 1, "reason": "Mistake", "refund_method": "cash"})
+    db.execute(update(Order).where(Order.id == last_week["id"]).values(
+        business_date=business_date(branch) - timedelta(days=7)))
+    db.commit()
+
+    login(client, admin.username)
+    d = client.get(f"{API}/admin/dashboard").json()
+    assert d["same_day_last_week"]["orders"] == 1 and d["same_day_last_week"]["sales_sen"] == 1000
+    assert d["cancelled_today"] == 1
+    assert len(d["hours_today"]) == 24 and sum(h["orders"] for h in d["hours_today"]) == 1
+    assert sum(h["orders"] for h in d["hours_same_day_last_week"]) == 1
+
+
+def test_units_sold_last_7_days(client, staff, admin, menu, branch, db):
+    login(client, staff.username)
+    counter_order(client, [{**tender(menu), "quantity": 2}], tendered=5000)
+    old = counter_order(client, [milo(menu)]).json()
+    gone = counter_order(client, [tender(menu)]).json()
+    client.post(f"{API}/staff/orders/{gone['id']}/cancel", json={"version": 1, "reason": "Mistake", "refund_method": "cash"})
+    db.execute(update(Order).where(Order.id == old["id"]).values(
+        business_date=business_date(branch) - timedelta(days=8)))
+    db.commit()
+
+    assert client.get(f"{API}/admin/menu/units-sold").status_code == 403
+    login(client, admin.username)
+    r = client.get(f"{API}/admin/menu/units-sold", params={"days": 7})
+    assert r.json() == [{"menu_item_id": menu["tender"], "units": 2}]
+    assert client.get(f"{API}/admin/menu/units-sold", params={"days": 0}).status_code == 422
