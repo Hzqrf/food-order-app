@@ -130,7 +130,7 @@ Each design token goes into the Mantine theme once, in `frontend/src/theme.ts`, 
 | Page title / section title | 30/38 semibold −0.02em / 16/24 semibold | same |
 | Segmented tabs | grey track `#F1F1F1`, white selected pill | Mantine `SegmentedControl` styled to match |
 
-**Palette:** a custom 10-shade `brand` palette with shade 6 = `#ea580c` and shade 8 = `#c2410c`. It becomes `primaryColor`, filled components use shade 8, and it replaces Mantine's default `orange` everywhere in the app. `index.html` already uses `#c2410c` as `theme-color` and `#ea580c` in the favicon, so no change is needed there.
+**Palette:** a custom 10-shade palette registered under Mantine's own `orange` key, so every existing `orange.N` reference picks it up: `#fff7ed, #ffedd5, #fed7aa, #fdba74, #fb923c, #f97316, #ea580c, #c2410c, #9a3412, #7c2d12`. Shade 6 = `#ea580c` (accent). `primaryShade` = 7 = `#c2410c` (filled). Mantine's automatic hover uses shade 8 = `#9a3412`. `index.html` already uses `#c2410c` as `theme-color` and `#ea580c` in the favicon, so no change is needed there.
 
 **Shared console components** go in `frontend/src/areas/staff/console/`, each one small with a single purpose:
 - `ConsoleLayout`: the shell, nav and lock context. Replaces `StaffLayout` and `AdminLayout`.
@@ -149,7 +149,7 @@ Every screen is in EN and BM. Money shows as RM from real data; the design's dol
 
 ### Order Queue (`/staff`)
 
-**Metric cards** come from `GET /staff/queue-metrics` and refresh every 30s:
+**Metric cards** come from `GET /staff/orders/metrics` and refresh every 30s:
 - **Open orders:** placed + preparing + ready.
 - **Avg prep time:** the mean of `ready_at − preparing_at` for today's orders, against the same weekday last week.
 - **Running late:** open orders past their promised time (`placed_at + branch.prep_minutes`) that are not yet ready.
@@ -268,14 +268,14 @@ Cards:
   - body `{version}`; same optimistic version check as transitions
   - allowed while the status is `placed` or `preparing`
   - claiming again by the same user returns the order unchanged
-  - taking over from another user is allowed and writes an audit-log entry `order.claim_takeover` (old claimer → new)
+  - taking over from another user is allowed and writes an audit-log entry `order_claim_takeover` (old claimer → new)
   - a locked tablet (no user) gets the existing not-authenticated error
 - **Start Cooking:** the `placed → preparing` transition with `claimed_by_user_id` null sets the claimer to the acting user.
-- **Schema fields:** `OrderSummary` and `OrderDetail` gain `claimed_by_name`, `claimed_at` and `preparing_at`. `OrderDetail` gains a timeline list `[{status, at, actor_name}]` built from `order_status_events`.
+- **Schema fields:** `OrderSummary` and `OrderDetail` gain `claimed_by_name`, `claimed_at` and `preparing_at`. The timeline uses `OrderDetail.events`, which already exists and already carries `actor_name`.
 
 ### Queue metrics
 
-`GET /staff/queue-metrics` (staff and admin) returns `{open_orders, avg_prep_minutes, avg_prep_minutes_last_week, running_late, orders_today, orders_same_day_last_week}`.
+`GET /staff/orders/metrics` (board auth, so the locked tablet can read it too) returns `{open_orders, avg_prep_minutes, avg_prep_minutes_last_week, running_late, orders_today, orders_same_day_last_week}`.
 - Dates use `business_date` and the branch timezone, like the existing reports.
 - The response contains no money.
 
@@ -291,7 +291,12 @@ Existing fields are unchanged.
 
 ### Reports
 
-`Totals` gains `refunds_sen` and `net_sen`, where net is `sales_sen − refunds_sen`. The refunds come from `payments` rows with `kind='refund'` in the period. `Dashboard` gets these too, because it shares `Totals`.
+`Totals` gains `gross_sen`, `refunds_sen` and `net_sen`. These count money that actually moved on orders whose status is in `SALES_STATUSES` (non-cancelled) and whose `business_date` is in the range:
+- `gross_sen`: succeeded charges
+- `refunds_sen`: succeeded refunds
+- `net_sen`: gross − refunds
+
+Refunds on cancelled orders are left out because those orders were never sales. A refunded duplicate charge cancels out against its own charge. `sales_sen` keeps its current meaning. `Dashboard` gets these fields too, because it shares `Totals`. Sales History's Gross / Refunds / Net cards use the new fields.
 
 `Report` gains:
 - `previous: Totals`, the same-length period immediately before `date_from`
