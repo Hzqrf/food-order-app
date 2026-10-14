@@ -659,6 +659,53 @@
       "onMenu": "On menu",
       "inStockFor": "{{name}} in stock",
       "onMenuFor": "Show {{name}} on the customer menu"
+    },
+    "period": {
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "range": "Date range",
+      "day": "Day",
+      "month": "Month",
+      "to": "to"
+    },
+    "dashboard": {
+      "title": "Sales Dashboard",
+      "subtitle": "How today is trading against the same day last week.",
+      "sales": "Net sales today",
+      "orders": "Orders",
+      "avgOrder": "Average order",
+      "cancelled": "Cancelled today",
+      "cancelledShare": "{{share}}% of today's orders",
+      "byHour": "Sales by hour",
+      "byHourSub": "Today, with the same day last week on hover",
+      "lastWeekWas": "last week {{amount}}",
+      "shareOfUnits": "Share of units",
+      "share": "Share"
+    },
+    "sales": {
+      "title": "Sales History",
+      "subtitle": "Gross through to net, the hours money comes in, and how customers paid.",
+      "gross": "Gross sales",
+      "refunds": "Refunds",
+      "net": "Net sales",
+      "vsDayBefore": "vs the day before",
+      "vsPreviousPeriod": "vs the previous period",
+      "ordersHint_one": "{{count}} order",
+      "ordersHint_other": "{{count}} orders",
+      "byHour": "Sales by hour",
+      "byDay": "Sales by day",
+      "paymentMethods": "Payment methods",
+      "shareOfNet": "Share of net sales",
+      "history": "Order history"
+    },
+    "report": {
+      "title": "Sales Report",
+      "subtitle": "Takings broken down by day, by item and by channel.",
+      "byDay": "By day",
+      "byItem": "By item",
+      "date": "Date",
+      "peakHour": "Peak hour",
+      "moneyDefinition": "Gross is money taken on the day's orders that were not cancelled; refunds are money given back on them; net is what the shop kept. Methods show net."
     }
   }
 }

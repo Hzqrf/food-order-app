@@ -22,9 +22,9 @@ const SearchPage = lazy(() => import("./areas/staff/pages/SearchPage"));
 const StaffOrderPage = lazy(() => import("./areas/staff/pages/OrderPage"));
 const StaffMenuPage = lazy(() => import("./areas/staff/pages/MenuPage"));
 
-const AdminTodayPage = lazy(() => import("./areas/admin/pages/TodayPage"));
-const AdminOrdersPage = lazy(() => import("./areas/admin/pages/OrdersPage"));
-const AdminReportsPage = lazy(() => import("./areas/admin/pages/ReportsPage"));
+const DashboardPage = lazy(() => import("./areas/staff/pages/DashboardPage"));
+const SalesHistoryPage = lazy(() => import("./areas/staff/pages/SalesHistoryPage"));
+const SalesReportPage = lazy(() => import("./areas/staff/pages/SalesReportPage"));
 const AdminAuditPage = lazy(() => import("./areas/admin/pages/AuditPage"));
 const AdminStaffPage = lazy(() => import("./areas/admin/pages/StaffPage"));
 const AdminSettingsPage = lazy(() => import("./areas/admin/pages/SettingsPage"));
@@ -79,9 +79,9 @@ export const router = createBrowserRouter([
       { path: "orders/:id", element: <Lazy><StaffOrderPage /></Lazy> },
       { path: "menu", element: <Lazy><StaffMenuPage /></Lazy> },
       { path: "sold-out", element: <LegacyRedirect /> },
-      { path: "dashboard", element: owner(<AdminTodayPage />) },
-      { path: "sales", element: owner(<AdminOrdersPage />) },
-      { path: "reports", element: owner(<AdminReportsPage />) },
+      { path: "dashboard", element: owner(<DashboardPage />) },
+      { path: "sales", element: owner(<SalesHistoryPage />) },
+      { path: "reports", element: owner(<SalesReportPage />) },
       { path: "team", element: owner(<AdminStaffPage />) },
       { path: "audit", element: owner(<AdminAuditPage />) },
       { path: "settings", element: owner(<AdminSettingsPage />) },

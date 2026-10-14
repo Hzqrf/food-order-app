@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next";
 
 export type Bar = { key: string; label: string; detail?: string; value: number };
 
-// One series, one hue: Mantine orange 8. Validated for >= 3:1 against the white surface.
-const BAR = "#e8590c";
-const BAR_HOVER = "#c2410c";
+// One series, one hue: the brand accent (#ea580c), >= 3:1 against the white surface.
+const BAR = "var(--mantine-color-orange-6)";
+const BAR_HOVER = "var(--mantine-color-orange-7)";
 const GRID = "var(--mantine-color-gray-2)";
 const MAX_BAR = 24;
 const M = { top: 12, right: 8, bottom: 24, left: 56 };
@@ -24,8 +24,9 @@ function niceStep(max: number, ticks: number): number {
  * a square foot on the baseline; each column's full height is its hover/focus target. A table view
  * carries every value for readers who can't or don't want to hover.
  */
-export function BarChart({ title, data, format, axisFormat, height = 220, valueLabel }: {
+export function BarChart({ title, sub, data, format, axisFormat, height = 220, valueLabel }: {
   title: string;
+  sub?: string;
   data: Bar[];
   format: (v: number) => string;
   axisFormat?: (v: number) => string;
@@ -51,9 +52,12 @@ export function BarChart({ title, data, format, axisFormat, height = 220, valueL
   const hovered = active !== null ? data[active] : null;
 
   return (
-    <Paper withBorder p="md">
-      <Group justify="space-between" mb="xs">
-        <Title order={5}>{title}</Title>
+    <Paper p={20} radius={16} shadow="xs">
+      <Group justify="space-between" mb="xs" wrap="nowrap" align="flex-start">
+        <div>
+          <Title order={5} fz={16} fw={600}>{title}</Title>
+          {sub && <Text fz={13} c="dimmed">{sub}</Text>}
+        </div>
         <SegmentedControl size="xs" value={view} onChange={(v) => setView(v as "chart" | "table")}
           data={[{ value: "chart", label: t("charts.chart") }, { value: "table", label: t("charts.table") }]} />
       </Group>

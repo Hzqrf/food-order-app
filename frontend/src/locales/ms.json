@@ -656,6 +656,53 @@
       "onMenu": "Dalam menu",
       "inStockFor": "{{name}} ada stok",
       "onMenuFor": "Tunjuk {{name}} dalam menu pelanggan"
+    },
+    "period": {
+      "daily": "Harian",
+      "monthly": "Bulanan",
+      "range": "Julat tarikh",
+      "day": "Hari",
+      "month": "Bulan",
+      "to": "hingga"
+    },
+    "dashboard": {
+      "title": "Papan Jualan",
+      "subtitle": "Prestasi hari ini berbanding hari yang sama minggu lepas.",
+      "sales": "Jualan bersih hari ini",
+      "orders": "Pesanan",
+      "avgOrder": "Purata pesanan",
+      "cancelled": "Dibatalkan hari ini",
+      "cancelledShare": "{{share}}% daripada pesanan hari ini",
+      "byHour": "Jualan mengikut jam",
+      "byHourSub": "Hari ini, dengan hari yang sama minggu lepas apabila dihalakan",
+      "lastWeekWas": "minggu lepas {{amount}}",
+      "shareOfUnits": "Bahagian unit",
+      "share": "Bahagian"
+    },
+    "sales": {
+      "title": "Sejarah Jualan",
+      "subtitle": "Kasar hingga bersih, jam wang masuk, dan cara pelanggan membayar.",
+      "gross": "Jualan kasar",
+      "refunds": "Bayaran balik",
+      "net": "Jualan bersih",
+      "vsDayBefore": "berbanding hari sebelumnya",
+      "vsPreviousPeriod": "berbanding tempoh sebelumnya",
+      "ordersHint_one": "{{count}} pesanan",
+      "ordersHint_other": "{{count}} pesanan",
+      "byHour": "Jualan mengikut jam",
+      "byDay": "Jualan mengikut hari",
+      "paymentMethods": "Kaedah bayaran",
+      "shareOfNet": "Bahagian jualan bersih",
+      "history": "Sejarah pesanan"
+    },
+    "report": {
+      "title": "Laporan Jualan",
+      "subtitle": "Kutipan mengikut hari, item dan saluran.",
+      "byDay": "Mengikut hari",
+      "byItem": "Mengikut item",
+      "date": "Tarikh",
+      "peakHour": "Jam puncak",
+      "moneyDefinition": "Kasar ialah wang yang diterima bagi pesanan hari itu yang tidak dibatalkan; bayaran balik ialah wang yang dipulangkan; bersih ialah yang disimpan oleh kedai. Kaedah menunjukkan jumlah bersih."
     }
   }
 }
