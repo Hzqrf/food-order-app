@@ -6,16 +6,15 @@ import { Navigate, useNavigate, useSearchParams } from "react-router";
 
 import { useLogin, useSession } from "../../../api/auth";
 import { isApiError } from "../../../api/client";
-import type { SessionOut } from "../../../api/types";
 import { LanguageSwitch } from "../../../components/LanguageSwitch";
 import { PoweredBy } from "../../../components/PoweredBy";
+import { mapLegacyPath } from "../console/legacy";
 import { PinPad } from "../components/PinPad";
 
-function home(session: SessionOut, next: string | null) {
-  if (next && next.startsWith("/") && !next.startsWith("//")) {
-    if (!next.startsWith("/admin") || session.user?.role === "admin") return next;
-  }
-  return session.user?.role === "admin" && !session.device_registered ? "/admin" : "/staff";
+function home(next: string | null) {
+  // Everyone lands on the console queue; a safe "next" (old /admin links mapped) wins.
+  if (next && next.startsWith("/") && !next.startsWith("//")) return mapLegacyPath(next);
+  return "/staff";
 }
 
 export default function LoginPage() {
@@ -29,14 +28,14 @@ export default function LoginPage() {
   const [usePassword, setUsePassword] = useState(false);
   const form = useForm({ initialValues: { login: "", password: "", totp_code: "" } });
 
-  if (session?.user) return <Navigate to={home(session, params.get("next"))} replace />;
+  if (session?.user) return <Navigate to={home(params.get("next"))} replace />;
 
   const submit = form.onSubmit((values) => {
     setError(null);
     login.mutate(
       { login: values.login, password: values.password, totp_code: values.totp_code || undefined },
       {
-        onSuccess: (s) => navigate(home(s, params.get("next")), { replace: true }),
+        onSuccess: () => navigate(home(params.get("next")), { replace: true }),
         onError: (e) => {
           if (isApiError(e, "totp_required")) return setNeedTotp(true);
           if (isApiError(e, "account_locked") || isApiError(e, "too_many_requests")) return setError(t("login.locked"));

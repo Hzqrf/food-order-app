@@ -14,7 +14,7 @@ import { useNewOrderAlert } from "../../../hooks/useNewOrderAlert";
 import { formatTime } from "../../../lib/dates";
 import { NEXT_STEP, OrderCard } from "../components/OrderCard";
 import { OrderDetailDrawer } from "../components/OrderDetailDrawer";
-import { useStaff } from "../StaffLayout";
+import { useStaff } from "../console/lock";
 
 const COLUMNS = [
   { status: "placed", label: "board.columns.new" },

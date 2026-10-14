@@ -2,7 +2,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./lib/i18n";
 
-import { createTheme, MantineProvider } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
@@ -11,12 +11,7 @@ import { RouterProvider } from "react-router";
 
 import { isApiError } from "./api/client";
 import { router } from "./routes";
-
-const theme = createTheme({
-  primaryColor: "orange",
-  defaultRadius: "md",
-  fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-});
+import { theme } from "./theme";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({

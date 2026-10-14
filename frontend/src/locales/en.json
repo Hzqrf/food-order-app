@@ -539,5 +539,44 @@
     "note": "Send the money back first, then record it here. The refund is logged with your name.",
     "confirm": "Record {{amount}} refund",
     "done": "Refund of {{amount}} recorded"
+  },
+  "console": {
+    "nav": {
+      "operations": "Operations",
+      "management": "Management",
+      "queue": "Order Queue",
+      "addOrder": "Add Order",
+      "search": "Search",
+      "menu": "Menu",
+      "dashboard": "Sales Dashboard",
+      "sales": "Sales History",
+      "reports": "Sales Report",
+      "team": "Staff & Roles",
+      "audit": "Audit Log",
+      "settings": "Settings"
+    },
+    "menuToggle": "Open navigation",
+    "logout": {
+      "button": "Log Out",
+      "title": "Log out of the console?",
+      "body": "Open tickets stay in the queue for whoever is next on shift.",
+      "note": "{{cooking}} orders are still cooking and {{waiting}} are waiting at the counter.",
+      "stay": "Stay Signed In",
+      "confirm": "Log Out"
+    },
+    "ownerToolsHidden": {
+      "title": "Owner tools hidden",
+      "body": "Sales, reports, staff and settings need an owner sign-in."
+    },
+    "ownerOnTablet": {
+      "title": "Use your own device for owner tools",
+      "body": "Sales, reports, staff and settings never open on the shared shop tablet. Sign in on your phone or computer."
+    },
+    "availability": {
+      "available": "Available",
+      "soldOut": "Sold out",
+      "hidden": "Hidden"
+    },
+    "someone": "Someone"
   }
 }

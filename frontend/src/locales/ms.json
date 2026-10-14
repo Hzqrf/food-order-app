@@ -536,5 +536,44 @@
     "note": "Pulangkan wang dahulu, kemudian rekodkan di sini. Pulangan dilog dengan nama anda.",
     "confirm": "Rekod pulangan {{amount}}",
     "done": "Pulangan {{amount}} direkodkan"
+  },
+  "console": {
+    "nav": {
+      "operations": "Operasi",
+      "management": "Pengurusan",
+      "queue": "Barisan Pesanan",
+      "addOrder": "Tambah Pesanan",
+      "search": "Cari",
+      "menu": "Menu",
+      "dashboard": "Papan Jualan",
+      "sales": "Sejarah Jualan",
+      "reports": "Laporan Jualan",
+      "team": "Pekerja & Peranan",
+      "audit": "Log Audit",
+      "settings": "Tetapan"
+    },
+    "menuToggle": "Buka navigasi",
+    "logout": {
+      "button": "Log Keluar",
+      "title": "Log keluar dari konsol?",
+      "body": "Tiket yang terbuka kekal dalam barisan untuk pekerja syif seterusnya.",
+      "note": "{{cooking}} pesanan masih dimasak dan {{waiting}} sedang menunggu di kaunter.",
+      "stay": "Kekal Log Masuk",
+      "confirm": "Log Keluar"
+    },
+    "ownerToolsHidden": {
+      "title": "Alat pemilik disembunyikan",
+      "body": "Jualan, laporan, pekerja dan tetapan perlu log masuk pemilik."
+    },
+    "ownerOnTablet": {
+      "title": "Guna peranti sendiri untuk alat pemilik",
+      "body": "Jualan, laporan, pekerja dan tetapan tidak dibuka pada tablet kedai yang dikongsi. Log masuk pada telefon atau komputer anda."
+    },
+    "availability": {
+      "available": "Ada",
+      "soldOut": "Habis",
+      "hidden": "Disembunyikan"
+    },
+    "someone": "Seseorang"
   }
 }

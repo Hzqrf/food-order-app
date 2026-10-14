@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { useIdle } from "@mantine/hooks";
 import { IconClipboardList, IconDownload, IconLock, IconPlus, IconSearch, IconSettings, IconToolsKitchen2 } from "@tabler/icons-react";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 
@@ -24,18 +24,10 @@ import { notifyError } from "../../components/errors";
 import { LanguageSwitch } from "../../components/LanguageSwitch";
 import { useStaffApp, useWakeLock } from "../../hooks/useStaffApp";
 import { PinPad } from "./components/PinPad";
+import { LockContext as Ctx } from "./console/lock";
 
 const IDLE_LOCK_MS = 5 * 60_000;
 
-type StaffCtx = {
-  /** True when nobody is signed in on a shared tablet: the board is visible but read-only. */
-  locked: boolean;
-  /** Call before an action. Returns false and asks for a PIN when the tablet is locked. */
-  ensureUnlocked: () => boolean;
-};
-
-const Ctx = createContext<StaffCtx>({ locked: false, ensureUnlocked: () => true });
-export const useStaff = () => useContext(Ctx);
 
 const TABS = [
   { to: "/staff", label: "staff.tabs.board", icon: IconClipboardList, end: true },

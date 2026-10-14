@@ -18,7 +18,7 @@ const walk = (d) => readdirSync(d).forEach((f) => {
 walk("src");
 
 const used = new Set();
-const pattern = /\bt\("([a-zA-Z0-9_.]+)"|"((?:board|cancel|staff|admin)\.[a-zA-Z.]+)"/g;
+const pattern = /\bt\("([a-zA-Z0-9_.]+)"|"((?:board|cancel|staff|admin|console)\.[a-zA-Z.]+)"/g;
 for (const f of files) {
   for (const m of readFileSync(f, "utf8").matchAll(pattern)) used.add(m[1] ?? m[2]);
 }
