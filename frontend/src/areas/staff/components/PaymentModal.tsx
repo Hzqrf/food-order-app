@@ -12,8 +12,10 @@ const QUICK_NOTES = [1000, 2000, 5000, 10000];
  * Take the money, then confirm. The idempotency key is made once when the sheet opens, so a retry
  * after a dropped connection can never create a second order.
  */
-export function PaymentModal({ opened, totalSen, busy, onClose, onConfirm }: {
+export function PaymentModal({ opened, totalSen, busy, initialMethod = "cash", onClose, onConfirm }: {
   opened: boolean;
+  /** The method already picked on the ticket; staff can still change it here. */
+  initialMethod?: PaymentMethod;
   totalSen: number;
   busy: boolean;
   onClose: () => void;
@@ -26,11 +28,11 @@ export function PaymentModal({ opened, totalSen, busy, onClose, onConfirm }: {
 
   useEffect(() => {
     if (opened) {
-      setMethod("cash");
+      setMethod(initialMethod);
       setTendered("");
       setKey(newIdempotencyKey());
     }
-  }, [opened]);
+  }, [opened, initialMethod]);
 
   const tenderedSen = tendered === "" ? null : ringgitToSen(tendered);
   const change = tenderedSen === null ? 0 : tenderedSen - totalSen;

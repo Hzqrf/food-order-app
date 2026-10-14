@@ -623,6 +623,27 @@
       "timeline": "Timeline",
       "notFound": "This order was not found, or is older than staff can see.",
       "moved": "#{{number}} is now {{status}}"
+    },
+    "take": {
+      "title": "Add Counter Order",
+      "subtitle": "Take an order at the counter and send it straight to the kitchen queue.",
+      "pick": "Pick items",
+      "search": "Search the menu",
+      "all": "All",
+      "noMatch": "No items match.",
+      "ticket": "Counter ticket",
+      "walkIn": "Walk-in",
+      "empty": "Nothing on the ticket yet. Pick items on the left.",
+      "paymentTaken": "Payment taken",
+      "send": "Send To Kitchen",
+      "backToQueue": "Back to queue"
+    },
+    "search": {
+      "title": "Search",
+      "start": "Type an order number, order ID, phone or name.",
+      "number": "Order",
+      "when": "Time",
+      "status": "Status"
     }
   }
 }

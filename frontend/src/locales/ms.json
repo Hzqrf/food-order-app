@@ -620,6 +620,27 @@
       "timeline": "Garis masa",
       "notFound": "Pesanan ini tidak dijumpai, atau lebih lama daripada yang boleh dilihat pekerja.",
       "moved": "#{{number}} kini {{status}}"
+    },
+    "take": {
+      "title": "Tambah Pesanan Kaunter",
+      "subtitle": "Ambil pesanan di kaunter dan hantar terus ke barisan dapur.",
+      "pick": "Pilih item",
+      "search": "Cari menu",
+      "all": "Semua",
+      "noMatch": "Tiada item yang sepadan.",
+      "ticket": "Tiket kaunter",
+      "walkIn": "Pelanggan datang",
+      "empty": "Tiket masih kosong. Pilih item di sebelah kiri.",
+      "paymentTaken": "Bayaran diterima",
+      "send": "Hantar Ke Dapur",
+      "backToQueue": "Kembali ke barisan"
+    },
+    "search": {
+      "title": "Cari",
+      "start": "Taip nombor pesanan, ID pesanan, telefon atau nama.",
+      "number": "Pesanan",
+      "when": "Masa",
+      "status": "Status"
     }
   }
 }
