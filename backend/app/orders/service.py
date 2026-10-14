@@ -17,7 +17,7 @@ from app.orders import state_machine as sm
 from app.payments import service as payments
 from app.phone import normalize_my_phone
 from app.security import limiter
-from app.shop.service import business_date, is_open
+from app.shop.service import business_date, takes_online_orders
 
 STAFF_SEARCH_DAYS = 7
 
@@ -224,7 +224,7 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
     if existing := find_by_idempotency_key(db, idempotency_key):
         return existing, _payment_url_for(db, existing), False
 
-    if not (is_open(branch) and branch.is_accepting_online_orders):
+    if not takes_online_orders(branch):
         raise AppError("shop_closed", "The shop is not taking online orders right now.", 409)
     limiter.hit("online-order", ip, limit=10, window_seconds=600)
     # The phone number is optional. When given it must be a real number, since the shop may call it.

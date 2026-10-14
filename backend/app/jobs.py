@@ -31,7 +31,10 @@ def close_day(db: Session) -> dict[str, int]:
 
 
 def payments_tick(db: Session) -> dict[str, int]:
+    from app.config import get_settings
     from app.payments.service import expire_unpaid, reconcile
+    if not get_settings().online_payments_enabled:
+        return {"reconciled": 0, "expired": 0}
     return {"reconciled": reconcile(db), "expired": expire_unpaid(db)}
 
 

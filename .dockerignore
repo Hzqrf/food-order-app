@@ -1,0 +1,8 @@
+# Build context for deploy/web.Dockerfile (the repository root): only the frontend source is needed.
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
+backend
+Documentation
+.git

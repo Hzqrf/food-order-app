@@ -16,13 +16,14 @@ earlier cash-on-collection, commission-based design and are superseded.
 - [Installation](#installation)
 - [Getting around: customer, staff and owner](#getting-around-customer-staff-and-owner)
 - [Payments](#payments)
+- [Running a real shop](#running-a-real-shop)
 - [Tests and checks](#tests-and-checks)
 - [Troubleshooting](#troubleshooting)
 - [Code layout](#code-layout)
 
 ## What works today
 
-Release 1, roadmap steps 1–5:
+Release 1, roadmap steps 1–5, and most of step 6:
 
 | Step | What works |
 | --- | --- |
@@ -31,6 +32,7 @@ Release 1, roadmap steps 1–5:
 | 3. Counter and kitchen | Server-side pricing, the order life cycle (New → Preparing → Ready → Collected, or Cancelled), counter orders paid by cash, QR or card, the staff board with a new-order chime and a 5-second undo, cancelling with a required refund decision, order search, sold-out page, the shop tablet with PIN unlock, the nightly day close |
 | 4. Online ordering | Cart kept on the customer's phone, options and notes per item, a one-screen checkout, prepaid orders through the payment gateway, a private tracking page that updates itself, pay again or cancel while unpaid, order again, recent orders with their live status, the pause switch and opening hours |
 | 5. Owner tools | **Today**: sales, orders, average order and online share, live order counts, top items, a 14-day sales chart, and a **Needs attention** panel (paid but cancelled, paid twice, ready for over 30 minutes, closed automatically, payment amount mismatch). **Orders**: every order with filters and search, refunds of a whole order or of one duplicate payment. **Reports**: sales by day, week or month and by hour, items sold including unsold ones, online vs counter, payment methods for checking the cash drawer, cancellations and refunds, CSV export for the accountant. **Audit log**: who changed prices, refunds, staff and settings |
+| 6. Hardening | A production setup for one server: Docker Compose with Caddy for HTTPS. Nightly backups of the database and photos, each one proved by restoring it into a scratch database, with an optional copy off the server and a restore command. A failed or late backup shows under **Needs attention**. The API refuses to start with unsafe settings. A counter-only mode for when there's no payment gateway yet. The staff screens install as an app on the shop tablet and keep its screen on |
 
 Recent changes:
 
@@ -44,10 +46,10 @@ Recent changes:
 - **"Your recent orders" shows each order's status** on the customer menu page: Awaiting payment,
   Received, Preparing, Ready, Done, Payment failed or Cancelled, updated while the order is in progress.
 
-Next: step 6, hardening and a pilot in the shop: nightly backups with a tested restore, an error
-tracker, the staff app installable on the tablet, a production server with HTTPS, then a week of
-counter-only use before switching on online ordering. After that, Release 2: shift roster, clock-in,
-timesheets and optional customer accounts.
+Next: the pilot. Rent the server and point a domain at it ([Running a real shop](#running-a-real-shop)),
+run a week counter-only (`PAYMENT_GATEWAY=none`), then add a real payment gateway and switch on
+online ordering. There is no error tracker for now: errors go to the JSON logs. After that, Release 2:
+shift roster, clock-in, timesheets and optional customer accounts.
 
 ## Test credentials
 
@@ -172,10 +174,11 @@ All backend settings live in `backend/.env`. The defaults suit local development
 | `ALLOWED_ORIGINS` | `localhost:5173` | Addresses allowed to send changes to the API |
 | `RUN_SCHEDULER` | `true` | Run the timed jobs inside the API process |
 | `PUBLIC_BASE_URL` | `http://localhost:5173` | Where customers reach the app; used for payment return links |
-| `PAYMENT_GATEWAY` | `fake` | Which payment gateway to use (see [Payments](#payments)) |
+| `PAYMENT_GATEWAY` | `fake` | Which payment gateway to use: `fake`, or `none` for counter-only (see [Payments](#payments)) |
 | `GATEWAY_WEBHOOK_SECRET` | a dev value | The secret the gateway signs its messages with |
 | `COOKIE_SECURE` | `false` | Set `true` when served over HTTPS |
 | `BEHIND_PROXY` | `false` | Set `true` behind Caddy, so rate limits see the real client address |
+| `BACKUP_STATUS_FILE` | unset | The backup's status file. When set, a failed or late backup shows under **Needs attention** |
 
 ## Getting around: customer, staff and owner
 
@@ -263,6 +266,10 @@ for orders later cancelled, so the cash row can be checked against the drawer.
 1. On the tablet, open `/login` and sign in as the owner.
 2. Go to **Settings → Shop tablet → Register this device as the shop tablet**.
 3. Click **Sign out**. The tablet now shows the locked board, and staff unlock it with their PINs.
+4. Install the staff app: tap the **download icon** at the top of the board (Chrome or Edge), or
+   **Add to Home Screen** in the browser menu (Safari, Samsung Internet). It opens full screen
+   straight onto the board, and the screen stays on while it is open. This needs HTTPS, so it works
+   on the real server and on `localhost`, but not on a LAN address such as `192.168.x.x`.
 
 Give each staff member a PIN first, on the **Staff** page.
 
@@ -293,6 +300,10 @@ FakePay signs its messages exactly as a real gateway would, so the real payment 
 end. It keeps its bills in memory, so restarting the API forgets them; any orders left unpaid then
 simply expire. It refuses to start when `ENV=production`.
 
+`PAYMENT_GATEWAY=none` runs the shop **counter-only**: customers can browse the menu and are asked
+to order at the counter, the online-orders switches are hidden, and the payment jobs do nothing. Use
+it on the real server until a merchant account exists.
+
 Adding a real gateway (Billplz, HitPay, ToyyibPay or another) means writing one class in
 [backend/app/payments/gateway.py](backend/app/payments/gateway.py) with three methods: `create_bill`,
 `verify_webhook` and `get_status`.
@@ -300,6 +311,100 @@ Adding a real gateway (Billplz, HitPay, ToyyibPay or another) means writing one 
 Refunds of online payments are done by the owner in the gateway's own dashboard, then recorded in
 Kaunter. Staff cannot hand back money that was paid online; when they cancel such an order it is
 marked "paid but cancelled" for the owner.
+
+## Running a real shop
+
+Everything runs on one Linux server (VPS) with Docker: MySQL, the API, the nightly backup, and
+Caddy, which serves the app and gets the HTTPS certificate by itself. The files are in
+[deploy/](deploy/).
+
+### What you need
+
+- A VPS with 1–2 GB of memory and Docker installed (any provider; a Singapore region is closest).
+- A domain or subdomain, such as `order.kedaiayam.my`, with a DNS **A record** pointing at the
+  server's IP address.
+- Ports 80 and 443 open to the internet. Nothing else needs to be open apart from SSH.
+
+### First install
+
+On the server:
+
+```sh
+git clone <repository-url> kaunter
+cd kaunter/deploy
+cp .env.example .env
+nano .env                        # DOMAIN, ACME_EMAIL, and two passwords from: openssl rand -hex 24
+docker compose up -d --build     # builds and starts everything; the first build takes a few minutes
+docker compose exec api python -m app.cli setup --shop "Kedai Ayam" --admin-email you@example.com --admin-name "Your Name"
+```
+
+The last command asks for the owner's password. Do not run `seed-demo` on a real shop. Then open
+`https://<your domain>/login`, sign in as the owner, turn on two-step sign-in in **Settings**, and set
+up the menu, the staff and the tablet.
+
+The API refuses to start if a setting is unsafe for a real shop (no HTTPS, the fake gateway, a weak
+webhook secret) and says which one in `docker compose logs api`.
+
+### Updating
+
+```sh
+cd kaunter && git pull
+cd deploy && docker compose up -d --build
+```
+
+Database changes are applied automatically when the API starts. Updates restart the API for a few
+seconds, so do them outside opening hours.
+
+### Backups
+
+Every night at 04:30 shop time (after the 4 am day close), the `backup` container:
+
+1. dumps the database and archives the photos into the `backups` volume,
+2. loads the dump into a scratch database and checks it has the same tables, the same schema
+   version, and every order and payment, so a backup that would not restore is caught that night,
+3. copies the backup off the server, if `RCLONE_REMOTE` is set,
+4. deletes backups older than 14 days (`BACKUP_KEEP_DAYS`).
+
+If any step fails, or no good backup has run for 30 hours, the owner sees it under **Needs
+attention** on **Today**.
+
+**Copy backups off the server.** A backup on the same server doesn't help if the server itself is
+lost. Make an [rclone](https://rclone.org/) remote with `rclone config` on any computer (Backblaze B2
+and Google Drive both work), copy its `rclone.conf` into `deploy/rclone/`, set for example
+`RCLONE_REMOTE=b2:kedai-backups/kaunter` in `deploy/.env`, and run `docker compose up -d`. Old copies
+stay on the remote until you set a lifecycle rule there.
+
+| Task | Command (in `deploy/`) |
+| --- | --- |
+| Back up now | `docker compose exec backup /scripts/backup.sh` |
+| See the last result | `docker compose exec backup cat /backups/status.json` |
+| List backups | `docker compose exec backup ls /backups/db` |
+| Check a backup restores | `docker compose exec backup /scripts/restore-check.sh /backups/db/<file>` |
+
+**Restoring** replaces all current data with a backup. Stop the API first, so no orders are taken
+mid-restore:
+
+```sh
+docker compose stop api
+docker compose run --rm --no-deps backup /scripts/restore.sh kaunter_2026-10-12_0430 --yes
+docker compose start api
+```
+
+`--no-deps` matters: without it, Compose starts the API again before the restore. The script also
+refuses to run while the API is connected. To restore onto a new server, do the first install, copy
+the backup files into the `backups` volume (or fetch them with rclone), then restore as above.
+
+### Logs
+
+There is no error tracker, so the logs are the record. Each container keeps about 200 MB of logs.
+
+```sh
+docker compose logs api --since 1h                 # requests and errors, one JSON line each
+docker compose logs api | grep '"level": "ERROR"'  # just the errors
+docker compose logs backup                         # each night's backup
+```
+
+Every error response carries an `X-Request-Id` header; search the logs for it to find what happened.
 
 ## Tests and checks
 
@@ -331,12 +436,14 @@ uv run alembic revision --autogenerate -m "describe the change"   # after editin
 | Online ordering is greyed out | The shop is outside its opening hours or paused. Change it in **Settings** (the same opening and closing time means open 24 hours) |
 | Staff see "This device is not registered" | Register the tablet from **Settings** while signed in as the owner, in that same browser |
 | An order sits on "Awaiting payment" after the API restarted | Expected with FakePay: its bills were forgotten. The order is cancelled after 15 minutes |
+| The staff app has no install button | Chrome offers it only over HTTPS (or `localhost`), and not once installed. Use **Add to Home Screen** in the browser menu instead |
 | Start again with an empty database | `docker compose down -v`, then repeat steps 2 and 3. This deletes all data |
 
 ## Code layout
 
 ```text
 docker-compose.yml   the development MySQL
+deploy/              production: docker-compose.yml, Caddyfile, .env.example, backup/ scripts
 backend/
   app/
     main.py config.py db.py models.py deps.py errors.py security.py audit.py jobs.py cli.py

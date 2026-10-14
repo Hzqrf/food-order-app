@@ -49,7 +49,9 @@
     "closedTitle": "Kami tutup sekarang",
     "closedBody": "Lihat-lihat menu dahulu. Pesanan dibuka apabila kedai dibuka.",
     "pausedTitle": "Pesanan dalam talian dihentikan seketika",
-    "pausedBody": "Kami sangat sibuk. Sila pesan di kaunter atau cuba sebentar lagi."
+    "pausedBody": "Kami sangat sibuk. Sila pesan di kaunter atau cuba sebentar lagi.",
+    "counterOnlyTitle": "Pesan di kaunter",
+    "counterOnlyBody": "Pesanan dalam talian belum tersedia. Lihat menu, kemudian pesan di kaunter."
   },
   "menu": {
     "empty": "Menu sedang disediakan.",
@@ -95,7 +97,8 @@
     "signOut": "Log keluar",
     "tapToUnlock": "Ketik untuk buka",
     "lockedBanner": "Dikunci. Paparan pesanan sahaja.",
-    "adminLink": "Tetapan pemilik"
+    "adminLink": "Tetapan pemilik",
+    "install": "Pasang aplikasi"
   },
   "board": {
     "columns": {
@@ -327,7 +330,8 @@
       "totpStep2": "2. Taip kod 6 digit yang dipaparkan:",
       "totpConfirm": "Hidupkan",
       "changePassword": "Tukar kata laluan",
-      "currentPassword": "Kata laluan semasa"
+      "currentPassword": "Kata laluan semasa",
+      "onlineOff": "Pesanan dalam talian kekal ditutup sehingga bayaran dalam talian disediakan."
     },
     "loadMore": "Muat lagi",
     "filters": {
@@ -366,6 +370,9 @@
       "ready_too_long": "Siap lebih 30 minit",
       "auto_closed": "Ditutup automatik semasa tutup hari: adakah ia diambil?",
       "amount_mismatch": "Jumlah bayaran tidak sepadan dengan bil",
+      "backup_failed": "Sandaran malam gagal",
+      "backup_late": "Tiada sandaran terkini: sandaran malam tidak berjalan",
+      "backupHint": "Periksa pelayan, atau tanya orang yang menguruskannya.",
       "open": "Buka"
     },
     "reports": {

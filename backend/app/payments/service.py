@@ -103,6 +103,8 @@ def apply_result(db: Session, payment_id: int, result: GatewayResult) -> None:
 
 
 def handle_webhook(db: Session, provider: str, headers: dict[str, str], body: bytes) -> None:
+    if not get_settings().online_payments_enabled:
+        raise not_found("Unknown payment provider.")
     gateway = get_gateway()
     if provider != gateway.provider:
         raise not_found("Unknown payment provider.")

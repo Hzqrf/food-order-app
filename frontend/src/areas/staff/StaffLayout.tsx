@@ -13,7 +13,7 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { useIdle } from "@mantine/hooks";
-import { IconClipboardList, IconLock, IconPlus, IconSearch, IconSettings, IconToolsKitchen2 } from "@tabler/icons-react";
+import { IconClipboardList, IconDownload, IconLock, IconPlus, IconSearch, IconSettings, IconToolsKitchen2 } from "@tabler/icons-react";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
@@ -22,6 +22,7 @@ import { useLogout, useSession } from "../../api/auth";
 import { useSetOnlineOrders, useShop } from "../../api/menu";
 import { notifyError } from "../../components/errors";
 import { LanguageSwitch } from "../../components/LanguageSwitch";
+import { useStaffApp, useWakeLock } from "../../hooks/useStaffApp";
 import { PinPad } from "./components/PinPad";
 
 const IDLE_LOCK_MS = 5 * 60_000;
@@ -53,10 +54,13 @@ export default function StaffLayout() {
   const location = useLocation();
   const [pinOpen, setPinOpen] = useState(false);
   const idle = useIdle(IDLE_LOCK_MS, { initialState: false });
+  const { install } = useStaffApp();
 
   const user = session?.user ?? null;
   const onTablet = !!session?.device_registered;
   const locked = !user;
+  // The shop tablet's screen stays on, so the board is always visible in the kitchen.
+  useWakeLock(onTablet);
 
   // A PIN unlock lasts until 5 minutes without a touch, then the tablet locks itself.
   useEffect(() => {
@@ -91,7 +95,7 @@ export default function StaffLayout() {
               <Text fw={700} truncate>
                 {session?.branch_name}
               </Text>
-              {shop && (
+              {shop?.online_payments_enabled && (
                 <Tooltip label={t("staff.onlineOrdersHint")}>
                   <Switch
                     size="sm"
@@ -107,6 +111,13 @@ export default function StaffLayout() {
               )}
             </Group>
             <Group gap="xs" wrap="nowrap">
+              {install && (
+                <Tooltip label={t("staff.install")}>
+                  <ActionIcon variant="subtle" onClick={install} aria-label={t("staff.install")}>
+                    <IconDownload size={20} />
+                  </ActionIcon>
+                </Tooltip>
+              )}
               <LanguageSwitch />
               {user?.role === "admin" && (
                 <ActionIcon component={Link} to="/admin" variant="subtle" aria-label={t("staff.adminLink")}>

@@ -49,7 +49,9 @@
     "closedTitle": "We're closed right now",
     "closedBody": "Have a look at the menu. Ordering opens when we do.",
     "pausedTitle": "Online orders are paused",
-    "pausedBody": "We're very busy. Please order at the counter or try again shortly."
+    "pausedBody": "We're very busy. Please order at the counter or try again shortly.",
+    "counterOnlyTitle": "Order at the counter",
+    "counterOnlyBody": "Online ordering isn't available yet. Have a look at the menu, then order at the counter."
   },
   "menu": {
     "empty": "The menu is being prepared.",
@@ -95,7 +97,8 @@
     "signOut": "Sign out",
     "tapToUnlock": "Tap to unlock",
     "lockedBanner": "Locked. Showing orders only.",
-    "adminLink": "Owner settings"
+    "adminLink": "Owner settings",
+    "install": "Install app"
   },
   "board": {
     "columns": {
@@ -329,7 +332,8 @@
       "totpStep2": "2. Type the 6-digit code it shows:",
       "totpConfirm": "Turn on",
       "changePassword": "Change password",
-      "currentPassword": "Current password"
+      "currentPassword": "Current password",
+      "onlineOff": "Online ordering stays off until online payments are set up."
     },
     "loadMore": "Load more",
     "filters": {
@@ -368,6 +372,9 @@
       "ready_too_long": "Ready for over 30 minutes",
       "auto_closed": "Closed automatically at day close: was it collected?",
       "amount_mismatch": "Payment amount did not match the bill",
+      "backup_failed": "The nightly backup failed",
+      "backup_late": "No recent backup: the nightly backup has not run",
+      "backupHint": "Check the server, or ask whoever runs it.",
       "open": "Open"
     },
     "reports": {

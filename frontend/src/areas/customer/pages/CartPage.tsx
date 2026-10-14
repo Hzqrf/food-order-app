@@ -37,7 +37,9 @@ export default function CartPage() {
         <Title order={3}>{t("customer.yourOrder")}</Title>
         <Button component={Link} to="/" variant="subtle" size="compact-sm">{t("customer.addMore")}</Button>
       </Group>
-      {shop && !shop.can_order_online && <Alert color="gray">{t("shop.pausedBody")}</Alert>}
+      {shop && !shop.can_order_online && (
+        <Alert color="gray">{shop.online_payments_enabled ? t("shop.pausedBody") : t("shop.counterOnlyBody")}</Alert>
+      )}
       {problems > 0 && <Alert color="red">{t("customer.someUnavailable")}</Alert>}
       <Paper withBorder p="sm">
         <CartLines items={items} quote={quote.data} />

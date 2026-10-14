@@ -5,6 +5,7 @@ longer counts (refunds are whole-order today). Payment reports instead show mone
 """
 import csv
 import io
+import json
 from collections import defaultdict
 from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
@@ -205,9 +206,34 @@ def report(db: Session, branch: Branch, r: schemas.Range) -> schemas.Report:
     )
 
 
+def backup_attention(now: datetime | None = None) -> schemas.Attention | None:
+    """The nightly backup failed, or has not run for too long. There is no error tracker, so this is
+    where a broken backup gets noticed. The backup container writes the status file after each run."""
+    settings = get_settings()
+    path = settings.backup_status_file
+    if path is None:
+        return None
+    try:
+        status = json.loads(path.read_text(encoding="utf-8"))
+        finished = datetime.fromisoformat(status["finished_at"])
+        if finished.tzinfo is None:
+            finished = finished.replace(tzinfo=UTC)
+    except FileNotFoundError:
+        return schemas.Attention(kind="backup_late", message="No backup has run yet.")
+    except (OSError, ValueError, KeyError, TypeError):
+        return schemas.Attention(kind="backup_failed", message="The backup status file cannot be read.")
+    if not status.get("ok"):
+        return schemas.Attention(kind="backup_failed", since=finished, message=status.get("message"))
+    if (now or utcnow()) - finished > timedelta(hours=settings.backup_max_age_hours):
+        return schemas.Attention(kind="backup_late", since=finished)
+    return None
+
+
 def needs_attention(db: Session, branch: Branch, today: date) -> list[schemas.Attention]:
     """What the owner has to act on. Empty on a good day."""
     found: list[schemas.Attention] = []
+    if backup := backup_attention():
+        found.append(backup)
     base = Order.branch_id == branch.id
 
     # Money that came in for an order that was then cancelled, not yet refunded.
@@ -257,6 +283,7 @@ def dashboard(db: Session, branch: Branch) -> schemas.Dashboard:
         live=schemas.LiveCounts(placed=live.get(sm.PLACED, 0), preparing=live.get(sm.PREPARING, 0),
                                 ready=live.get(sm.READY, 0), awaiting_payment=live.get(sm.PENDING_PAYMENT, 0)),
         accepting_online_orders=branch.is_accepting_online_orders,
+        online_payments_enabled=get_settings().online_payments_enabled,
         is_open=is_open(branch),
         top_items=[schemas.TopItem(menu_item_id=r.menu_item_id, name=r.name, quantity=r.quantity,
                                    sales_sen=r.sales_sen) for r in items(db, branch, today, today, limit=5)

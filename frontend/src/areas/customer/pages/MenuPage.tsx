@@ -35,8 +35,10 @@ export default function MenuPage() {
   return (
     <>
       {shop && !shop.can_order_online && (
-        <Alert mt="md" color="gray" title={shop.is_open ? t("shop.pausedTitle") : t("shop.closedTitle")}>
-          {shop.is_open ? t("shop.pausedBody") : t("shop.closedBody")}
+        <Alert mt="md" color="gray" title={!shop.online_payments_enabled ? t("shop.counterOnlyTitle")
+          : shop.is_open ? t("shop.pausedTitle") : t("shop.closedTitle")}>
+          {!shop.online_payments_enabled ? t("shop.counterOnlyBody")
+            : shop.is_open ? t("shop.pausedBody") : t("shop.closedBody")}
         </Alert>
       )}
 

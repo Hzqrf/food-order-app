@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.audit import audit
 from app.config import get_settings
+from app.errors import AppError
 from app.models import Branch, User, utcnow
 from app.shop import schemas
 
@@ -36,18 +37,24 @@ def is_open(branch: Branch, now: datetime | None = None) -> bool:
     return any(start > end and hhmm < end for start, end in branch.opening_hours.get(yesterday, []))
 
 
+def takes_online_orders(branch: Branch) -> bool:
+    """Online ordering needs a payment gateway, opening hours, and the switch on."""
+    return get_settings().online_payments_enabled and is_open(branch) and branch.is_accepting_online_orders
+
+
 def shop_out(branch: Branch) -> schemas.ShopOut:
-    open_now = is_open(branch)
     return schemas.ShopOut(
-        name=branch.name, is_open=open_now, is_accepting_online_orders=branch.is_accepting_online_orders,
-        can_order_online=open_now and branch.is_accepting_online_orders, prep_minutes=branch.prep_minutes,
-        opening_hours=branch.opening_hours, timezone=branch.timezone,
+        name=branch.name, is_open=is_open(branch), is_accepting_online_orders=branch.is_accepting_online_orders,
+        can_order_online=takes_online_orders(branch), online_payments_enabled=get_settings().online_payments_enabled,
+        prep_minutes=branch.prep_minutes, opening_hours=branch.opening_hours, timezone=branch.timezone,
     )
 
 
 def set_online_orders(db: Session, branch: Branch, user: User, accepting: bool, ip: str) -> None:
     if branch.is_accepting_online_orders == accepting:
         return
+    if accepting and not get_settings().online_payments_enabled:
+        raise AppError("online_payments_off", "Online payments are not set up yet, so online orders stay off.", 409)
     audit(db, user.id, "online_orders_resumed" if accepting else "online_orders_paused", "branch", branch.id,
           {"is_accepting_online_orders": branch.is_accepting_online_orders},
           {"is_accepting_online_orders": accepting}, ip)

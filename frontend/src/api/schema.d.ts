@@ -914,7 +914,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Health */
+        /**
+         * Health
+         * @description For the container health check: the API is up and can reach the database.
+         */
         get: operations["health_api_v1_health_get"];
         put?: never;
         post?: never;
@@ -1009,12 +1012,14 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "paid_but_cancelled" | "duplicate_payment" | "ready_too_long" | "auto_closed" | "amount_mismatch";
-            order: components["schemas"]["AttentionOrder"];
+            kind: "paid_but_cancelled" | "duplicate_payment" | "ready_too_long" | "auto_closed" | "amount_mismatch" | "backup_failed" | "backup_late";
+            order?: components["schemas"]["AttentionOrder"] | null;
             /** Amount Sen */
             amount_sen?: number | null;
             /** Since */
             since?: string | null;
+            /** Message */
+            message?: string | null;
         };
         /** AttentionOrder */
         AttentionOrder: {
@@ -1247,6 +1252,8 @@ export interface components {
             live: components["schemas"]["LiveCounts"];
             /** Accepting Online Orders */
             accepting_online_orders: boolean;
+            /** Online Payments Enabled */
+            online_payments_enabled: boolean;
             /** Is Open */
             is_open: boolean;
             /** Top Items */
@@ -1894,6 +1901,8 @@ export interface components {
             is_accepting_online_orders: boolean;
             /** Can Order Online */
             can_order_online: boolean;
+            /** Online Payments Enabled */
+            online_payments_enabled: boolean;
             /** Prep Minutes */
             prep_minutes: number;
             /** Opening Hours */

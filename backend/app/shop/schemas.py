@@ -12,6 +12,8 @@ class ShopOut(BaseModel):
     is_open: bool
     is_accepting_online_orders: bool
     can_order_online: bool
+    # False while the shop runs counter-only (no payment gateway yet): hide the online switch.
+    online_payments_enabled: bool
     prep_minutes: int
     opening_hours: dict[str, list[list[str]]]
     timezone: str

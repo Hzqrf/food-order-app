@@ -1,0 +1,4 @@
+# Real secrets live only on the server.
+.env
+rclone/*
+!rclone/README.md

@@ -53,9 +53,12 @@ export default function SettingsPage() {
         <Group justify="space-between">
           <div>
             <Text fw={600}>{t("admin.settings.onlineOrders")}</Text>
-            <Text size="sm" c="dimmed">{t("admin.settings.onlineOrdersHint")}</Text>
+            <Text size="sm" c="dimmed">
+              {shop.online_payments_enabled ? t("admin.settings.onlineOrdersHint") : t("admin.settings.onlineOff")}
+            </Text>
           </div>
-          <Switch size="lg" color="green" checked={shop.is_accepting_online_orders}
+          <Switch size="lg" color="green" disabled={!shop.online_payments_enabled}
+            checked={shop.online_payments_enabled && shop.is_accepting_online_orders}
             onChange={(e) => setOnline.mutate(e.currentTarget.checked, {
               onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
             })} />

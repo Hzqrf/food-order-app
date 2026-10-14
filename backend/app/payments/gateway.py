@@ -114,4 +114,6 @@ def get_gateway() -> Gateway:
         if settings.is_production:
             raise RuntimeError("The fake payment gateway cannot run in production.")
         return FakeGateway(settings.gateway_webhook_secret)
+    if settings.payment_gateway == "none":
+        raise RuntimeError("Online payments are switched off (PAYMENT_GATEWAY=none).")
     raise RuntimeError(f"Unknown payment gateway: {settings.payment_gateway}")

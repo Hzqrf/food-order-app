@@ -1,0 +1,17 @@
+{
+  "id": "/staff",
+  "name": "Kaunter Staff",
+  "short_name": "Kaunter",
+  "description": "Order board, counter orders and sold-out switches for the shop tablet.",
+  "start_url": "/staff",
+  "scope": "/staff",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#c2410c",
+  "icons": [
+    { "src": "/icons/staff-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/staff-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/staff-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

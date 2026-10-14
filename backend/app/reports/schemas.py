@@ -62,10 +62,13 @@ class AttentionOrder(BaseModel):
 
 
 class Attention(BaseModel):
-    kind: Literal["paid_but_cancelled", "duplicate_payment", "ready_too_long", "auto_closed", "amount_mismatch"]
-    order: AttentionOrder
+    kind: Literal["paid_but_cancelled", "duplicate_payment", "ready_too_long", "auto_closed", "amount_mismatch",
+                  "backup_failed", "backup_late"]
+    # None for shop-wide problems such as a backup.
+    order: AttentionOrder | None = None
     amount_sen: int | None = None
     since: datetime | None = None
+    message: str | None = None
 
 
 class Dashboard(BaseModel):
@@ -73,6 +76,7 @@ class Dashboard(BaseModel):
     today: Totals
     live: LiveCounts
     accepting_online_orders: bool
+    online_payments_enabled: bool
     is_open: bool
     top_items: list[TopItem]
     last_14_days: list[DayPoint]

@@ -1,5 +1,5 @@
 import { Badge, Group, Paper, SimpleGrid, Stack, Switch, Table, Text, ThemeIcon, Title, UnstyledButton } from "@mantine/core";
-import { IconAlertTriangle, IconCircleCheck, IconClockHour4, IconCopy, IconReceiptRefund } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCircleCheck, IconClockHour4, IconCopy, IconDatabaseExclamation, IconReceiptRefund } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +20,8 @@ const ATTENTION_ICON = {
   ready_too_long: IconClockHour4,
   auto_closed: IconAlertTriangle,
   amount_mismatch: IconAlertTriangle,
+  backup_failed: IconDatabaseExclamation,
+  backup_late: IconDatabaseExclamation,
 } as const;
 
 /** How are we doing, what is happening now, and what needs me: in that order. */
@@ -67,12 +69,16 @@ export default function TodayPage() {
               </div>
             )}
           </Group>
-          <Switch size="md" color="green" checked={data.accepting_online_orders}
-            label={data.accepting_online_orders ? t("staff.onlineOn") : t("staff.onlinePaused")}
-            description={data.is_open ? undefined : t("admin.today.closedNow")}
-            onChange={(e) => setOnline.mutate(e.currentTarget.checked, {
-              onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
-            })} />
+          {data.online_payments_enabled ? (
+            <Switch size="md" color="green" checked={data.accepting_online_orders}
+              label={data.accepting_online_orders ? t("staff.onlineOn") : t("staff.onlinePaused")}
+              description={data.is_open ? undefined : t("admin.today.closedNow")}
+              onChange={(e) => setOnline.mutate(e.currentTarget.checked, {
+                onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
+              })} />
+          ) : (
+            <Text size="sm" c="dimmed">{t("admin.settings.onlineOff")}</Text>
+          )}
         </Paper>
 
         <Paper withBorder p="md">
@@ -88,7 +94,8 @@ export default function TodayPage() {
           ) : (
             <Stack gap={6}>
               {data.needs_attention.map((a, i) => (
-                <AttentionRow key={`${a.kind}-${a.order.id}-${i}`} item={a} onOpen={() => setOpenId(a.order.id)} />
+                <AttentionRow key={`${a.kind}-${a.order?.id}-${i}`} item={a}
+                  onOpen={a.order ? () => setOpenId(a.order!.id) : undefined} />
               ))}
             </Stack>
           )}
@@ -126,26 +133,29 @@ export default function TodayPage() {
   );
 }
 
-function AttentionRow({ item, onOpen }: { item: Attention; onOpen: () => void }) {
+function AttentionRow({ item, onOpen }: { item: Attention; onOpen?: () => void }) {
   const { t } = useTranslation();
   const Icon = ATTENTION_ICON[item.kind];
-  return (
-    <UnstyledButton onClick={onOpen}>
-      <Paper p="xs" radius="md" bg="red.0">
-        <Group wrap="nowrap" gap="sm">
-          <Icon size={20} color="var(--mantine-color-red-7)" />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <Text size="sm" fw={600}>{t(`admin.attention.${item.kind}`, {
-              amount: item.amount_sen != null ? formatSen(item.amount_sen) : "",
-            })}</Text>
-            <Text size="xs" c="dimmed">
-              #{item.order.order_number} · {item.order.order_code}
-              {item.since ? ` · ${formatDateTime(item.since)}` : ""}
-            </Text>
-          </div>
-          <Text size="xs" c="red.8" fw={600}>{t("admin.attention.open")}</Text>
-        </Group>
-      </Paper>
-    </UnstyledButton>
+  // Shop-wide problems (a backup) have no order to open: say what happened and what to do.
+  const detail = item.order
+    ? `#${item.order.order_number} · ${item.order.order_code}`
+    : [item.message, t("admin.attention.backupHint")].filter(Boolean).join(" ");
+  const row = (
+    <Paper p="xs" radius="md" bg="red.0">
+      <Group wrap="nowrap" gap="sm">
+        <Icon size={20} color="var(--mantine-color-red-7)" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Text size="sm" fw={600}>{t(`admin.attention.${item.kind}`, {
+            amount: item.amount_sen != null ? formatSen(item.amount_sen) : "",
+          })}</Text>
+          <Text size="xs" c="dimmed">
+            {detail}
+            {item.since ? ` · ${formatDateTime(item.since)}` : ""}
+          </Text>
+        </div>
+        {onOpen && <Text size="xs" c="red.8" fw={600}>{t("admin.attention.open")}</Text>}
+      </Group>
+    </Paper>
   );
+  return onOpen ? <UnstyledButton onClick={onOpen}>{row}</UnstyledButton> : row;
 }

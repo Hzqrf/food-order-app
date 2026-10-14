@@ -8,9 +8,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from app.auth.router import router as auth_router
 from app.config import get_settings
+from app.db import engine
 from app.errors import install_error_handlers
 from app.menu.admin_router import router as menu_admin_router
 from app.menu.router import router as menu_router
@@ -49,6 +51,8 @@ def _configure_logging() -> None:
 def create_app() -> FastAPI:
     settings = get_settings()
     _configure_logging()
+    if settings.is_production and (problems := settings.production_problems()):
+        raise RuntimeError("Unsafe production settings: " + "; ".join(problems))
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -85,7 +89,7 @@ def create_app() -> FastAPI:
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         if request.url.path.startswith(API_PREFIX):
             response.headers.setdefault("Cache-Control", "no-store")
-        if request.headers.get("x-poll") != "1":
+        if request.headers.get("x-poll") != "1" and request.url.path != f"{API_PREFIX}/health":
             access_log.info("request", extra={
                 "request_id": request_id, "method": request.method, "path": request.url.path,
                 "status": response.status_code, "ms": round((time.perf_counter() - start) * 1000, 1)})
@@ -100,6 +104,13 @@ def create_app() -> FastAPI:
 
     @app.get(f"{API_PREFIX}/health", tags=["health"])
     def health():
+        """For the container health check: the API is up and can reach the database."""
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+        except Exception:
+            logging.getLogger("app").exception("health check: database unreachable")
+            return JSONResponse({"ok": False}, 503)
         return {"ok": True}
 
     settings.media_dir.mkdir(parents=True, exist_ok=True)
