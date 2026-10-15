@@ -1,10 +1,10 @@
-import { Button, Center, Loader, Stack, Text, ThemeIcon, Title } from "@mantine/core";
+import { Button, Center, Group, Loader, Modal, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconDeviceTablet } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Navigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 
-import { useSession, useUnregisterDevice } from "../../../api/auth";
+import { useLogout, useSession, useUnregisterDevice } from "../../../api/auth";
 import { notifyError } from "../../../components/errors";
 import { SectionCard } from "./SectionCard";
 
@@ -13,6 +13,17 @@ export function OwnerRoute({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { data: session, isPending } = useSession();
   const unregister = useUnregisterDevice();
+  const logout = useLogout();
+  const navigate = useNavigate();
+  const [confirming, setConfirming] = useState(false);
+
+  // The owner may be here by PIN, which only counts on the shop tablet. Once it is no longer the
+  // tablet, end the session too, so owner tools never open on the shared device.
+  const unregisterAndSignOut = () =>
+    unregister.mutate(undefined, {
+      onSuccess: () => logout.mutate(undefined, { onSettled: () => navigate("/login", { replace: true }) }),
+      onError: (e) => notifyError(t, e),
+    });
 
   if (isPending) {
     return (
@@ -40,12 +51,21 @@ export function OwnerRoute({ children }: { children: ReactNode }) {
               {t("console.ownerOnTablet.body")}
             </Text>
             {/* Unregistering only works from the tablet itself, so it lives here rather than in Settings. */}
-            <Button variant="light" color="gray" mt="xs" loading={unregister.isPending}
-              onClick={() => unregister.mutate(undefined, { onError: (e) => notifyError(t, e) })}>
+            <Button variant="light" color="gray" mt="xs" onClick={() => setConfirming(true)}>
               {t("console.ownerOnTablet.unregister")}
             </Button>
           </Stack>
         </SectionCard>
+        <Modal opened={confirming} onClose={() => setConfirming(false)} centered radius={16}
+          title={t("console.ownerOnTablet.confirmTitle")}>
+          <Text size="sm" c="dimmed">{t("console.ownerOnTablet.confirmBody")}</Text>
+          <Group justify="flex-end" mt="lg" gap="xs">
+            <Button variant="default" onClick={() => setConfirming(false)}>{t("common.cancel")}</Button>
+            <Button color="red" loading={unregister.isPending || logout.isPending} onClick={unregisterAndSignOut}>
+              {t("console.ownerOnTablet.confirm")}
+            </Button>
+          </Group>
+        </Modal>
       </Center>
     );
   }

@@ -31,6 +31,11 @@ def _sales(branch: Branch, start: date, end: date):
             Order.status.in_(SALES_STATUSES), Order.payment_status == "paid")
 
 
+def placed_by(until: datetime | None) -> tuple:
+    """Only orders placed by `until`, so "same day last week" stops at the same time of day as now."""
+    return () if until is None else (func.coalesce(Order.placed_at, Order.created_at) <= until,)
+
+
 def day_bounds(branch: Branch, start: date, end: date) -> tuple[datetime, datetime]:
     """UTC instants covering business dates start..end. A business day starts at the day-close hour."""
     tz = ZoneInfo(branch.timezone)
@@ -49,26 +54,26 @@ def _attention_order(o: Order) -> schemas.AttentionOrder:
 # --- Building blocks -----------------------------------------------------------------------------
 
 
-def _money(db: Session, branch: Branch, start: date, end: date):
+def _money(db: Session, branch: Branch, start: date, end: date, until: datetime | None = None):
     """(business_date, method, kind, amount) for succeeded payments on non-cancelled orders of these dates."""
     return db.execute(
         select(Order.business_date, Payment.method, Payment.kind, func.coalesce(func.sum(Payment.amount_sen), 0))
         .join(Order, Order.id == Payment.order_id)
         .where(Order.branch_id == branch.id, Order.business_date >= start, Order.business_date <= end,
-               Order.status.in_(SALES_STATUSES), Payment.status == "succeeded")
+               Order.status.in_(SALES_STATUSES), Payment.status == "succeeded", *placed_by(until))
         .group_by(Order.business_date, Payment.method, Payment.kind)
     ).all()
 
 
-def totals(db: Session, branch: Branch, start: date, end: date) -> schemas.Totals:
+def totals(db: Session, branch: Branch, start: date, end: date, until: datetime | None = None) -> schemas.Totals:
     count, sales, online = db.execute(
         select(func.count(Order.id), func.coalesce(func.sum(Order.total_sen), 0),
                func.coalesce(func.sum(case((Order.channel == "online", 1), else_=0)), 0))
-        .where(*_sales(branch, start, end))
+        .where(*_sales(branch, start, end), *placed_by(until))
     ).one()
     count, sales, online = int(count), int(sales), int(online)
     gross = refunds = 0
-    for _, _, kind, amount in _money(db, branch, start, end):
+    for _, _, kind, amount in _money(db, branch, start, end, until):
         if kind == "charge":
             gross += int(amount)
         else:
@@ -336,9 +341,11 @@ def dashboard(db: Session, branch: Branch) -> schemas.Dashboard:
         last_14_days=[schemas.DayPoint(day=d, sales_sen=by_day.get(d, (0, 0))[0], orders=by_day.get(d, (0, 0))[1])
                       for d in (today - timedelta(days=13 - i) for i in range(14))],
         needs_attention=needs_attention(db, branch, today),
-        same_day_last_week=totals(db, branch, last_week, last_week),
+        same_day_last_week=totals(db, branch, last_week, last_week, until=utcnow() - timedelta(days=7)),
+        # Abandoned online checkouts were never orders the shop took, so they are not "cancelled" here.
         cancelled_today=db.scalar(select(func.count(Order.id)).where(
-            Order.branch_id == branch.id, Order.business_date == today, Order.status == sm.CANCELLED)) or 0,
+            Order.branch_id == branch.id, Order.business_date == today, Order.status == sm.CANCELLED,
+            func.coalesce(Order.cancel_reason, "").not_in(UNPAID_REASONS))) or 0,
         hours_today=hours(db, branch, today, today),
         hours_same_day_last_week=hours(db, branch, last_week, last_week),
     )

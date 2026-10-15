@@ -44,8 +44,10 @@ def test_metrics_with_no_orders(staff_client, branch):
 def test_metrics_last_week_comparison(staff_client, menu, db, branch):
     now = utcnow()
     o = counter_order(staff_client, [milo(menu)]).json()["id"]
+    week_ago = now - timedelta(days=7)
     set_order(db, o, status="completed", business_date=business_date(branch) - timedelta(days=7),
-              preparing_at=now - timedelta(minutes=60), ready_at=now - timedelta(minutes=30))
+              placed_at=week_ago - timedelta(minutes=70),
+              preparing_at=week_ago - timedelta(minutes=60), ready_at=week_ago - timedelta(minutes=30))
     m = staff_client.get(f"{API}/staff/orders/metrics").json()
     assert m["orders_same_day_last_week"] == 1 and m["avg_prep_minutes_last_week"] == 30.0
     assert m["orders_today"] == 0 and m["open_orders"] == 0
@@ -73,3 +75,12 @@ def test_locked_tablet_can_read_metrics(client, admin, branch):
 
 def test_metrics_need_a_session_or_tablet(client, branch):
     assert client.get(f"{API}/staff/orders/metrics").status_code == 401
+
+
+def test_last_week_order_count_stops_at_the_same_time_of_day(staff_client, menu, db, branch):
+    now = utcnow()
+    week_ago = business_date(branch) - timedelta(days=7)
+    earlier, later = (counter_order(staff_client, [milo(menu)]).json()["id"] for _ in range(2))
+    set_order(db, earlier, business_date=week_ago, placed_at=now - timedelta(days=7, hours=1))
+    set_order(db, later, business_date=week_ago, placed_at=now - timedelta(days=7) + timedelta(hours=1))
+    assert queue_metrics(db, branch, now=now).orders_same_day_last_week == 1

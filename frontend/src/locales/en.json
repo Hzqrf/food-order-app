@@ -550,7 +550,10 @@
     "ownerOnTablet": {
       "title": "Use your own device for owner tools",
       "body": "Sales, reports, staff and settings never open on the shared shop tablet. Sign in on your phone or computer.",
-      "unregister": "Unregister this tablet"
+      "unregister": "Unregister this tablet",
+      "confirmTitle": "Unregister this tablet?",
+      "confirmBody": "It stops being the shop tablet: staff can no longer unlock it with a PIN, and you are signed out here. To use it as the shop tablet again, sign in with the owner password and register it in Settings.",
+      "confirm": "Unregister"
     },
     "availability": {
       "available": "Available",

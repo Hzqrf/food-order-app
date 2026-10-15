@@ -547,7 +547,10 @@
     "ownerOnTablet": {
       "title": "Guna peranti sendiri untuk alat pemilik",
       "body": "Jualan, laporan, pekerja dan tetapan tidak dibuka pada tablet kedai yang dikongsi. Log masuk pada telefon atau komputer anda.",
-      "unregister": "Nyahdaftar tablet ini"
+      "unregister": "Nyahdaftar tablet ini",
+      "confirmTitle": "Nyahdaftar tablet ini?",
+      "confirmBody": "Ia bukan lagi tablet kedai: pekerja tidak boleh membukanya dengan PIN, dan anda dilog keluar di sini. Untuk menggunakannya semula sebagai tablet kedai, log masuk dengan kata laluan pemilik dan daftarkannya dalam Tetapan.",
+      "confirm": "Nyahdaftar"
     },
     "availability": {
       "available": "Ada",

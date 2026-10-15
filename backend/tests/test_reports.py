@@ -244,7 +244,7 @@ def test_dashboard_last_week_and_cancelled(client, staff, admin, menu, branch, d
     gone = counter_order(client, [milo(menu)]).json()
     client.post(f"{API}/staff/orders/{gone['id']}/cancel", json={"version": 1, "reason": "Mistake", "refund_method": "cash"})
     db.execute(update(Order).where(Order.id == last_week["id"]).values(
-        business_date=business_date(branch) - timedelta(days=7)))
+        business_date=business_date(branch) - timedelta(days=7), placed_at=utcnow() - timedelta(days=7, minutes=5)))
     db.commit()
 
     login(client, admin.username)
@@ -270,3 +270,33 @@ def test_units_sold_last_7_days(client, staff, admin, menu, branch, db):
     r = client.get(f"{API}/admin/menu/units-sold", params={"days": 7})
     assert r.json() == [{"menu_item_id": menu["tender"], "units": 2}]
     assert client.get(f"{API}/admin/menu/units-sold", params={"days": 0}).status_code == 422
+
+
+def test_cancelled_today_ignores_abandoned_online_checkouts(client, staff, admin, menu, branch, db):
+    abandoned = online(client, [milo(menu)], 450)  # never paid, then expired: never an order the shop took
+    db.execute(update(Order).where(Order.order_code == abandoned["order_code"]).values(
+        status="cancelled", cancel_reason="payment_expired"))
+    db.commit()
+    login(client, staff.username)
+    gone = counter_order(client, [milo(menu)]).json()
+    client.post(f"{API}/staff/orders/{gone['id']}/cancel", json={"version": 1, "reason": "Mistake", "refund_method": "cash"})
+
+    login(client, admin.username)
+    assert client.get(f"{API}/admin/dashboard").json()["cancelled_today"] == 1
+
+
+def test_last_week_comparison_stops_at_the_same_time_of_day(client, staff, admin, menu, branch, db):
+    login(client, staff.username)
+    earlier = counter_order(client, [tender(menu)]).json()  # last week, before this time of day: compared
+    later = counter_order(client, [milo(menu)]).json()  # last week, after this time of day: not yet comparable
+    week_ago = business_date(branch) - timedelta(days=7)
+    now = utcnow()
+    db.execute(update(Order).where(Order.id == earlier["id"]).values(
+        business_date=week_ago, placed_at=now - timedelta(days=7, hours=1)))
+    db.execute(update(Order).where(Order.id == later["id"]).values(
+        business_date=week_ago, placed_at=now - timedelta(days=7) + timedelta(hours=1)))
+    db.commit()
+
+    login(client, admin.username)
+    before = client.get(f"{API}/admin/dashboard").json()["same_day_last_week"]
+    assert (before["orders"], before["sales_sen"], before["gross_sen"]) == (1, 1000, 1000)
