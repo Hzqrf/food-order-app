@@ -169,8 +169,9 @@ function SecuritySection() {
             <Code block>{secret.secret}</Code>
             <Text size="sm">{t("admin.settings.totpStep2")}</Text>
             <Group>
-              <TextInput inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.currentTarget.value)}
-                aria-label={t("login.totp")} />
+              {/* one-time-code stops the browser's password manager filling a saved username in here. */}
+              <TextInput inputMode="numeric" autoComplete="one-time-code" name="totp" maxLength={6} value={code}
+                onChange={(e) => setCode(e.currentTarget.value.replace(/\D/g, ""))} aria-label={t("login.totp")} />
               <Button disabled={code.length !== 6} loading={enable.isPending}
                 onClick={() => enable.mutate(code, {
                   onSuccess: () => { setSecret(null); notifications.show({ color: "green", message: t("admin.settings.totpOn") }); },
@@ -194,9 +195,10 @@ function SecuritySection() {
 
         <Text fw={500} size="sm" mt="sm">{t("admin.settings.changePassword")}</Text>
         <Group align="flex-end">
-          <PasswordInput label={t("admin.settings.currentPassword")} value={current}
+          <PasswordInput label={t("admin.settings.currentPassword")} autoComplete="current-password" value={current}
             onChange={(e) => setCurrent(e.currentTarget.value)} />
-          <PasswordInput label={t("admin.staff.newPassword")} value={next} onChange={(e) => setNext(e.currentTarget.value)} />
+          <PasswordInput label={t("admin.staff.newPassword")} autoComplete="new-password" value={next}
+            onChange={(e) => setNext(e.currentTarget.value)} />
           <Button variant="default" disabled={!current || next.length < 10} loading={change.isPending}
             onClick={() => change.mutate({ current_password: current, new_password: next }, {
               onSuccess: () => { setCurrent(""); setNext(""); notifications.show({ color: "green", message: t("admin.saved") }); },

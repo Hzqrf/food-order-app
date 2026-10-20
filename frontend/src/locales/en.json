@@ -700,7 +700,10 @@
       "active": "Active",
       "passwordOnly": "Password only",
       "editTitle": "Edit {{name}}",
-      "rolesHint": "Owners see sales, reports, staff and settings. Staff see the queue, orders, search and menu."
+      "rolesHint": "Owners see sales, reports, staff and settings. Staff see the queue, orders, search and menu.",
+      "username": "Username",
+      "usernameHint": "What they type to sign in. Lowercase letters, numbers, dots or dashes, e.g. jonsnow.",
+      "usernameInvalid": "Letters, numbers, dots or dashes only (3 or more), no @ or spaces. Put an email address in the Email box."
     },
     "settings": {
       "subtitle": "Opening hours, prep time, pausing online orders, this tablet and your sign-in.",

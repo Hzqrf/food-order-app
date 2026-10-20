@@ -166,8 +166,12 @@ function CreateStaffModal({ opened, onClose }: { opened: boolean; onClose: () =>
   const create = useCreateStaff();
   const [f, setF] = useState(EMPTY);
   const set = (k: keyof typeof EMPTY) => (e: ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.currentTarget.value });
-  const valid = f.full_name.trim() && /^[a-z0-9._-]{3,50}$/.test(f.username) && f.password.length >= 10
-    && (!f.pin || /^\d{4,6}$/.test(f.pin)) && (f.role === "staff" || f.email.trim());
+  // Say what is wrong next to the field, instead of only greying out Save.
+  const usernameOk = /^[a-z0-9._-]{3,50}$/.test(f.username);
+  const passwordOk = f.password.length >= 10;
+  const pinOk = !f.pin || /^\d{4,6}$/.test(f.pin);
+  const emailOk = f.role === "staff" || !!f.email.trim();
+  const valid = !!f.full_name.trim() && usernameOk && passwordOk && pinOk && emailOk;
 
   const close = () => { setF(EMPTY); onClose(); };
   const save = () => create.mutate({
@@ -184,17 +188,20 @@ function CreateStaffModal({ opened, onClose }: { opened: boolean; onClose: () =>
         <SegmentedControl value={f.role} onChange={(v) => setF({ ...f, role: v as Role })}
           data={[{ value: "staff", label: t("role.staff") }, { value: "admin", label: t("role.admin") }]} />
         <TextInput label={t("admin.staff.name")} required value={f.full_name} onChange={set("full_name")} maxLength={100} />
-        <TextInput label={t("login.username")} description={t("admin.staff.usernameHint")} required value={f.username}
-          onChange={(e) => setF({ ...f, username: e.currentTarget.value.toLowerCase() })} maxLength={50} />
-        {f.role === "admin" && (
-          <TextInput label={t("admin.staff.email")} type="email" required value={f.email} onChange={set("email")} />
-        )}
+        <TextInput label={t("console.team.username")} description={t("console.team.usernameHint")} required autoComplete="off"
+          value={f.username} maxLength={50} placeholder="jonsnow"
+          error={f.username && !usernameOk ? t("console.team.usernameInvalid") : undefined}
+          onChange={(e) => setF({ ...f, username: e.currentTarget.value.toLowerCase() })} />
+        <TextInput label={t("admin.staff.email")} type="email" required={f.role === "admin"} autoComplete="off"
+          description={f.role === "admin" ? undefined : t("common.optional")} value={f.email} onChange={set("email")} />
         <TextInput label={t("admin.staff.phone")} value={f.phone} onChange={set("phone")} maxLength={20} />
         <TextInput label={t("admin.staff.position")} value={f.position} onChange={set("position")} maxLength={50} />
-        <PasswordInput label={t("login.password")} description={t("admin.staff.passwordHint")} required
-          value={f.password} onChange={set("password")} />
-        <TextInput label={t("admin.staff.pin")} description={t("admin.staff.pinHint")} inputMode="numeric"
-          value={f.pin} onChange={set("pin")} maxLength={6} />
+        <PasswordInput label={t("login.password")} description={t("admin.staff.passwordHint")} required autoComplete="new-password"
+          value={f.password} onChange={set("password")}
+          error={f.password && !passwordOk ? t("admin.staff.passwordHint") : undefined} />
+        <TextInput label={t("admin.staff.pin")} description={t("admin.staff.pinHint")} inputMode="numeric" autoComplete="off"
+          value={f.pin} maxLength={6} error={!pinOk ? t("admin.staff.pinHint") : undefined}
+          onChange={(e) => setF({ ...f, pin: e.currentTarget.value.replace(/\D/g, "") })} />
         <Text fz={13} c={tokens.muted}>{t("console.team.rolesHint")}</Text>
         <Group justify="flex-end">
           <Button variant="default" onClick={close}>{t("common.cancel")}</Button>
@@ -277,7 +284,7 @@ function PasswordModal({ staff, onClose }: { staff: StaffOut | null; onClose: ()
     <Modal opened={staff !== null} onClose={close} centered
       title={t("admin.staff.resetPasswordFor", { name: staff?.full_name })}>
       <Stack>
-        <PasswordInput label={t("admin.staff.newPassword")} description={t("admin.staff.passwordHint")}
+        <PasswordInput label={t("admin.staff.newPassword")} description={t("admin.staff.passwordHint")} autoComplete="new-password"
           value={password} onChange={(e) => setPassword(e.currentTarget.value)} />
         <Text size="xs" c="dimmed">{t("admin.staff.resetSignsOut")}</Text>
         <Button disabled={password.length < 10} loading={reset.isPending}

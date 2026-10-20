@@ -697,7 +697,10 @@
       "active": "Aktif",
       "passwordOnly": "Kata laluan sahaja",
       "editTitle": "Ubah {{name}}",
-      "rolesHint": "Pemilik melihat jualan, laporan, pekerja dan tetapan. Pekerja melihat barisan, pesanan, carian dan menu."
+      "rolesHint": "Pemilik melihat jualan, laporan, pekerja dan tetapan. Pekerja melihat barisan, pesanan, carian dan menu.",
+      "username": "Nama pengguna",
+      "usernameHint": "Apa yang ditaip untuk log masuk. Huruf kecil, nombor, titik atau sengkang, cth. jonsnow.",
+      "usernameInvalid": "Huruf, nombor, titik atau sengkang sahaja (3 atau lebih), tanpa @ atau jarak. Letak alamat e-mel dalam kotak E-mel."
     },
     "settings": {
       "subtitle": "Waktu buka, masa penyediaan, jeda pesanan dalam talian, tablet ini dan log masuk anda.",
