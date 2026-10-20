@@ -17,6 +17,7 @@ import { PageHeader } from "../console/PageHeader";
 import { SectionCard, tileStyle } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
 import { toast } from "../console/toast";
+import type { QueueState } from "./BoardPage";
 import { tokens } from "../console/tokens";
 
 /** Every forward move staff may make, including skips, so a drink can go straight to Collected. */
@@ -71,6 +72,12 @@ export default function OrderPage() {
   const canRefund = isAdmin && order.payment_status === "paid" && order.payments.some((p) => p.refundable_sen > 0);
   const move = (to: string) => {
     if (!ensureUnlocked()) return;
+    // Handing over from a ready order happens on the queue, which gives 5 seconds to undo it.
+    if (to === "completed" && order.status === "ready") {
+      const state: QueueState = { handOver: order.id };
+      navigate("/staff", { state });
+      return;
+    }
     transition.mutate({ id: order.id, to, version: order.version }, {
       onSuccess: () => toast(t("console.order.moved", { number: order.order_number, status: t(`status.${to}`) })),
       onError: (e) => notifyError(t, e),
@@ -154,7 +161,10 @@ export default function OrderPage() {
               <Row label={t("console.order.phone")} value={order.customer_phone ?? "—"} />
               <Row label={t("console.order.channel")} value={t(`channel.${order.channel}`)} />
               <Row label={t("console.order.code")} value={<Text span ff="monospace" inherit>{order.order_code}</Text>} />
-              <Row label={t("console.order.payment")} value={t(`paymentStatus.${order.payment_status}`)} />
+              <Row label={t("console.order.payment")} value={[
+                t(`paymentStatus.${order.payment_status}`),
+                ...new Set(order.payments.filter((p) => p.kind === "charge").map((p) => t(`paymentMethod.${p.method}`))),
+              ].join(" · ")} />
               {order.created_by_name && <Row label={t("console.order.keyedBy")} value={order.created_by_name} />}
               {order.claimed_by_name && <Row label={t("console.order.takenBy")} value={order.claimed_by_name} />}
               <Group justify="space-between" pt={12}>

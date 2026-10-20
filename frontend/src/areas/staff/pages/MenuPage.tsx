@@ -1,5 +1,5 @@
-import { Box, Button, Group, Image, Stack, Switch, Table, Tabs, Text, TextInput } from "@mantine/core";
-import { IconPhoto, IconPlus, IconSearch } from "@tabler/icons-react";
+import { Button, Group, Stack, Switch, Table, Tabs, Text, TextInput } from "@mantine/core";
+import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +13,7 @@ import { CategoriesPanel } from "../components/menu/CategoriesPanel";
 import { ItemDrawer } from "../components/menu/ItemDrawer";
 import { OptionGroupsPanel } from "../components/menu/OptionGroupsPanel";
 import { moved, SortButtons } from "../components/menu/SortButtons";
+import { ItemPhoto } from "../console/ItemPhoto";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
@@ -30,16 +31,6 @@ type Row = {
   blockedByOption: boolean;
   admin?: AdminItem;
 };
-
-function Photo({ url }: { url: string | null }) {
-  return url ? (
-    <Image src={url} w={48} h={48} radius={8} alt="" />
-  ) : (
-    <Box w={48} h={48} bg={tokens.secondaryBg} c={tokens.muted} display="grid" style={{ borderRadius: 8, placeItems: "center" }}>
-      <IconPhoto size={20} />
-    </Box>
-  );
-}
 
 /** Staff switch things off when they run out; the owner also edits, hides and reorders. */
 export default function MenuPage() {
@@ -137,7 +128,7 @@ export default function MenuPage() {
                 </Table.Tr>,
                 ...shown.map((r) => (
                   <Table.Tr key={r.id} style={{ opacity: r.active ? 1 : 0.6 }}>
-                    <Table.Td><Photo url={r.imageUrl} /></Table.Td>
+                    <Table.Td><ItemPhoto url={r.imageUrl} /></Table.Td>
                     <Table.Td>
                       <Text fz={14} fw={500} c={tokens.text}>{r.name}</Text>
                       {r.blockedByOption && <Text fz={12} c="orange.8">{t("soldOut.blockedByOption")}</Text>}

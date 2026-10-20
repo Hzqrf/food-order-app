@@ -34,6 +34,10 @@ const UNDO_MS = 5_000;
 const CONFLICTS = ["version_conflict", "invalid_transition", "not_claimable"];
 
 export type SentNotice = { number: string; method: string };
+/** What other console pages can hand the queue through navigation state. */
+export type QueueState = { sent?: SentNotice; handOver?: number } | null;
+
+const SENT_BANNER_MS = 8_000;
 
 function Metrics({ m }: { m: QueueMetrics | undefined }) {
   const { t } = useTranslation();
@@ -80,7 +84,23 @@ export default function BoardPage() {
   const timers = useRef(new Map<number, { handle: number; send: () => void }>());
   const [now, setNow] = useState(Date.now());
   useInterval(() => setNow(Date.now()), 30_000, { autoInvoke: true });
-  const sent = (location.state as { sent?: SentNotice } | null)?.sent;
+  const [sent, setSent] = useState<SentNotice | null>(null);
+  const [handOverId, setHandOverId] = useState<number | null>(null);
+
+  // Take what other pages handed over, then clear it from history so a reload doesn't repeat it.
+  useEffect(() => {
+    const state = location.state as QueueState;
+    if (!state) return;
+    if (state.sent) setSent(state.sent);
+    if (state.handOver) setHandOverId(state.handOver);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!sent) return;
+    const timer = window.setTimeout(() => setSent(null), SENT_BANNER_MS);
+    return () => window.clearTimeout(timer);
+  }, [sent]);
 
   // Leaving the board inside the undo window sends the hand-over straight away rather than losing it.
   useEffect(() => {
@@ -169,6 +189,15 @@ export default function BoardPage() {
     };
     timers.current.set(order.id, { handle: window.setTimeout(fire, UNDO_MS), send: fire });
   };
+
+  // "Handed over" on the order page comes here, so it gets the same 5-second undo as the board.
+  useEffect(() => {
+    if (handOverId === null || !board.data) return;
+    const order = board.data.find((o) => o.id === handOverId);
+    setHandOverId(null);
+    if (order && order.status === "ready") advance(order, "completed");
+    // advance is recreated each render; this runs once per hand-over request.
+  }, [handOverId, board.data]);
 
   const header = (
     <PageHeader title={t("console.queue.title")} subtitle={t("console.queue.subtitle")}

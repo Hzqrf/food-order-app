@@ -43,6 +43,14 @@ function useOrderMutation<V, R>(fn: (v: V) => Promise<R>) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: fn,
+    // The server bumps the order's version on every change. Put the fresh row on the board now, so a
+    // second tap before the refetch lands (Take, then Start Cooking) does not send a stale version.
+    onSuccess: (result) => {
+      const fresh = result as Partial<OrderSummary> | undefined;
+      if (!fresh?.id || fresh.version === undefined) return;
+      qc.setQueryData<OrderSummary[]>(boardKey, (rows) =>
+        rows?.map((o) => (o.id === fresh.id ? { ...o, ...fresh } : o)));
+    },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: boardKey });
       qc.invalidateQueries({ queryKey: ["order"] });

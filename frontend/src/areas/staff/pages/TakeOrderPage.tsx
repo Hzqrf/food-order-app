@@ -40,6 +40,7 @@ import {
 import { formatSen } from "../../../lib/money";
 import { OptionsModal } from "../components/OptionsModal";
 import { PaymentModal } from "../components/PaymentModal";
+import { ItemPhoto } from "../console/ItemPhoto";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard, tileStyle } from "../console/SectionCard";
 import { tokens } from "../console/tokens";
@@ -161,13 +162,16 @@ export default function TakeOrderPage() {
         {shown.length === 0 && <Text c="dimmed" size="sm">{t("console.take.noMatch")}</Text>}
         {shown.map((item) => (
           <Group key={item.id} gap={8} wrap="nowrap" style={{ ...tileStyle, opacity: item.is_sold_out ? 0.5 : 1 }}>
-            <UnstyledButton flex={1} p={14} miw={0} disabled={item.is_sold_out}
+            <UnstyledButton flex={1} p={12} miw={0} disabled={item.is_sold_out}
               onClick={() => (needsOptionsSheet(item) ? setOptionsFor(item) : add(item, []))}>
               <Group justify="space-between" wrap="nowrap" gap={16}>
-                <Stack gap={2} miw={0}>
-                  <Text fz={14} lh="20px" fw={500} c={tokens.text} truncate>{item.name}</Text>
-                  <Text fz={13} c={tokens.muted}>{catName.get(item.category_id)}</Text>
-                </Stack>
+                <Group gap={12} wrap="nowrap" miw={0}>
+                  <ItemPhoto url={item.image_url} size={52} />
+                  <Stack gap={2} miw={0}>
+                    <Text fz={14} lh="20px" fw={500} c={tokens.text} truncate>{item.name}</Text>
+                    <Text fz={13} c={tokens.muted}>{catName.get(item.category_id)}</Text>
+                  </Stack>
+                </Group>
                 <Group gap={12} wrap="nowrap">
                   <Text fz={14} fw={600} c={item.is_sold_out ? tokens.muted : tokens.text}>
                     {item.is_sold_out ? t("menu.soldOut") : formatSen(item.price_sen)}

@@ -1,10 +1,34 @@
 import { Checkbox, Group, Radio, Stack, Text, Title } from "@mantine/core";
+import { IconCircleCheckFilled } from "@tabler/icons-react";
+import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { MenuGroup, MenuItem } from "../api/types";
 import { formatSen } from "../lib/money";
 
 export type Chosen = Record<number, number[]>;
+
+/** A picked choice gets an orange border and tint, so it is clear what is on the order. */
+function cardStyle(on: boolean, disabled: boolean): CSSProperties {
+  return {
+    opacity: disabled ? 0.5 : 1,
+    borderColor: on ? "var(--mantine-color-orange-7)" : undefined,
+    boxShadow: on ? "0 0 0 1px var(--mantine-color-orange-7)" : undefined,
+    background: on ? "var(--mantine-color-orange-0)" : undefined,
+  };
+}
+
+function ChoiceLabel({ name, price, on }: { name: string; price: string; on: boolean }) {
+  return (
+    <>
+      <Group gap={6} wrap="nowrap" justify="space-between">
+        <Text fw={600}>{name}</Text>
+        {on && <IconCircleCheckFilled size={18} color="var(--mantine-color-orange-7)" aria-hidden />}
+      </Group>
+      <Text size="sm" c="dimmed">{price}</Text>
+    </>
+  );
+}
 
 export function ruleLabel(t: (k: string, o?: Record<string, unknown>) => string, g: Pick<MenuGroup, "min_select" | "max_select">) {
   if (g.min_select === 1 && g.max_select === 1) return t("options.chooseOne");
@@ -53,9 +77,8 @@ export function OptionPicker({ item, chosen, onChange }: {
                 <Group gap="xs">
                   {g.options.map((o) => (
                     <Radio.Card key={o.id} value={String(o.id)} disabled={o.is_sold_out} p="sm" w="auto" miw={110}
-                      style={{ opacity: o.is_sold_out ? 0.5 : 1 }}>
-                      <Text fw={600}>{o.name}</Text>
-                      <Text size="sm" c="dimmed">{price(o)}</Text>
+                      style={cardStyle(picked[0] === o.id, o.is_sold_out)}>
+                      <ChoiceLabel name={o.name} price={price(o)} on={picked[0] === o.id} />
                     </Radio.Card>
                   ))}
                 </Group>
@@ -68,13 +91,12 @@ export function OptionPicker({ item, chosen, onChange }: {
                   const disabled = o.is_sold_out || full;
                   return (
                     <Checkbox.Card key={o.id} checked={on} disabled={disabled} p="sm" w="auto" miw={110}
-                      style={{ opacity: disabled ? 0.5 : 1 }}
+                      style={cardStyle(on, disabled)}
                       onClick={() => {
                         if (disabled) return;
                         onChange({ ...chosen, [g.id]: on ? picked.filter((x) => x !== o.id) : [...picked, o.id] });
                       }}>
-                      <Text fw={600}>{o.name}</Text>
-                      <Text size="sm" c="dimmed">{price(o)}</Text>
+                      <ChoiceLabel name={o.name} price={price(o)} on={on} />
                     </Checkbox.Card>
                   );
                 })}
