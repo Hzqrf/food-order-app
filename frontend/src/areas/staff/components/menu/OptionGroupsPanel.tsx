@@ -115,7 +115,11 @@ function PriceCell({ valueSen, label, onSave }: { valueSen: number; label: strin
   useEffect(() => setValue(valueSen), [valueSen]);
   return (
     <MoneyInput size="xs" valueSen={value} onChangeSen={setValue} aria-label={label}
-      onBlur={() => value !== null && value !== valueSen && onSave(value)} />
+      onBlur={() => {
+        // An emptied box would look like "no amount" while the saved one still applies: show it again.
+        if (value === null) setValue(valueSen);
+        else if (value !== valueSen) onSave(value);
+      }} />
   );
 }
 

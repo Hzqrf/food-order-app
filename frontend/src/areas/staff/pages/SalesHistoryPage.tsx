@@ -11,7 +11,7 @@ import { BarChart } from "../../../components/BarChart";
 import { ErrorState } from "../../../components/ErrorState";
 import { formatDateTime, shortDay } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
-import { percentChange } from "../console/delta";
+import { percentChange, profitChange } from "../console/delta";
 import { MetricCard } from "../console/MetricCard";
 import { PageHeader } from "../console/PageHeader";
 import { defaultPeriod, type Period, PeriodPicker } from "../console/PeriodPicker";
@@ -95,8 +95,7 @@ export default function SalesHistoryPage() {
               {...percentChange(r.totals.net_sen, r.previous.net_sen)}
               deltaLabel={t("console.sales.ordersHint", { count: r.totals.orders })} />
             <MetricCard label={t("console.cost.grossProfit")} value={formatSen(r.totals.gross_profit_sen)}
-              {...percentChange(r.totals.gross_profit_sen, r.previous.gross_profit_sen)}
-              deltaLabel={profitLabel(r.totals)} />
+              {...profitChange(r.totals, r.previous)} deltaLabel={profitLabel(r.totals)} />
           </SimpleGrid>
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing={20}>
             <BarChart title={t(oneDay ? "console.sales.byHour" : "console.sales.byDay")} sub={periodLabel}
