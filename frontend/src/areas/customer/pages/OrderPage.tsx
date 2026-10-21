@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { isApiError } from "../../../api/client";
-import { useMenu } from "../../../api/menu";
+import { useMenu, useShop } from "../../../api/menu";
 import { useCancelUnpaid, usePayAgain, useTracking } from "../../../api/public";
 import type { TrackingOut } from "../../../api/types";
 import { indexMenu } from "../../../lib/cart";
@@ -23,11 +23,14 @@ function Card({ children, bg = tokens.card }: { children: ReactNode; bg?: string
   return <Box p={16} bg={bg} style={{ borderRadius: radius.card, boxShadow: tokens.cardShadow }}>{children}</Box>;
 }
 
-/** The promise, honestly: a ready time while it is still ahead, "running late" once it has passed. */
-function heading(t: TFunction, order: TrackingOut, now: number): string | null {
+/**
+ * The promise, honestly: a ready time while it is still ahead, "running late" once it has passed.
+ * It adds the kitchen's current delay, the same way checkout did, so the two screens agree.
+ */
+function heading(t: TFunction, order: TrackingOut, now: number, extraMinutes: number): string | null {
   if (order.status === "ready") return t("tracking.readyNow");
   if ((order.status === "placed" || order.status === "preparing") && order.placed_at && order.prep_minutes) {
-    const promise = new Date(order.placed_at).getTime() + order.prep_minutes * 60_000;
+    const promise = new Date(order.placed_at).getTime() + (order.prep_minutes + extraMinutes) * 60_000;
     return promise > now
       ? t("tracking.readyAt", { time: formatTime(new Date(promise).toISOString()) })
       : t("tracking.runningLate");
@@ -81,6 +84,7 @@ export default function OrderPage() {
   const { token = "" } = useParams();
   const { t } = useTranslation();
   const { data: order, isPending, isError, error } = useTracking(token);
+  const { data: shop } = useShop();
   const [now, setNow] = useState(Date.now());
   useInterval(() => setNow(Date.now()), 30_000, { autoInvoke: true });
 
@@ -118,7 +122,7 @@ export default function OrderPage() {
   }
 
   const ready = order.status === "ready";
-  const title = heading(t, order, now);
+  const title = heading(t, order, now, shop?.extra_wait_minutes ?? 0);
   return (
     <Stack pt={12} pb={24} gap={12}>
       <Group gap={8}>

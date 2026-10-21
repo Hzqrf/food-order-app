@@ -1,8 +1,8 @@
 import "@fontsource-variable/inter";
 
 import { Box } from "@mantine/core";
-import { useEffect } from "react";
-import { Outlet, useLocation } from "react-router";
+import { useEffect, useLayoutEffect } from "react";
+import { Outlet, useLocation, useNavigationType } from "react-router";
 
 import { useShop } from "../../api/menu";
 import { tokens } from "../../ui/tokens";
@@ -29,6 +29,12 @@ function Shell() {
   useEffect(() => {
     if (shop && !pathname.startsWith("/t/")) document.title = shop.name;
   }, [shop, pathname]);
+
+  // A new page starts at the top. Going back (POP) keeps the place; the menu restores its own.
+  const navigationType = useNavigationType();
+  useLayoutEffect(() => {
+    if (navigationType !== "POP") window.scrollTo(0, 0);
+  }, [pathname, navigationType]);
 
   return (
     <Box mih="100vh" bg={tokens.pageBg} c={tokens.text} style={{ fontFamily: "'Inter Variable', sans-serif" }}>

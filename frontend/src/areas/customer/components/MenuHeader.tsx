@@ -22,7 +22,9 @@ export function MenuHeader({ query, onQuery, categories, activeId, onPick }: {
   if (shop) {
     // The server decides open or closed; the hours only add when.
     const hours = hoursLine(shop);
-    if (shop.is_open && hours && "openUntil" in hours) {
+    if (shop.is_open && hours && "allDay" in hours) {
+      status = `${t("shop.open")} · ${t("shop.prepTime", { minutes: shop.prep_minutes })}`;
+    } else if (shop.is_open && hours && "openUntil" in hours) {
       status = t("shop.openUntil", { time: clockLabel(hours.openUntil), minutes: shop.prep_minutes });
     } else if (!shop.is_open && hours && "opensAt" in hours) {
       const time = clockLabel(hours.opensAt);

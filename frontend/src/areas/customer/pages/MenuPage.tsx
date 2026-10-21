@@ -2,7 +2,7 @@ import { Alert, Box, Group, Skeleton, Stack, Text } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 
 import { useMenu, useShop } from "../../../api/menu";
 import type { MenuItem } from "../../../api/types";
@@ -33,7 +33,10 @@ export default function MenuPage() {
   const navigate = useNavigate();
   const { data: menu, isPending, isError, refetch } = useMenu();
   const { data: shop } = useShop();
-  const [query, setQuery] = useState("");
+  // The search lives in the URL, so coming back from an item brings the results back with it.
+  const [params, setParams] = useSearchParams();
+  const query = params.get("q") ?? "";
+  const setQuery = (q: string) => setParams(q ? { q } : {}, { replace: true });
   const [activeId, setActiveId] = useState<number | null>(null);
   const restored = useRef(false);
 

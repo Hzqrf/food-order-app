@@ -20,9 +20,12 @@ function shopClock(timeZone: string, now: Date): { day: number; minutes: number 
  * Null when the shop has no hours at all.
  */
 export function hoursLine(shop: ShopOut, now = new Date()):
-  { openUntil: string } | { opensAt: string; dayOffset: number; day: string } | null {
+  { allDay: true } | { openUntil: string } | { opensAt: string; dayOffset: number; day: string } | null {
   const { day, minutes } = shopClock(shop.timezone, now);
   const windows = (d: number) => (shop.opening_hours[DAYS[(d + 7) % 7]] ?? []) as string[][];
+
+  // Like the server, a window that starts and ends at the same time means open around the clock.
+  if (windows(day).some(([start, end]) => start === end)) return { allDay: true };
 
   for (const [start, end] of windows(day)) {
     const s = toMinutes(start), e = toMinutes(end);
