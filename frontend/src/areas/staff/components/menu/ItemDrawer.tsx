@@ -7,12 +7,14 @@ import { useCreateItem, useSetItemGroups, useUpdateItem, useUploadItemImage } fr
 import type { AdminItem, AdminMenu } from "../../../../api/types";
 import { notifyError } from "../../../../components/errors";
 import { MoneyInput } from "../../../../components/MoneyInput";
+import { marginPct } from "../../../../lib/margin";
 
 type Form = {
   category_id: string | null;
   name: string;
   description: string;
   price_sen: number | null;
+  cost_sen: number | null;
   is_active: boolean;
   is_sold_out: boolean;
   groups: string[];
@@ -25,6 +27,7 @@ function initial(item: AdminItem | "new" | null, menu: AdminMenu): Form {
       name: item.name,
       description: item.description ?? "",
       price_sen: item.price_sen,
+      cost_sen: item.cost_sen,
       is_active: item.is_active,
       is_sold_out: item.is_sold_out,
       groups: item.option_group_ids.map(String),
@@ -33,7 +36,7 @@ function initial(item: AdminItem | "new" | null, menu: AdminMenu): Form {
   return {
     category_id: menu.categories[0] ? String(menu.categories[0].id) : null,
     name: "", description: "",
-    price_sen: null, is_active: true, is_sold_out: false, groups: [],
+    price_sen: null, cost_sen: null, is_active: true, is_sold_out: false, groups: [],
   };
 }
 
@@ -57,6 +60,9 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
   const set = <K extends keyof Form>(key: K, value: Form[K]) => setForm((f) => ({ ...f, [key]: value }));
   const valid = form.name.trim() && form.price_sen !== null && form.category_id;
   const saving = create.isPending || update.isPending || setGroups.isPending;
+  const margin = form.price_sen === null ? null : marginPct(form.price_sen, form.cost_sen);
+  const marginHint = form.cost_sen === null ? t("console.cost.notSetHint")
+    : margin === null ? undefined : t("console.cost.marginHint", { pct: margin });
 
   const save = async () => {
     if (!valid) return;
@@ -65,6 +71,7 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
       name: form.name.trim(),
       description: form.description.trim() || null,
       price_sen: form.price_sen!,
+      cost_sen: form.cost_sen,
       is_active: form.is_active,
     };
     try {
@@ -95,6 +102,9 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
           onChange={(e) => set("description", e.currentTarget.value)} />
         <MoneyInput label={t("admin.menu.price")} required valueSen={form.price_sen}
           onChangeSen={(v) => set("price_sen", v)} />
+        <MoneyInput label={t("console.cost.foodCost")} valueSen={form.cost_sen}
+          onChangeSen={(v) => set("cost_sen", v)} description={marginHint}
+          styles={{ description: { color: margin !== null && margin < 0 ? "var(--mantine-color-red-7)" : undefined } }} />
         <MultiSelect label={t("admin.menu.optionGroups")} description={t("admin.menu.optionGroupsHint")}
           value={form.groups} onChange={(v) => set("groups", v)} searchable
           data={menu.option_groups.map((g) => ({ value: String(g.id), label: g.is_active ? g.name : `${g.name} (${t("admin.menu.hidden")})` }))} />

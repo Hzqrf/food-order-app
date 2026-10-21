@@ -705,6 +705,21 @@
     "settings": {
       "subtitle": "Waktu buka, masa penyediaan, jeda pesanan dalam talian, tablet ini dan log masuk anda.",
       "kitchen": "Dapur"
+    },
+    "cost": {
+      "foodCost": "Kos makanan",
+      "extraCost": "Kos tambahan",
+      "cost": "Kos",
+      "margin": "Margin",
+      "marginHint": "Margin {{pct}}%",
+      "notSetHint": "Belum ditetapkan: keuntungan tidak mengira item ini",
+      "notSet": "Kos belum ditetapkan",
+      "grossProfit": "Untung Kasar",
+      "marginLabel": "Margin {{pct}}%",
+      "coverageLabel": "Kos ditetapkan untuk {{pct}}% jualan",
+      "noSales": "Belum ada jualan",
+      "profit": "Untung",
+      "profitDefinition": "Untung kasar hanya mengira baris yang ada kos makanan semasa dijual."
     }
   }
 }

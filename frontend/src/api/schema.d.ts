@@ -1011,6 +1011,8 @@ export interface components {
             description: string | null;
             /** Price Sen */
             price_sen: number;
+            /** Cost Sen */
+            cost_sen: number | null;
             /** Image Url */
             image_url: string | null;
             /** Sort Order */
@@ -1041,6 +1043,8 @@ export interface components {
             name: string;
             /** Price Delta Sen */
             price_delta_sen: number;
+            /** Cost Delta Sen */
+            cost_delta_sen: number;
             /** Sort Order */
             sort_order: number;
             /** Is Active */
@@ -1391,6 +1395,8 @@ export interface components {
             description?: string | null;
             /** Price Sen */
             price_sen: number;
+            /** Cost Sen */
+            cost_sen?: number | null;
             /**
              * Is Active
              * @default true
@@ -1407,6 +1413,8 @@ export interface components {
             description?: string | null;
             /** Price Sen */
             price_sen?: number | null;
+            /** Cost Sen */
+            cost_sen?: number | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Is Sold Out */
@@ -1426,6 +1434,14 @@ export interface components {
             sales_sen: number;
             /** Is Active */
             is_active: boolean;
+            /** Cost Sen */
+            cost_sen: number;
+            /** Gross Profit Sen */
+            gross_profit_sen: number;
+            /** Margin Pct */
+            margin_pct: number | null;
+            /** Costed */
+            costed: boolean;
         };
         /** LiveCounts */
         LiveCounts: {
@@ -1592,6 +1608,11 @@ export interface components {
              */
             price_delta_sen: number;
             /**
+             * Cost Delta Sen
+             * @default 0
+             */
+            cost_delta_sen: number;
+            /**
              * Is Active
              * @default true
              */
@@ -1603,6 +1624,8 @@ export interface components {
             name?: string | null;
             /** Price Delta Sen */
             price_delta_sen?: number | null;
+            /** Cost Delta Sen */
+            cost_delta_sen?: number | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Is Sold Out */
@@ -1850,6 +1873,8 @@ export interface components {
             };
             /** Peak Hour */
             peak_hour: number | null;
+            /** Gross Profit Sen */
+            gross_profit_sen: number;
         };
         /** Problem */
         Problem: {
@@ -2134,6 +2159,14 @@ export interface components {
             refunds_sen: number;
             /** Net Sen */
             net_sen: number;
+            /** Food Cost Sen */
+            food_cost_sen: number;
+            /** Gross Profit Sen */
+            gross_profit_sen: number;
+            /** Margin Pct */
+            margin_pct: number | null;
+            /** Cost Coverage Pct */
+            cost_coverage_pct: number | null;
         };
         /** TotpCodeIn */
         TotpCodeIn: {

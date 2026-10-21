@@ -55,6 +55,16 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
         </Button>
       </Group>
       <Table verticalSpacing={4}>
+        {group.options.length > 0 && (
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th fz="xs" c="dimmed">{t("admin.menu.name")}</Table.Th>
+              <Table.Th fz="xs" c="dimmed">{t("admin.groups.extraPrice")}</Table.Th>
+              <Table.Th fz="xs" c="dimmed">{t("console.cost.extraCost")}</Table.Th>
+              <Table.Th colSpan={3} />
+            </Table.Tr>
+          </Table.Thead>
+        )}
         <Table.Tbody>
           {group.options.map((o, idx) => (
             <Table.Tr key={o.id} style={{ opacity: o.is_active ? 1 : 0.5 }}>
@@ -64,8 +74,12 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
                     updateOption.mutate({ id: o.id, name: e.currentTarget.value.trim() }, { onError })} />
               </Table.Td>
               <Table.Td w={130}>
-                <PriceCell valueSen={o.price_delta_sen}
+                <PriceCell valueSen={o.price_delta_sen} label={t("admin.groups.extraPrice")}
                   onSave={(sen) => updateOption.mutate({ id: o.id, price_delta_sen: sen }, { onError })} />
+              </Table.Td>
+              <Table.Td w={130}>
+                <PriceCell valueSen={o.cost_delta_sen} label={t("console.cost.extraCost")}
+                  onSave={(sen) => updateOption.mutate({ id: o.id, cost_delta_sen: sen }, { onError })} />
               </Table.Td>
               <Table.Td>
                 <Switch size="sm" checked={o.is_active} aria-label={t("admin.menu.visible")}
@@ -86,7 +100,7 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
         <MoneyInput size="xs" w={130} valueSen={price} onChangeSen={setPrice} aria-label={t("admin.groups.extraPrice")} />
         <Button size="xs" disabled={!name.trim()} loading={createOption.isPending}
           onClick={() => createOption.mutate(
-            { option_group_id: group.id, name: name.trim(), price_delta_sen: price ?? 0, is_active: true },
+            { option_group_id: group.id, name: name.trim(), price_delta_sen: price ?? 0, cost_delta_sen: 0, is_active: true },
             { onSuccess: () => { setName(""); setPrice(0); }, onError },
           )}>
           {t("common.add")}
@@ -96,12 +110,11 @@ function GroupCard({ group, onEdit }: { group: AdminOptionGroup; onEdit: () => v
   );
 }
 
-function PriceCell({ valueSen, onSave }: { valueSen: number; onSave: (sen: number) => void }) {
-  const { t } = useTranslation();
+function PriceCell({ valueSen, label, onSave }: { valueSen: number; label: string; onSave: (sen: number) => void }) {
   const [value, setValue] = useState<number | null>(valueSen);
   useEffect(() => setValue(valueSen), [valueSen]);
   return (
-    <MoneyInput size="xs" valueSen={value} onChangeSen={setValue} aria-label={t("admin.groups.extraPrice")}
+    <MoneyInput size="xs" valueSen={value} onChangeSen={setValue} aria-label={label}
       onBlur={() => value !== null && value !== valueSen && onSave(value)} />
   );
 }

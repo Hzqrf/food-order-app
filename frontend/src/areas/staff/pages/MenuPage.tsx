@@ -1,4 +1,4 @@
-import { Button, Group, Stack, Switch, Table, Tabs, Text, TextInput } from "@mantine/core";
+import { Button, Group, Stack, Switch, Table, Tabs, Text, TextInput, Tooltip } from "@mantine/core";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import { useAdminMenu, useMenu, useSetSoldOut, useSort, useUnitsSold, useUpdateI
 import type { AdminItem, MenuOption } from "../../../api/types";
 import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
+import { marginPct } from "../../../lib/margin";
 import { formatSen } from "../../../lib/money";
 import { CategoriesPanel } from "../components/menu/CategoriesPanel";
 import { ItemDrawer } from "../components/menu/ItemDrawer";
@@ -31,6 +32,32 @@ type Row = {
   blockedByOption: boolean;
   admin?: AdminItem;
 };
+
+/** Cost and margin cells for the owner's table. A missing cost shows in amber so the gaps stand out. */
+function CostCells({ priceSen, costSen }: { priceSen: number; costSen: number | null }) {
+  const { t } = useTranslation();
+  const margin = marginPct(priceSen, costSen);
+  if (costSen === null) {
+    return (
+      <>
+        <Table.Td ta="right">
+          <Tooltip label={t("console.cost.notSet")}>
+            <Text span c="yellow.8" fw={600}>—</Text>
+          </Tooltip>
+        </Table.Td>
+        <Table.Td ta="right"><Text span c="dimmed">—</Text></Table.Td>
+      </>
+    );
+  }
+  return (
+    <>
+      <Table.Td ta="right">{formatSen(costSen)}</Table.Td>
+      <Table.Td ta="right" c={margin !== null && margin < 0 ? "red.7" : undefined}>
+        {margin === null ? "—" : `${margin}%`}
+      </Table.Td>
+    </>
+  );
+}
 
 /** Staff switch things off when they run out; the owner also edits, hides and reorders. */
 export default function MenuPage() {
@@ -87,7 +114,7 @@ export default function MenuPage() {
   pub.data.categories.forEach((c) =>
     c.items.forEach((i) => i.groups.forEach((g) => g.options.forEach((o) => options.set(o.id, { ...o, group: g.name })))),
   );
-  const cols = isOwner ? 8 : 6;
+  const cols = isOwner ? 10 : 6;
 
   const itemsTable = (
     <SectionCard padded={false}
@@ -104,6 +131,8 @@ export default function MenuPage() {
               <Table.Th w={72} />
               <Table.Th>{t("console.menu.item")}</Table.Th>
               <Table.Th ta="right">{t("admin.menu.price")}</Table.Th>
+              {isOwner && <Table.Th ta="right">{t("console.cost.cost")}</Table.Th>}
+              {isOwner && <Table.Th ta="right">{t("console.cost.margin")}</Table.Th>}
               {isOwner && <Table.Th ta="right">{t("console.menu.sold7d")}</Table.Th>}
               <Table.Th>{t("console.menu.availability")}</Table.Th>
               <Table.Th ta="center">{t("console.menu.inStock")}</Table.Th>
@@ -134,6 +163,7 @@ export default function MenuPage() {
                       {r.blockedByOption && <Text fz={12} c="orange.8">{t("soldOut.blockedByOption")}</Text>}
                     </Table.Td>
                     <Table.Td ta="right">{formatSen(r.priceSen)}</Table.Td>
+                    {isOwner && <CostCells priceSen={r.priceSen} costSen={r.admin?.cost_sen ?? null} />}
                     {isOwner && <Table.Td ta="right">{sold.data?.get(r.id) ?? 0}</Table.Td>}
                     <Table.Td>
                       <StatusLabel kind="availability"

@@ -708,6 +708,21 @@
     "settings": {
       "subtitle": "Opening hours, prep time, pausing online orders, this tablet and your sign-in.",
       "kitchen": "Kitchen"
+    },
+    "cost": {
+      "foodCost": "Food cost",
+      "extraCost": "Extra cost",
+      "cost": "Cost",
+      "margin": "Margin",
+      "marginHint": "Margin {{pct}}%",
+      "notSetHint": "Not set: profit won't count this item",
+      "notSet": "Cost not set",
+      "grossProfit": "Gross Profit",
+      "marginLabel": "Margin {{pct}}%",
+      "coverageLabel": "Cost set for {{pct}}% of sales",
+      "noSales": "No sales yet",
+      "profit": "Profit",
+      "profitDefinition": "Gross profit counts only lines that had a food cost when they were sold."
     }
   }
 }
