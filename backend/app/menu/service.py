@@ -134,7 +134,7 @@ def admin_menu(db: Session) -> schemas.AdminMenuOut:
 def _admin_item(item: MenuItem) -> schemas.AdminItem:
     return schemas.AdminItem(
         id=item.id, category_id=item.category_id, name=item.name,
-        description=item.description, price_sen=item.price_sen,
+        description=item.description, price_sen=item.price_sen, cost_sen=item.cost_sen,
         image_url=image_urls(item.image_path)[0], sort_order=item.sort_order, is_active=item.is_active,
         is_sold_out=item.is_sold_out, option_group_ids=[link.option_group_id for link in item.group_links],
     )
@@ -177,7 +177,7 @@ def create_item(db: Session, admin: User, body: schemas.ItemIn, ip: str) -> sche
     db.add(item)
     db.flush()
     audit(db, admin.id, "menu_item_created", "menu_item", item.id, None,
-          {"name": item.name, "price_sen": item.price_sen}, ip)
+          {"name": item.name, "price_sen": item.price_sen, "cost_sen": item.cost_sen}, ip)
     invalidate_menu_cache()
     db.refresh(item, ["group_links"])
     return _admin_item(item)
@@ -188,7 +188,7 @@ def update_item(db: Session, admin: User, item_id: int, body: schemas.ItemPatch,
     values = body.model_dump(exclude_unset=True)
     if "category_id" in values and db.get(MenuCategory, values["category_id"]) is None:
         raise AppError("invalid_category", "Category not found.", 422)
-    before, after = changes(item, ["price_sen", "is_active"], values)
+    before, after = changes(item, ["price_sen", "cost_sen", "is_active"], values)
     _apply(item, values)
     if after:
         audit(db, admin.id, "menu_item_changed", "menu_item", item.id, before, after, ip)
@@ -246,7 +246,7 @@ def create_option(db: Session, admin: User, body: schemas.OptionIn, ip: str) -> 
     db.add(option)
     db.flush()
     audit(db, admin.id, "option_created", "option", option.id, None,
-          {"name": option.name, "price_delta_sen": option.price_delta_sen}, ip)
+          {"name": option.name, "price_delta_sen": option.price_delta_sen, "cost_delta_sen": option.cost_delta_sen}, ip)
     invalidate_menu_cache()
     return option
 
@@ -254,7 +254,7 @@ def create_option(db: Session, admin: User, body: schemas.OptionIn, ip: str) -> 
 def update_option(db: Session, admin: User, option_id: int, body: schemas.OptionPatch, ip: str) -> Option:
     option = db.get(Option, option_id) or _raise(not_found("Option not found."))
     values = body.model_dump(exclude_unset=True)
-    before, after = changes(option, ["price_delta_sen", "is_active"], values)
+    before, after = changes(option, ["price_delta_sen", "cost_delta_sen", "is_active"], values)
     _apply(option, values)
     if after:
         audit(db, admin.id, "option_changed", "option", option.id, before, after, ip)

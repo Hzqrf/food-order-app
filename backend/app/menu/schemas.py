@@ -70,6 +70,7 @@ class ItemIn(BaseModel):
     name: str = Name
     description: str | None = Field(default=None, max_length=500)
     price_sen: int = Field(ge=0, le=10_000_00)
+    cost_sen: int | None = Field(default=None, ge=0, le=10_000_00)  # food cost; None = not set
     is_active: bool = True
 
 
@@ -78,6 +79,7 @@ class ItemPatch(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=500)
     price_sen: int | None = Field(default=None, ge=0, le=10_000_00)
+    cost_sen: int | None = Field(default=None, ge=0, le=10_000_00)  # send null to clear
     is_active: bool | None = None
     is_sold_out: bool | None = None
 
@@ -106,12 +108,14 @@ class OptionIn(BaseModel):
     option_group_id: int
     name: str = Name
     price_delta_sen: int = Field(default=0, ge=0, le=1_000_00)
+    cost_delta_sen: int = Field(default=0, ge=0, le=1_000_00)
     is_active: bool = True
 
 
 class OptionPatch(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     price_delta_sen: int | None = Field(default=None, ge=0, le=1_000_00)
+    cost_delta_sen: int | None = Field(default=None, ge=0, le=1_000_00)
     is_active: bool | None = None
     is_sold_out: bool | None = None
 
@@ -140,6 +144,7 @@ class AdminItem(BaseModel):
     name: str
     description: str | None
     price_sen: int
+    cost_sen: int | None  # owner-only food cost
     image_url: str | None
     sort_order: int
     is_active: bool
@@ -152,6 +157,7 @@ class AdminOption(BaseModel):
     option_group_id: int
     name: str
     price_delta_sen: int
+    cost_delta_sen: int  # owner-only extra food cost
     sort_order: int
     is_active: bool
     is_sold_out: bool
