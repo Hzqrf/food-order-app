@@ -103,3 +103,29 @@ def test_problems_reported_per_line_and_good_lines_still_priced():
 def test_zero_quantity_rejected():
     with pytest.raises(ValueError):
         price_cart([CartLine(200, 0)], make_menu())
+
+
+# --- Food cost: worked out with the price, saved on the order line ------------------------------
+
+
+def menu_with_costs(item_cost: int | None = 350) -> MenuIndex:
+    return make_menu(
+        items={100: MenuItem(100, "Chicken Tender", 1000, True, False, (10, 20), cost_sen=item_cost)},
+        options={LARGE: MenuOption(LARGE, 10, "Large", 400, True, cost_delta_sen=120),
+                 CHEESE: MenuOption(CHEESE, 20, "Cheese", 200, True, cost_delta_sen=80)},
+    )
+
+
+def test_line_cost_is_item_cost_plus_option_costs():
+    line = price_cart([CartLine(100, 2, (LARGE, CHEESE))], menu_with_costs()).lines[0]
+    assert line.unit_cost_sen == 350 + 120 + 80
+
+
+def test_uncosted_item_gives_no_line_cost():
+    line = price_cart([CartLine(100, 1, (REGULAR,))], menu_with_costs(item_cost=None)).lines[0]
+    assert line.unit_cost_sen is None
+
+
+def test_option_without_extra_cost_adds_nothing():
+    line = price_cart([CartLine(100, 1, (REGULAR, SPICY))], menu_with_costs()).lines[0]
+    assert line.unit_cost_sen == 350  # Regular and Spicy Sauce have no extra cost

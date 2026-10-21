@@ -13,6 +13,7 @@ class MenuOption:
     name: str
     price_delta_sen: int
     available: bool  # active and not sold out
+    cost_delta_sen: int = 0  # extra food cost when chosen
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,7 @@ class MenuItem:
     active: bool  # item and its category are active
     sold_out: bool
     group_ids: tuple[int, ...]  # active groups attached to the item
+    cost_sen: int | None = None  # food cost; None = not set
 
 
 @dataclass(frozen=True)
@@ -67,6 +69,7 @@ class PricedLine:
     line_total_sen: int
     note: str | None
     options: tuple[PricedOption, ...]
+    unit_cost_sen: int | None = None  # item cost + chosen options' extra cost; None if the item has no cost
 
 
 @dataclass(frozen=True)
@@ -117,6 +120,7 @@ def _price_line(index: int, line: CartLine, menu: MenuIndex) -> PricedLine | lis
             chosen_by_group[option.group_id].append(option)
 
     priced_options: list[PricedOption] = []
+    options_cost = 0
     for gid in item.group_ids:
         group = menu.groups[gid]
         available = [o for o in group.option_ids if menu.options[o].available]
@@ -130,6 +134,7 @@ def _price_line(index: int, line: CartLine, menu: MenuIndex) -> PricedLine | lis
         order = {oid: pos for pos, oid in enumerate(group.option_ids)}
         for option in sorted(chosen, key=lambda o: order.get(o.id, 0)):
             priced_options.append(PricedOption(option.id, group.name, option.name, option.price_delta_sen))
+            options_cost += option.cost_delta_sen
 
     if problems:
         return problems
@@ -139,6 +144,7 @@ def _price_line(index: int, line: CartLine, menu: MenuIndex) -> PricedLine | lis
         options_total_sen=options_total, quantity=line.quantity,
         line_total_sen=(item.price_sen + options_total) * line.quantity,
         note=line.note, options=tuple(priced_options),
+        unit_cost_sen=None if item.cost_sen is None else item.cost_sen + options_cost,
     )
 
 

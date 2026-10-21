@@ -46,10 +46,12 @@ def load_menu_index(db: Session, item_ids: set[int]) -> pricing.MenuIndex:
             for o in g.options:
                 options[o.id] = pricing.MenuOption(id=o.id, group_id=g.id, name=o.name,
                                                    price_delta_sen=o.price_delta_sen,
-                                                   available=o.is_active and not o.is_sold_out)
+                                                   available=o.is_active and not o.is_sold_out,
+                                                   cost_delta_sen=o.cost_delta_sen)
         items[row.id] = pricing.MenuItem(id=row.id, name=row.name, price_sen=row.price_sen,
                                          active=row.is_active and row.category.is_active,
-                                         sold_out=row.is_sold_out, group_ids=tuple(group_ids))
+                                         sold_out=row.is_sold_out, group_ids=tuple(group_ids),
+                                         cost_sen=row.cost_sen)
     return pricing.MenuIndex(items=items, groups=groups, options=options)
 
 
@@ -143,7 +145,8 @@ def _build_order(branch: Branch, result: pricing.PriceResult, **fields) -> Order
     for line in result.lines:
         item = OrderItem(menu_item_id=line.menu_item_id, item_name=line.item_name,
                          unit_price_sen=line.unit_price_sen, options_total_sen=line.options_total_sen,
-                         quantity=line.quantity, line_total_sen=line.line_total_sen, note=line.note)
+                         quantity=line.quantity, line_total_sen=line.line_total_sen,
+                         unit_cost_sen=line.unit_cost_sen, note=line.note)
         item.options = [OrderItemOption(option_id=o.option_id, group_name=o.group_name,
                                         option_name=o.option_name, price_sen=o.price_sen) for o in line.options]
         order.items.append(item)

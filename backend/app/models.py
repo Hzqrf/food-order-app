@@ -140,12 +140,15 @@ class MenuItem(TimestampMixin, Base):
     __table_args__ = (
         Index("ix_menu_items_category_sort", "category_id", "sort_order"),
         CheckConstraint("price_sen >= 0", name="ck_menu_items_price"),
+        CheckConstraint("cost_sen IS NULL OR cost_sen >= 0", name="ck_menu_items_cost"),
     )
 
     category_id: Mapped[int] = mapped_column(BigId, fk("menu_categories.id"))
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(500))
     price_sen: Mapped[int] = mapped_column(Integer)
+    # Food cost of one item, owner-only. NULL = not set yet (not the same as free).
+    cost_sen: Mapped[int | None] = mapped_column(Integer)
     image_path: Mapped[str | None] = mapped_column(String(255))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -174,11 +177,13 @@ class OptionGroup(TimestampMixin, Base):
 
 class Option(TimestampMixin, Base):
     __tablename__ = "options"
-    __table_args__ = (Index("ix_options_group_sort", "option_group_id", "sort_order"),)
+    __table_args__ = (Index("ix_options_group_sort", "option_group_id", "sort_order"),
+                      CheckConstraint("cost_delta_sen >= 0", name="ck_options_cost"))
 
     option_group_id: Mapped[int] = mapped_column(BigId, fk("option_groups.id"))
     name: Mapped[str] = mapped_column(String(100))
     price_delta_sen: Mapped[int] = mapped_column(Integer, default=0)
+    cost_delta_sen: Mapped[int] = mapped_column(Integer, default=0, server_default="0")  # extra food cost
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_sold_out: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -263,6 +268,8 @@ class OrderItem(TimestampMixin, Base):
     options_total_sen: Mapped[int] = mapped_column(Integer, default=0)
     quantity: Mapped[int] = mapped_column(Integer)
     line_total_sen: Mapped[int] = mapped_column(Integer)
+    # Food cost per unit when sold (item + chosen options). NULL when the item had no cost set.
+    unit_cost_sen: Mapped[int | None] = mapped_column(Integer)
     note: Mapped[str | None] = mapped_column(String(200))
 
     order: Mapped[Order] = relationship(back_populates="items")
