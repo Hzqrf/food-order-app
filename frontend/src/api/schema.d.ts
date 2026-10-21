@@ -1021,6 +1021,8 @@ export interface components {
             is_active: boolean;
             /** Is Sold Out */
             is_sold_out: boolean;
+            /** Is Popular */
+            is_popular: boolean;
             /** Option Group Ids */
             option_group_ids: number[];
         };
@@ -1402,6 +1404,11 @@ export interface components {
              * @default true
              */
             is_active: boolean;
+            /**
+             * Is Popular
+             * @default false
+             */
+            is_popular: boolean;
         };
         /** ItemPatch */
         ItemPatch: {
@@ -1419,6 +1426,8 @@ export interface components {
             is_active?: boolean | null;
             /** Is Sold Out */
             is_sold_out?: boolean | null;
+            /** Is Popular */
+            is_popular?: boolean | null;
         };
         /** ItemRow */
         ItemRow: {
@@ -1508,6 +1517,8 @@ export interface components {
             is_sold_out: boolean;
             /** Item Sold Out */
             item_sold_out: boolean;
+            /** Is Popular */
+            is_popular: boolean;
             /** Groups */
             groups: components["schemas"]["MenuGroupOut"][];
         };
@@ -2047,6 +2058,8 @@ export interface components {
             };
             /** Timezone */
             timezone: string;
+            /** Extra Wait Minutes */
+            extra_wait_minutes: number;
         };
         /** SoldOutIn */
         SoldOutIn: {

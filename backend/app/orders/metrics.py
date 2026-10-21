@@ -1,4 +1,5 @@
 """Numbers above the kitchen queue. Counts and minutes only: no money, so staff and the locked tablet see them."""
+import math
 from datetime import date, datetime, timedelta
 
 from sqlalchemy import func, select
@@ -27,16 +28,35 @@ def _orders_on(db: Session, branch: Branch, day: date, until: datetime | None = 
         *placed_by(until))) or 0
 
 
+def _late(branch: Branch, now: datetime) -> tuple:
+    """Not ready yet and past placed_at + prep_minutes."""
+    return (Order.branch_id == branch.id, Order.status.in_((sm.PLACED, sm.PREPARING)),
+            Order.placed_at < now - timedelta(minutes=branch.prep_minutes))
+
+
+EXTRA_WAIT_MIN_LATE = 2
+EXTRA_WAIT_CAP = 60
+
+
+def extra_wait_minutes(db: Session, branch: Branch, now: datetime | None = None) -> int:
+    """How much longer pickups are running, for the customers' busy banner. 0 unless at least two
+    orders are late; then their average lateness, rounded up to 5 minutes and capped at an hour."""
+    now = now or utcnow()
+    placed = db.scalars(select(Order.placed_at).where(*_late(branch, now))).all()
+    if len(placed) < EXTRA_WAIT_MIN_LATE:
+        return 0
+    promise = timedelta(minutes=branch.prep_minutes)
+    avg = sum((now - p - promise).total_seconds() for p in placed) / len(placed) / 60
+    return min(EXTRA_WAIT_CAP, math.ceil(avg / 5) * 5)
+
+
 def queue_metrics(db: Session, branch: Branch, now: datetime | None = None) -> schemas.QueueMetrics:
     now = now or utcnow()
     today = business_date(branch, now)
     last_week = today - timedelta(days=7)
     open_orders = db.scalar(select(func.count(Order.id)).where(
         Order.branch_id == branch.id, Order.status.in_(sm.ACTIVE))) or 0
-    promised_before = now - timedelta(minutes=branch.prep_minutes)
-    running_late = db.scalar(select(func.count(Order.id)).where(
-        Order.branch_id == branch.id, Order.status.in_((sm.PLACED, sm.PREPARING)),
-        Order.placed_at < promised_before)) or 0
+    running_late = db.scalar(select(func.count(Order.id)).where(*_late(branch, now))) or 0
     return schemas.QueueMetrics(
         open_orders=open_orders,
         avg_prep_minutes=_avg_prep_minutes(db, branch, today),

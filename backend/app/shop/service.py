@@ -42,11 +42,14 @@ def takes_online_orders(branch: Branch) -> bool:
     return get_settings().online_payments_enabled and is_open(branch) and branch.is_accepting_online_orders
 
 
-def shop_out(branch: Branch) -> schemas.ShopOut:
+def shop_out(db: Session, branch: Branch) -> schemas.ShopOut:
+    from app.orders.metrics import extra_wait_minutes  # metrics imports this module
+
     return schemas.ShopOut(
         name=branch.name, is_open=is_open(branch), is_accepting_online_orders=branch.is_accepting_online_orders,
         can_order_online=takes_online_orders(branch), online_payments_enabled=get_settings().online_payments_enabled,
         prep_minutes=branch.prep_minutes, opening_hours=branch.opening_hours, timezone=branch.timezone,
+        extra_wait_minutes=extra_wait_minutes(db, branch),
     )
 
 

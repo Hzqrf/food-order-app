@@ -6,7 +6,7 @@ from sqlalchemy import update
 
 from app.main import app
 from app.models import Order, utcnow
-from app.orders.metrics import queue_metrics
+from app.orders.metrics import extra_wait_minutes, queue_metrics
 from app.shop.service import business_date
 from tests.conftest import ORIGIN, counter_order, login
 
@@ -84,3 +84,58 @@ def test_last_week_order_count_stops_at_the_same_time_of_day(staff_client, menu,
     set_order(db, earlier, business_date=week_ago, placed_at=now - timedelta(days=7, hours=1))
     set_order(db, later, business_date=week_ago, placed_at=now - timedelta(days=7) + timedelta(hours=1))
     assert queue_metrics(db, branch, now=now).orders_same_day_last_week == 1
+
+
+# --- Extra wait shown to customers when the kitchen is behind -----------------------------------
+
+
+def late(staff_client, menu, db, now, minutes_late):
+    """One placed order this many minutes past its promise (prep_minutes is 15)."""
+    o = counter_order(staff_client, [milo(menu)]).json()["id"]
+    set_order(db, o, placed_at=now - timedelta(minutes=15 + minutes_late))
+    return o
+
+
+def test_extra_wait_needs_two_late_orders(staff_client, menu, db, branch):
+    now = utcnow()
+    assert extra_wait_minutes(db, branch, now) == 0
+    late(staff_client, menu, db, now, 40)
+    assert extra_wait_minutes(db, branch, now) == 0
+
+
+def test_extra_wait_rounds_up_to_five(staff_client, menu, db, branch):
+    now = utcnow()
+    a, b = late(staff_client, menu, db, now, 1), late(staff_client, menu, db, now, 3)
+    assert extra_wait_minutes(db, branch, now) == 5  # average 2
+    set_order(db, a, placed_at=now - timedelta(minutes=15 + 4))
+    set_order(db, b, placed_at=now - timedelta(minutes=15 + 8))
+    assert extra_wait_minutes(db, branch, now) == 10  # average 6
+    set_order(db, a, placed_at=now - timedelta(minutes=15 + 5))
+    set_order(db, b, placed_at=now - timedelta(minutes=15 + 5))
+    assert extra_wait_minutes(db, branch, now) == 5  # exactly 5 stays 5
+
+
+def test_extra_wait_capped_at_sixty(staff_client, menu, db, branch):
+    now = utcnow()
+    late(staff_client, menu, db, now, 90)
+    late(staff_client, menu, db, now, 100)
+    assert extra_wait_minutes(db, branch, now) == 60
+
+
+def test_extra_wait_ignores_ready_orders(staff_client, menu, db, branch):
+    now = utcnow()
+    a = late(staff_client, menu, db, now, 10)
+    late(staff_client, menu, db, now, 10)
+    set_order(db, a, status="ready")
+    assert extra_wait_minutes(db, branch, now) == 0
+
+
+def test_shop_reports_extra_wait(client, staff_client, menu, db):
+    now = utcnow()
+    late(staff_client, menu, db, now, 7)
+    late(staff_client, menu, db, now, 7)
+    body = client.get(f"{API}/shop").json()
+    assert body["extra_wait_minutes"] == 10
+    assert set(body) == {"name", "is_open", "is_accepting_online_orders", "can_order_online",
+                         "online_payments_enabled", "prep_minutes", "opening_hours", "timezone",
+                         "extra_wait_minutes"}

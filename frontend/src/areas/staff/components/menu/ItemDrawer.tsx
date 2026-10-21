@@ -17,6 +17,7 @@ type Form = {
   cost_sen: number | null;
   is_active: boolean;
   is_sold_out: boolean;
+  is_popular: boolean;
   groups: string[];
 };
 
@@ -30,13 +31,14 @@ function initial(item: AdminItem | "new" | null, menu: AdminMenu): Form {
       cost_sen: item.cost_sen,
       is_active: item.is_active,
       is_sold_out: item.is_sold_out,
+      is_popular: item.is_popular,
       groups: item.option_group_ids.map(String),
     };
   }
   return {
     category_id: menu.categories[0] ? String(menu.categories[0].id) : null,
     name: "", description: "",
-    price_sen: null, cost_sen: null, is_active: true, is_sold_out: false, groups: [],
+    price_sen: null, cost_sen: null, is_active: true, is_sold_out: false, is_popular: false, groups: [],
   };
 }
 
@@ -73,6 +75,7 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
       price_sen: form.price_sen!,
       cost_sen: form.cost_sen,
       is_active: form.is_active,
+      is_popular: form.is_popular,
     };
     try {
       const saved = existing

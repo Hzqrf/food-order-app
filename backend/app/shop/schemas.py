@@ -17,6 +17,8 @@ class ShopOut(BaseModel):
     prep_minutes: int
     opening_hours: dict[str, list[list[str]]]
     timezone: str
+    # Minutes only: how much longer pickups are running right now (0 when on time).
+    extra_wait_minutes: int
 
 
 class OnlineOrdersIn(BaseModel):

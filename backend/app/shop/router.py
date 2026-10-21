@@ -7,22 +7,22 @@ router = APIRouter(tags=["shop"])
 
 
 @router.get("/shop", response_model=schemas.ShopOut)
-def get_shop(branch: BranchDep):
-    return service.shop_out(branch)
+def get_shop(branch: BranchDep, db: DB):
+    return service.shop_out(db, branch)
 
 
 @router.patch("/staff/shop/online-orders", response_model=schemas.ShopOut)
 def online_orders(body: schemas.OnlineOrdersIn, user: StaffUser, branch: BranchDep, db: DB, request: Request):
     service.set_online_orders(db, branch, user, body.accepting, client_ip(request))
-    return service.shop_out(branch)
+    return service.shop_out(db, branch)
 
 
 @router.get("/admin/settings", response_model=schemas.ShopOut)
-def get_settings(_: AdminUser, branch: BranchDep):
-    return service.shop_out(branch)
+def get_settings(_: AdminUser, branch: BranchDep, db: DB):
+    return service.shop_out(db, branch)
 
 
 @router.patch("/admin/settings", response_model=schemas.ShopOut)
 def update_settings(body: schemas.SettingsPatch, admin: AdminUser, branch: BranchDep, db: DB, request: Request):
     service.update_settings(db, branch, admin, body, client_ip(request))
-    return service.shop_out(branch)
+    return service.shop_out(db, branch)
