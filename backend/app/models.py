@@ -19,6 +19,7 @@ from sqlalchemy import (
     String,
     TypeDecorator,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -153,6 +154,8 @@ class MenuItem(TimestampMixin, Base):
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_sold_out: Mapped[bool] = mapped_column(Boolean, default=False)
+    # The owner's Popular pick. With none picked, the public menu shows the best sellers instead.
+    is_popular: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
     category: Mapped[MenuCategory] = relationship(back_populates="items")
     group_links: Mapped[list["MenuItemOptionGroup"]] = relationship(

@@ -35,6 +35,8 @@ class MenuItemOut(BaseModel):
     is_sold_out: bool
     # The item's own sold-out switch, without the option-group effect. Drives the staff switch.
     item_sold_out: bool
+    # The owner's picks, or the best sellers when there are none.
+    is_popular: bool
     groups: list[MenuGroupOut]
 
 
@@ -72,6 +74,7 @@ class ItemIn(BaseModel):
     price_sen: int = Field(ge=0, le=10_000_00)
     cost_sen: int | None = Field(default=None, ge=0, le=10_000_00)  # food cost; None = not set
     is_active: bool = True
+    is_popular: bool = False
 
 
 class ItemPatch(BaseModel):
@@ -82,6 +85,7 @@ class ItemPatch(BaseModel):
     cost_sen: int | None = Field(default=None, ge=0, le=10_000_00)  # send null to clear
     is_active: bool | None = None
     is_sold_out: bool | None = None
+    is_popular: bool | None = None
 
 
 class OptionGroupIn(BaseModel):
@@ -149,6 +153,7 @@ class AdminItem(BaseModel):
     sort_order: int
     is_active: bool
     is_sold_out: bool
+    is_popular: bool  # the owner's own switch
     option_group_ids: list[int]
 
 

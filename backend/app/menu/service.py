@@ -2,17 +2,21 @@ import io
 import secrets
 import threading
 import time
+from datetime import date, timedelta
 from typing import Any
 
 from PIL import Image, UnidentifiedImageError
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.audit import audit, changes
 from app.config import get_settings
 from app.errors import AppError, not_found
 from app.menu import schemas
-from app.models import MenuCategory, MenuItem, MenuItemOptionGroup, Option, OptionGroup, User
+from app.models import (Branch, MenuCategory, MenuItem, MenuItemOptionGroup, Option, OptionGroup, Order, OrderItem,
+                        User)
+from app.reports.queries import _sales
+from app.shop.service import business_date
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
 IMAGE_SIZES = {"sm": 400, "lg": 1200}
@@ -43,17 +47,40 @@ def group_unavailable(group: OptionGroup) -> bool:
     return group.min_select > 0 and len(available) < group.min_select
 
 
-def public_menu(db: Session) -> schemas.MenuOut:
+POPULAR_DAYS = 14
+POPULAR_MIN_UNITS = 5
+POPULAR_COUNT = 3
+
+
+def popular_item_ids(db: Session, branch: Branch, today: date) -> set[int]:
+    """The owner's picks; with none, the best sellers by units over the last 14 business days.
+    An item needs 5 units to count, so a quiet shop shows nothing rather than a meaningless list."""
+    picked = set(db.scalars(select(MenuItem.id).where(MenuItem.is_active.is_(True), MenuItem.is_popular.is_(True))))
+    if picked:
+        return picked
+    units = func.sum(OrderItem.quantity)
+    rows = db.execute(
+        select(OrderItem.menu_item_id).join(Order, Order.id == OrderItem.order_id)
+        .join(MenuItem, MenuItem.id == OrderItem.menu_item_id)
+        .where(*_sales(branch, today - timedelta(days=POPULAR_DAYS - 1), today), MenuItem.is_active.is_(True))
+        .group_by(OrderItem.menu_item_id).having(units >= POPULAR_MIN_UNITS)
+        .order_by(units.desc(), OrderItem.menu_item_id).limit(POPULAR_COUNT)
+    ).scalars()
+    return set(rows)
+
+
+def public_menu(db: Session, branch: Branch) -> schemas.MenuOut:
     with _cache_lock:
         if _cache.get("expires", 0) > time.monotonic():
             return _cache["menu"]
-    menu = _build_public_menu(db)
+    menu = _build_public_menu(db, branch)
     with _cache_lock:
         _cache.update(menu=menu, expires=time.monotonic() + _CACHE_TTL)
     return menu
 
 
-def _build_public_menu(db: Session) -> schemas.MenuOut:
+def _build_public_menu(db: Session, branch: Branch) -> schemas.MenuOut:
+    popular = popular_item_ids(db, branch, business_date(branch))
     categories = db.scalars(
         select(MenuCategory).where(MenuCategory.is_active.is_(True))
         .order_by(MenuCategory.sort_order, MenuCategory.id)
@@ -83,7 +110,7 @@ def _build_public_menu(db: Session) -> schemas.MenuOut:
             id=item.id, category_id=item.category_id, name=item.name,
             description=item.description, price_sen=item.price_sen,
             image_url=small, image_url_large=large, is_sold_out=item.is_sold_out or blocked,
-            item_sold_out=item.is_sold_out, groups=groups,
+            item_sold_out=item.is_sold_out, is_popular=item.id in popular, groups=groups,
         ))
     # A category with no active items is hidden automatically.
     return schemas.MenuOut(categories=[
@@ -136,7 +163,7 @@ def _admin_item(item: MenuItem) -> schemas.AdminItem:
         id=item.id, category_id=item.category_id, name=item.name,
         description=item.description, price_sen=item.price_sen, cost_sen=item.cost_sen,
         image_url=image_urls(item.image_path)[0], sort_order=item.sort_order, is_active=item.is_active,
-        is_sold_out=item.is_sold_out, option_group_ids=[link.option_group_id for link in item.group_links],
+        is_sold_out=item.is_sold_out, is_popular=item.is_popular, option_group_ids=[link.option_group_id for link in item.group_links],
     )
 
 
@@ -177,7 +204,8 @@ def create_item(db: Session, admin: User, body: schemas.ItemIn, ip: str) -> sche
     db.add(item)
     db.flush()
     audit(db, admin.id, "menu_item_created", "menu_item", item.id, None,
-          {"name": item.name, "price_sen": item.price_sen, "cost_sen": item.cost_sen}, ip)
+          {"name": item.name, "price_sen": item.price_sen, "cost_sen": item.cost_sen,
+           "is_popular": item.is_popular}, ip)
     invalidate_menu_cache()
     db.refresh(item, ["group_links"])
     return _admin_item(item)
@@ -188,7 +216,7 @@ def update_item(db: Session, admin: User, item_id: int, body: schemas.ItemPatch,
     values = body.model_dump(exclude_unset=True)
     if "category_id" in values and db.get(MenuCategory, values["category_id"]) is None:
         raise AppError("invalid_category", "Category not found.", 422)
-    before, after = changes(item, ["price_sen", "cost_sen", "is_active"], values)
+    before, after = changes(item, ["price_sen", "cost_sen", "is_active", "is_popular"], values)
     _apply(item, values)
     if after:
         audit(db, admin.id, "menu_item_changed", "menu_item", item.id, before, after, ip)

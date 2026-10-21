@@ -1,16 +1,16 @@
 from fastapi import APIRouter
 
-from app.deps import DB, StaffUser
+from app.deps import DB, BranchDep, StaffUser
 from app.menu import schemas, service
 
 router = APIRouter(tags=["menu"])
 
 
 @router.get("/menu", response_model=schemas.MenuOut)
-def get_menu(db: DB):
+def get_menu(db: DB, branch: BranchDep):
     # Cached in the process for 30 s and dropped on every change. Not cached by browsers, so a
     # sold-out switch shows at once on the screen that flipped it.
-    return service.public_menu(db)
+    return service.public_menu(db, branch)
 
 
 @router.patch("/staff/menu/items/{item_id}/sold-out", status_code=204)
