@@ -113,6 +113,8 @@ export function ItemDrawer({ item, menu, onClose }: { item: AdminItem | "new" | 
           data={menu.option_groups.map((g) => ({ value: String(g.id), label: g.is_active ? g.name : `${g.name} (${t("admin.menu.hidden")})` }))} />
         <Switch label={t("admin.menu.visible")} checked={form.is_active}
           onChange={(e) => set("is_active", e.currentTarget.checked)} />
+        <Switch label={t("console.menu.popular")} description={t("console.menu.popularHelp")} checked={form.is_popular}
+          onChange={(e) => set("is_popular", e.currentTarget.checked)} />
         {existing && (
           <Switch label={t("menu.soldOutToday")} checked={form.is_sold_out}
             onChange={(e) => set("is_sold_out", e.currentTarget.checked)} />

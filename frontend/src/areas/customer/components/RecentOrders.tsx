@@ -1,4 +1,5 @@
-import { Badge, Group, Paper, ScrollArea, Text, UnstyledButton } from "@mantine/core";
+import { Badge, Box, Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { IconChevronRight } from "@tabler/icons-react";
 import { useQueries } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,7 @@ import type { TrackingOut } from "../../../api/types";
 import { formatDateTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { forgetOrder, loadRecent } from "../../../lib/storage";
+import { radius, tokens } from "../../../ui/tokens";
 
 const FINAL = new Set(["completed", "cancelled"]);
 
@@ -26,7 +28,7 @@ function statusOf(o: TrackingOut): { key: string; color: string } {
   }[o.status] ?? { key: "received", color: "blue" };
 }
 
-/** Guests keep links to their recent orders on this device. No account needed. */
+/** Guests keep links to their recent orders on this device, newest first. No account needed. */
 export function RecentOrders() {
   const { t } = useTranslation();
   const recent = loadRecent();
@@ -49,39 +51,38 @@ export function RecentOrders() {
   }, [results, recent]);
 
   const visible = recent.filter((_, i) => !isApiError(results[i]?.error, "not_found"));
-  if (visible.length === 0) return null;
+  if (visible.length === 0) {
+    return <Text c={tokens.muted} ta="center" mt={60}>{t("customer.ordersEmpty")}</Text>;
+  }
 
   return (
-    <Paper mt="md" p="sm" withBorder>
-      <Text size="sm" fw={600} mb={6}>
-        {t("customer.recentOrders")}
-      </Text>
-      <ScrollArea type="never">
-        <Group gap="xs" wrap="nowrap">
-          {recent.map((o, i) => {
-            const data = results[i]?.data;
-            if (isApiError(results[i]?.error, "not_found")) return null;
-            const status = data ? statusOf(data) : null;
-            return (
-              <UnstyledButton key={o.token} component={Link} to={`/t/${o.token}`}>
-                <Paper px="sm" py={6} bg="gray.0" radius="md" miw={150}>
-                  <Group gap={6} justify="space-between" wrap="nowrap">
-                    <Text fw={700} size="sm">#{o.number}</Text>
-                    {status && (
-                      <Badge size="xs" variant="light" color={status.color}>
-                        {t(`customer.recentStatus.${status.key}`)}
-                      </Badge>
-                    )}
-                  </Group>
-                  <Text size="xs" c="dimmed">
-                    {formatSen(o.totalSen)} · {formatDateTime(o.placedAt)}
-                  </Text>
-                </Paper>
-              </UnstyledButton>
-            );
-          })}
-        </Group>
-      </ScrollArea>
-    </Paper>
+    <Stack gap={10}>
+      {recent.map((o, i) => {
+        const data = results[i]?.data;
+        if (isApiError(results[i]?.error, "not_found")) return null;
+        const status = data ? statusOf(data) : null;
+        return (
+          <UnstyledButton key={o.token} component={Link} to={`/t/${o.token}`} p={14} bg={tokens.card}
+            style={{ borderRadius: radius.card, boxShadow: tokens.cardShadow }}>
+            <Group justify="space-between" wrap="nowrap">
+              <Box miw={0}>
+                <Group gap={8}>
+                  <Text fz={15} fw={600}>#{o.number}</Text>
+                  {status && (
+                    <Badge size="sm" variant="light" color={status.color}>
+                      {t(`customer.recentStatus.${status.key}`)}
+                    </Badge>
+                  )}
+                </Group>
+                <Text fz={13} c={tokens.muted} mt={2}>
+                  {formatSen(o.totalSen)} · {formatDateTime(o.placedAt)}
+                </Text>
+              </Box>
+              <IconChevronRight size={18} color={tokens.muted} />
+            </Group>
+          </UnstyledButton>
+        );
+      })}
+    </Stack>
   );
 }
