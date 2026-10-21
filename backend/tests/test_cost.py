@@ -79,3 +79,74 @@ def test_cost_is_owner_only(client, staff, admin, menu, db):
     ]
     assert not any(has_cost_key(r) for r in responses)
     assert client.get(f"{API}/admin/menu").status_code == 403
+
+
+# --- Profit in reports ----------------------------------------------------------------------------
+
+
+def milo(menu, qty=1):
+    return {"menu_item_id": menu["milo"], "quantity": qty}
+
+
+def report(client, branch, day=None):
+    from app.shop.service import business_date
+    d = (day or business_date(branch)).isoformat()
+    return client.get(f"{API}/admin/reports", params={"date_from": d, "date_to": d}).json()
+
+
+def test_report_profit_margin_and_coverage(client, staff, admin, menu, branch, db):
+    set_costs(db, menu)  # tender 350; Regular adds nothing; milo has no cost
+    login(client, staff.username)
+    counter_order(client, [tender(menu, "Regular", qty=2), milo(menu)], tendered=5000)  # 2000 costed + 450 not
+
+    login(client, admin.username)
+    r = report(client, branch)
+    t = r["totals"]
+    assert (t["food_cost_sen"], t["gross_profit_sen"], t["margin_pct"]) == (700, 1300, 65.0)
+    assert t["cost_coverage_pct"] == round(2000 / 2450 * 100, 1)
+    assert r["periods"][0]["gross_profit_sen"] == 1300
+    items = {i["name"]: i for i in r["items"]}
+    tender_row, milo_row = items["Chicken Tender"], items["Iced Milo"]
+    assert (tender_row["cost_sen"], tender_row["gross_profit_sen"], tender_row["margin_pct"], tender_row["costed"]) \
+        == (700, 1300, 65.0, True)
+    assert (milo_row["gross_profit_sen"], milo_row["margin_pct"], milo_row["costed"]) == (0, None, False)
+
+
+def test_refunded_and_cancelled_orders_excluded_from_profit(client, staff, admin, menu, branch, db):
+    set_costs(db, menu)
+    login(client, staff.username)
+    refunded = counter_order(client, [tender(menu, "Regular")]).json()
+    client.post(f"{API}/staff/orders/{refunded['id']}/transition", json={"to": "completed", "version": 1})
+    cancelled = counter_order(client, [tender(menu, "Regular")]).json()
+    client.post(f"{API}/staff/orders/{cancelled['id']}/cancel",
+                json={"version": 1, "reason": "Mistake", "refund_method": "cash"})
+    counter_order(client, [tender(menu, "Regular")])  # the one real sale
+
+    login(client, admin.username)
+    assert client.post(f"{API}/admin/orders/{refunded['id']}/refund",
+                       json={"reason": "Cold", "refund_method": "cash"}).status_code == 200
+    t = report(client, branch)["totals"]
+    assert (t["food_cost_sen"], t["gross_profit_sen"]) == (350, 650)
+
+
+def test_uncosted_period_has_no_margin(client, staff, admin, menu, branch):
+    from datetime import timedelta
+    from app.shop.service import business_date
+    login(client, staff.username)
+    counter_order(client, [milo(menu)])
+
+    login(client, admin.username)
+    t = report(client, branch)["totals"]
+    assert (t["gross_profit_sen"], t["margin_pct"], t["cost_coverage_pct"]) == (0, None, 0.0)
+    empty = report(client, branch, business_date(branch) - timedelta(days=1))["totals"]
+    assert (empty["margin_pct"], empty["cost_coverage_pct"]) == (None, None)
+
+
+def test_cost_change_does_not_change_past_profit(client, staff, admin, menu, branch, db):
+    set_costs(db, menu)
+    login(client, staff.username)
+    counter_order(client, [tender(menu, "Regular")])
+
+    login(client, admin.username)
+    client.patch(f"{API}/admin/menu/items/{menu['tender']}", json={"cost_sen": 900})
+    assert report(client, branch)["totals"]["gross_profit_sen"] == 1000 - 350

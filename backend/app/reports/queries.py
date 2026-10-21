@@ -65,6 +65,37 @@ def _money(db: Session, branch: Branch, start: date, end: date, until: datetime 
     ).all()
 
 
+def _profit_rows(db: Session, branch: Branch, start: date, end: date, until: datetime | None = None):
+    """Per business date and item: (date, item, all line sales, costed line sales, food cost, uncosted lines).
+
+    Same base as sales: paid, non-cancelled orders. Lines sold without a cost are left out of profit.
+    """
+    costed = OrderItem.unit_cost_sen.is_not(None)
+    return db.execute(
+        select(Order.business_date, OrderItem.menu_item_id,
+               func.coalesce(func.sum(OrderItem.line_total_sen), 0),
+               func.coalesce(func.sum(case((costed, OrderItem.line_total_sen), else_=0)), 0),
+               func.coalesce(func.sum(case((costed, OrderItem.unit_cost_sen * OrderItem.quantity), else_=0)), 0),
+               func.coalesce(func.sum(case((costed, 0), else_=1)), 0))
+        .join(Order, Order.id == OrderItem.order_id)
+        .where(*_sales(branch, start, end), *placed_by(until))
+        .group_by(Order.business_date, OrderItem.menu_item_id)
+    ).all()
+
+
+def _profit(db: Session, branch: Branch, start: date, end: date,
+            until: datetime | None = None) -> tuple[int, int, int]:
+    """(all line sales, costed line sales, food cost) over the range."""
+    all_sales = costed = cost = 0
+    for _, _, a, c, f, _ in _profit_rows(db, branch, start, end, until):
+        all_sales, costed, cost = all_sales + int(a), costed + int(c), cost + int(f)
+    return all_sales, costed, cost
+
+
+def _margin(costed_sen: int, cost_sen: int) -> float | None:
+    return round((costed_sen - cost_sen) / costed_sen * 100, 1) if costed_sen else None
+
+
 def totals(db: Session, branch: Branch, start: date, end: date, until: datetime | None = None) -> schemas.Totals:
     count, sales, online = db.execute(
         select(func.count(Order.id), func.coalesce(func.sum(Order.total_sen), 0),
@@ -78,9 +109,12 @@ def totals(db: Session, branch: Branch, start: date, end: date, until: datetime 
             gross += int(amount)
         else:
             refunds += int(amount)
+    all_sales, costed, cost = _profit(db, branch, start, end, until)
     return schemas.Totals(sales_sen=sales, orders=count, avg_order_sen=sales // count if count else 0,
                           online_orders=online, counter_orders=count - online,
-                          gross_sen=gross, refunds_sen=refunds, net_sen=gross - refunds)
+                          gross_sen=gross, refunds_sen=refunds, net_sen=gross - refunds,
+                          food_cost_sen=cost, gross_profit_sen=costed - cost, margin_pct=_margin(costed, cost),
+                          cost_coverage_pct=round(costed / all_sales * 100, 1) if all_sales else None)
 
 
 def daily(db: Session, branch: Branch, start: date, end: date) -> dict[date, tuple[int, int]]:
@@ -138,9 +172,14 @@ def periods(db: Session, branch: Branch, start: date, end: date, group_by: str) 
         by_hour = hour_sales.get(key)
         return max(by_hour, key=lambda h: (by_hour[h], -h)) if by_hour else None
 
+    profit: dict[date, int] = defaultdict(int)
+    for day, _, _, costed, cost, _ in _profit_rows(db, branch, start, end):
+        profit[_period_start(day, group_by)] += int(costed) - int(cost)
+
     return [schemas.PeriodRow(period=_period_label(k, group_by), start=k, sales_sen=s, orders=o,
                               avg_order_sen=s // o if o else 0, refunds_sen=refunds.get(k, 0),
-                              methods=dict(methods.get(k, {})), peak_hour=peak(k))
+                              methods=dict(methods.get(k, {})), peak_hour=peak(k),
+                              gross_profit_sen=profit.get(k, 0))
             for k, (s, o) in sorted(buckets.items())]
 
 
@@ -172,11 +211,22 @@ def items(db: Session, branch: Branch, start: date, end: date, limit: int | None
             .group_by(OrderItem.menu_item_id)
         ).all()
     }
+    # menu_item_id -> [costed line sales, food cost, uncosted lines]
+    costs: dict[int, list[int]] = defaultdict(lambda: [0, 0, 0])
+    for _, mid, _, costed, cost, uncosted in _profit_rows(db, branch, start, end):
+        row = costs[mid]
+        row[0], row[1], row[2] = row[0] + int(costed), row[1] + int(cost), row[2] + int(uncosted)
     menu = db.execute(select(MenuItem.id, MenuItem.name, MenuCategory.name, MenuItem.is_active)
                       .join(MenuCategory, MenuCategory.id == MenuItem.category_id)).all()
-    rows = [schemas.ItemRow(menu_item_id=mid, name=name, category=cat, quantity=sold.get(mid, (0, 0))[0],
-                            sales_sen=sold.get(mid, (0, 0))[1], is_active=active)
-            for mid, name, cat, active in menu if mid in sold or active]
+    rows = []
+    for mid, name, cat, active in menu:
+        if mid not in sold and not active:
+            continue
+        costed, cost, uncosted = costs.get(mid, (0, 0, 0))
+        rows.append(schemas.ItemRow(
+            menu_item_id=mid, name=name, category=cat, quantity=sold.get(mid, (0, 0))[0],
+            sales_sen=sold.get(mid, (0, 0))[1], is_active=active, cost_sen=cost,
+            gross_profit_sen=costed - cost, margin_pct=_margin(costed, cost), costed=uncosted == 0))
     rows.sort(key=lambda r: (-r.quantity, -r.sales_sen, r.name))
     return rows[:limit] if limit else rows
 

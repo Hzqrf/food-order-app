@@ -48,7 +48,8 @@ def test_dashboard_counts_only_paid_live_orders(client, staff, admin, menu, bran
     login(client, admin.username)
     d = client.get(f"{API}/admin/dashboard").json()
     assert d["today"] == {"sales_sen": 1450, "orders": 2, "avg_order_sen": 725, "online_orders": 1,
-                          "counter_orders": 1, "gross_sen": 1450, "refunds_sen": 0, "net_sen": 1450}
+                          "counter_orders": 1, "gross_sen": 1450, "refunds_sen": 0, "net_sen": 1450,
+                          "food_cost_sen": 0, "gross_profit_sen": 0, "margin_pct": None, "cost_coverage_pct": 0.0}
     assert d["live"] == {"placed": 2, "preparing": 0, "ready": 0, "awaiting_payment": 1}
     assert {(i["name"], i["quantity"]) for i in d["top_items"]} == {("Chicken Tender", 1), ("Iced Milo", 1)}
     assert len(d["last_14_days"]) == 14 and d["last_14_days"][-1]["sales_sen"] == 1450

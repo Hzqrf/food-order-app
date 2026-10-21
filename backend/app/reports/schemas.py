@@ -33,6 +33,11 @@ class Totals(BaseModel):
     gross_sen: int  # charges that succeeded
     refunds_sen: int  # refunds that succeeded
     net_sen: int  # gross - refunds
+    # Owner-only food cost. Counted only over lines that had a cost when sold (see spec).
+    food_cost_sen: int
+    gross_profit_sen: int  # costed sales - their food cost
+    margin_pct: float | None  # gross profit / costed sales; None without costed sales
+    cost_coverage_pct: float | None  # share of sales that had a cost; None without sales
 
 
 class LiveCounts(BaseModel):
@@ -103,6 +108,7 @@ class PeriodRow(BaseModel):
     refunds_sen: int
     methods: dict[str, int]  # net per payment method
     peak_hour: int | None  # shop-time hour with the most sales
+    gross_profit_sen: int
 
 
 class HourRow(BaseModel):
@@ -119,6 +125,10 @@ class ItemRow(BaseModel):
     quantity: int
     sales_sen: int
     is_active: bool
+    cost_sen: int  # food cost of this item's lines that had a cost
+    gross_profit_sen: int
+    margin_pct: float | None
+    costed: bool  # every sold line had a cost (true when nothing sold)
 
 
 class ChannelRow(BaseModel):
