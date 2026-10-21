@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { type OrderFilters, ordersCsvUrl, useAdminOrders, useReport, useStaffList } from "../../../api/admin";
+import type { Report } from "../../../api/types";
 import { BarChart } from "../../../components/BarChart";
 import { ErrorState } from "../../../components/ErrorState";
 import { formatDateTime, shortDay } from "../../../lib/dates";
@@ -42,6 +43,12 @@ export default function SalesHistoryPage() {
   const set = (k: keyof OrderFilters) => (v: string | null) => setFilters((f) => ({ ...f, [k]: v ?? undefined }));
 
   const oneDay = period.date_from === period.date_to;
+  // Profit only counts lines sold with a cost; say how much of the period that is until it's all costed.
+  const profitLabel = (totals: Report["totals"]) => {
+    if (totals.cost_coverage_pct === null) return t("console.cost.noSales");
+    if (totals.cost_coverage_pct < 100) return t("console.cost.coverageLabel", { pct: totals.cost_coverage_pct });
+    return t("console.cost.marginLabel", { pct: totals.margin_pct ?? 0 });
+  };
   const periodLabel = oneDay ? shortDay(period.date_from) : `${shortDay(period.date_from)} – ${shortDay(period.date_to)}`;
   const compare = t(oneDay ? "console.sales.vsDayBefore" : "console.sales.vsPreviousPeriod");
 
@@ -79,7 +86,7 @@ export default function SalesHistoryPage() {
         <Text c="dimmed">{t("common.loading")}</Text>
       ) : (
         <Stack gap={20} style={{ opacity: report.isPlaceholderData ? 0.6 : 1, transition: "opacity 150ms" }}>
-          <SimpleGrid cols={{ base: 1, xs: 3 }} spacing={{ base: 12, sm: 20 }}>
+          <SimpleGrid cols={{ base: 2, md: 4 }} spacing={{ base: 12, sm: 20 }}>
             <MetricCard label={t("console.sales.gross")} value={formatSen(r.totals.gross_sen)}
               {...percentChange(r.totals.gross_sen, r.previous.gross_sen)} deltaLabel={compare} />
             <MetricCard label={t("console.sales.refunds")} value={formatSen(r.totals.refunds_sen)} good="down"
@@ -87,6 +94,9 @@ export default function SalesHistoryPage() {
             <MetricCard label={t("console.sales.net")} value={formatSen(r.totals.net_sen)}
               {...percentChange(r.totals.net_sen, r.previous.net_sen)}
               deltaLabel={t("console.sales.ordersHint", { count: r.totals.orders })} />
+            <MetricCard label={t("console.cost.grossProfit")} value={formatSen(r.totals.gross_profit_sen)}
+              {...percentChange(r.totals.gross_profit_sen, r.previous.gross_profit_sen)}
+              deltaLabel={profitLabel(r.totals)} />
           </SimpleGrid>
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing={20}>
             <BarChart title={t(oneDay ? "console.sales.byHour" : "console.sales.byDay")} sub={periodLabel}

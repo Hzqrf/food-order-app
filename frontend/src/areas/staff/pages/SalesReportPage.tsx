@@ -51,7 +51,7 @@ export default function SalesReportPage() {
 
           <Tabs.Panel value="day">
             <SectionCard padded={false}>
-              <Table.ScrollContainer minWidth={960}>
+              <Table.ScrollContainer minWidth={1060}>
                 <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="lg">
                   <Table.Thead>
                     <Table.Tr>
@@ -60,6 +60,7 @@ export default function SalesReportPage() {
                       <Table.Th ta="right">{t("console.sales.gross")}</Table.Th>
                       <Table.Th ta="right">{t("console.sales.refunds")}</Table.Th>
                       <Table.Th ta="right">{t("console.sales.net")}</Table.Th>
+                      <Table.Th ta="right">{t("console.cost.grossProfit")}</Table.Th>
                       {METHODS.map((m) => <Table.Th key={m} ta="right">{t(`paymentMethod.${m}`)}</Table.Th>)}
                       <Table.Th>{t("console.report.peakHour")}</Table.Th>
                     </Table.Tr>
@@ -75,6 +76,7 @@ export default function SalesReportPage() {
                         <Table.Td ta="right" {...num}>{formatSen(net + p.refunds_sen)}</Table.Td>
                         <Table.Td ta="right" {...num}>{p.refunds_sen ? `−${formatSen(p.refunds_sen)}` : "—"}</Table.Td>
                         <Table.Td ta="right" fw={600} {...num}>{formatSen(net)}</Table.Td>
+                        <Table.Td ta="right" {...num}>{p.gross_profit_sen ? formatSen(p.gross_profit_sen) : "—"}</Table.Td>
                         {METHODS.map((m) => (
                           <Table.Td key={m} ta="right" {...num}>{p.methods[m] ? formatSen(p.methods[m]) : "—"}</Table.Td>
                         ))}
@@ -90,6 +92,7 @@ export default function SalesReportPage() {
                       <Table.Td ta="right" {...num}>{formatSen(r.totals.gross_sen)}</Table.Td>
                       <Table.Td ta="right" {...num}>{r.totals.refunds_sen ? `−${formatSen(r.totals.refunds_sen)}` : "—"}</Table.Td>
                       <Table.Td ta="right" {...num}>{formatSen(r.totals.net_sen)}</Table.Td>
+                      <Table.Td ta="right" {...num}>{formatSen(r.totals.gross_profit_sen)}</Table.Td>
                       {METHODS.map((m) => {
                         const total = r.periods.reduce((s, p) => s + (p.methods[m] ?? 0), 0);
                         return <Table.Td key={m} ta="right" {...num}>{formatSen(total)}</Table.Td>;
@@ -99,13 +102,14 @@ export default function SalesReportPage() {
                   </Table.Tfoot>
                 </Table>
               </Table.ScrollContainer>
-              <Text fz={12} c="dimmed" px={24} py={12}>{t("console.report.moneyDefinition")}</Text>
+              <Text fz={12} c="dimmed" px={24} pt={12}>{t("console.report.moneyDefinition")}</Text>
+              <Text fz={12} c="dimmed" px={24} pb={12}>{t("console.cost.profitDefinition")}</Text>
             </SectionCard>
           </Tabs.Panel>
 
           <Tabs.Panel value="item">
             <SectionCard padded={false}>
-              <Table.ScrollContainer minWidth={420}>
+              <Table.ScrollContainer minWidth={680}>
                 <Table striped verticalSpacing="sm" horizontalSpacing="lg">
                   <Table.Thead>
                     <Table.Tr>
@@ -113,6 +117,9 @@ export default function SalesReportPage() {
                       <Table.Th>{t("admin.menu.category")}</Table.Th>
                       <Table.Th ta="right">{t("admin.reports.qty")}</Table.Th>
                       <Table.Th ta="right">{t("admin.reports.sales")}</Table.Th>
+                      <Table.Th ta="right">{t("console.cost.cost")}</Table.Th>
+                      <Table.Th ta="right">{t("console.cost.profit")}</Table.Th>
+                      <Table.Th ta="right">{t("console.cost.margin")}</Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
@@ -121,10 +128,18 @@ export default function SalesReportPage() {
                         <Table.Td>
                           {i.name}{" "}
                           {i.quantity === 0 && <Badge size="xs" color="gray" variant="light">{t("admin.reports.notSold")}</Badge>}
+                          {i.quantity > 0 && !i.costed && (
+                            <Badge size="xs" color="yellow" variant="light">{t("console.cost.notSet")}</Badge>
+                          )}
                         </Table.Td>
                         <Table.Td c={tokens.muted}>{i.category ?? "—"}</Table.Td>
                         <Table.Td ta="right" {...num}>{i.quantity}</Table.Td>
                         <Table.Td ta="right" {...num}>{formatSen(i.sales_sen)}</Table.Td>
+                        <Table.Td ta="right" {...num}>{i.cost_sen ? formatSen(i.cost_sen) : "—"}</Table.Td>
+                        <Table.Td ta="right" {...num}>{i.margin_pct === null ? "—" : formatSen(i.gross_profit_sen)}</Table.Td>
+                        <Table.Td ta="right" {...num} c={i.margin_pct !== null && i.margin_pct < 0 ? "red.7" : undefined}>
+                          {i.margin_pct === null ? "—" : `${i.margin_pct}%`}
+                        </Table.Td>
                       </Table.Tr>
                     ))}
                   </Table.Tbody>

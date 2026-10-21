@@ -240,21 +240,24 @@ The **Online orders** switch at the bottom of the sidebar pauses new online orde
 
 Sign in at `/login` with the owner email and password. The owner uses every **Operations** page
 above; on **Menu** they also edit items (photos, prices, option groups, categories, order of
-display), hide items from the customer menu, and see units sold in the last 7 days. The
+display), hide items from the customer menu, see units sold in the last 7 days, and set a **food cost** on
+each item and an extra cost on options, with the margin shown as you type. The
 **Management** pages:
 
 | Page | What it does |
 | --- | --- |
 | **Sales Dashboard** | Today's net sales, orders, average order and cancellations against the same day last week; sales by hour; top items; what is happening right now, with the pause switch; and **Needs attention**, which lists anything the owner must act on and is empty on a good day. Click an entry to open the order |
-| **Sales History** | Pick a day, a month or a date range. Gross sales, refunds and net sales against the previous period, sales by hour or by day, payment methods, then every order in the period with filters (status, payment, channel, who keyed it in) and search. **Download CSV** gives one row per order for the accountant |
-| **Sales Report** | Pick a day, a month or a date range. **By day**: orders, gross, refunds, net, each payment method and the peak hour. **By item** (unsold items included), **Online vs counter**, and **Cancellations and refunds** |
+| **Sales History** | Pick a day, a month or a date range. Gross sales, refunds, net sales and **gross profit** against the previous period, sales by hour or by day, payment methods, then every order in the period with filters (status, payment, channel, who keyed it in) and search. **Download CSV** gives one row per order for the accountant |
+| **Sales Report** | Pick a day, a month or a date range. **By day**: orders, gross, refunds, net, gross profit, each payment method and the peak hour. **By item** (unsold items included, with cost, profit and margin), **Online vs counter**, and **Cancellations and refunds** |
 | **Staff & Roles** | Add people, edit their details and role, set their tablet PIN, reset passwords, deactivate leavers (their history is kept) |
 | **Audit Log** | Who changed what and when: prices, refunds, cancellations of paid orders, staff changes, settings, owner sign-ins. Filter by date or action. Nobody can edit or delete entries |
 | **Settings** | Shop name and opening hours, usual prep time, pausing online orders, registering the shop tablet, two-step sign-in, changing your password |
 
 **How sales are counted:** by business day (a day runs from 4 am to 4 am, so a late-night sale counts
 towards the evening before). **Gross** is money taken on that day's orders that were not cancelled,
-**Refunds** is money given back on them, and **Net** is what the shop kept. The payment-methods
+**Refunds** is money given back on them, and **Net** is what the shop kept. **Gross profit** is sales
+minus food cost, counted only for lines that had a food cost when they were sold; until every item has
+a cost, Sales History says what share of sales the profit covers. Costs and profit are owner-only. The payment-methods
 table in Sales History is different on purpose: it shows money that actually moved in the period,
 including payments for orders later cancelled, so the cash row can be checked against the drawer.
 
