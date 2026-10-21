@@ -15,12 +15,12 @@ function shopClock(timeZone: string, now: Date): { day: number; minutes: number 
 }
 
 /**
- * When the shop closes today, or when it next opens and how many days from now, from the weekly
+ * When the shop closes today, or when it next opens (how many days from now, and that day's key), from the weekly
  * hours in the shop's timezone. A window that ends before it starts runs past midnight.
  * Null when the shop has no hours at all.
  */
 export function hoursLine(shop: ShopOut, now = new Date()):
-  { openUntil: string } | { opensAt: string; dayOffset: number } | null {
+  { openUntil: string } | { opensAt: string; dayOffset: number; day: string } | null {
   const { day, minutes } = shopClock(shop.timezone, now);
   const windows = (d: number) => (shop.opening_hours[DAYS[(d + 7) % 7]] ?? []) as string[][];
 
@@ -35,7 +35,7 @@ export function hoursLine(shop: ShopOut, now = new Date()):
   for (let offset = 0; offset < 8; offset++) {
     const starts = windows(day + offset).map(([start]) => start)
       .filter((start) => offset > 0 || toMinutes(start) > minutes).sort();
-    if (starts.length) return { opensAt: starts[0], dayOffset: offset };
+    if (starts.length) return { opensAt: starts[0], dayOffset: offset, day: DAYS[(day + offset) % 7] };
   }
   return null;
 }

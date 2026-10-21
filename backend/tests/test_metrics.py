@@ -139,3 +139,14 @@ def test_shop_reports_extra_wait(client, staff_client, menu, db):
     assert set(body) == {"name", "is_open", "is_accepting_online_orders", "can_order_online",
                          "online_payments_enabled", "prep_minutes", "opening_hours", "timezone",
                          "extra_wait_minutes"}
+
+
+def test_extra_wait_ignores_orders_from_earlier_days(staff_client, menu, db, branch):
+    """A forgotten order from yesterday must not keep today's busy banner up."""
+    now = utcnow()
+    a = late(staff_client, menu, db, now, 10)
+    b = late(staff_client, menu, db, now, 10)
+    yesterday = business_date(branch, now) - timedelta(days=1)
+    set_order(db, a, business_date=yesterday)
+    set_order(db, b, business_date=yesterday)
+    assert extra_wait_minutes(db, branch, now) == 0

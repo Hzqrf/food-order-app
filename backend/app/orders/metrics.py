@@ -42,7 +42,9 @@ def extra_wait_minutes(db: Session, branch: Branch, now: datetime | None = None)
     """How much longer pickups are running, for the customers' busy banner. 0 unless at least two
     orders are late; then their average lateness, rounded up to 5 minutes and capped at an hour."""
     now = now or utcnow()
-    placed = db.scalars(select(Order.placed_at).where(*_late(branch, now))).all()
+    # Today's orders only: one left open from yesterday must not keep the banner up all day.
+    placed = db.scalars(select(Order.placed_at).where(
+        *_late(branch, now), Order.business_date == business_date(branch, now))).all()
     if len(placed) < EXTRA_WAIT_MIN_LATE:
         return 0
     promise = timedelta(minutes=branch.prep_minutes)
