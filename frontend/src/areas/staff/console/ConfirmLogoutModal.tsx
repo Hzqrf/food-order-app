@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBoard } from "../../../api/orders";
 import { tileStyle } from "./SectionCard";
-import { tokens } from "./tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** "Log out of the console?" with how many orders are still in the kitchen. */
 export function ConfirmLogoutModal({ opened, busy, onClose, onConfirm }: {

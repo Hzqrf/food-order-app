@@ -1,4 +1,4 @@
-// Design tokens from the Staff Console design. The only hex values console code may use.
+// Design tokens shared by the Staff Console and the customer app. The only hex values either may use.
 export const tokens = {
   pageBg: "#F4F5F7",
   card: "#FFFFFF",
@@ -18,6 +18,11 @@ export const tokens = {
   danger: "#F04438",
   dangerBg: "#FEF3F2",
   warning: "#F79009",
+  // Customer app
+  placeholderBg: "#fff7ed",
+  placeholderText: "#c2410c",
+  busyBg: "#FEF6E7",
+  choiceBorder: "#D0D5DD",
 } as const;
 
 export const radius = { button: 6, tile: 12, card: 16 } as const;

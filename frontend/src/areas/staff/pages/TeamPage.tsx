@@ -31,7 +31,7 @@ import { notifyError } from "../../../components/errors";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 type Role = "staff" | "admin";
 

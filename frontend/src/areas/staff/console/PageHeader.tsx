@@ -3,7 +3,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { radius, tokens } from "./tokens";
+import { radius, tokens } from "../../../ui/tokens";
 
 export function PageHeader({ title, subtitle, actions, back }: {
   title: string;

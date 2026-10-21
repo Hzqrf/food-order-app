@@ -18,7 +18,7 @@ import { SectionCard, tileStyle } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
 import { toast } from "../console/toast";
 import type { QueueState } from "./BoardPage";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** Every forward move staff may make, including skips, so a drink can go straight to Collected. */
 const FORWARD: Record<string, string[]> = {

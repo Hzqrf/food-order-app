@@ -11,7 +11,7 @@ import { formatSen } from "../../../lib/money";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 export default function SearchPage() {
   const { t } = useTranslation();

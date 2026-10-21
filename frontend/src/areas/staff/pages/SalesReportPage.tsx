@@ -10,7 +10,7 @@ import { formatSen } from "../../../lib/money";
 import { PageHeader } from "../console/PageHeader";
 import { defaultPeriod, type Period, PeriodPicker } from "../console/PeriodPicker";
 import { SectionCard } from "../console/SectionCard";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 const METHODS = ["cash", "qr_counter", "card_terminal", "gateway"] as const;
 const num = { style: { fontVariantNumeric: "tabular-nums" as const } };

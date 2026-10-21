@@ -6,7 +6,7 @@ import type { OrderSummary } from "../../../api/types";
 import { formatSen } from "../../../lib/money";
 import { minutesSince } from "../../../lib/dates";
 import { tileStyle } from "../console/SectionCard";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 import classes from "./OrderCard.module.css";
 
 export const NEXT_STEP: Record<string, { to: string; label: string } | undefined> = {

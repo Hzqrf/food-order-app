@@ -18,7 +18,7 @@ import { ItemPhoto } from "../console/ItemPhoto";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** One row of the menu table, whether it came from the owner's or the public menu. */
 type Row = {

@@ -2,7 +2,7 @@ import { Group, Text } from "@mantine/core";
 import { IconArrowDownRight, IconArrowUpRight } from "@tabler/icons-react";
 
 import { SectionCard } from "./SectionCard";
-import { tokens } from "./tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** A label, one loud number and an optional change against a comparison period. Null shows a dash. */
 export function MetricCard({ label, value, delta, direction, good = "up", deltaLabel }: {

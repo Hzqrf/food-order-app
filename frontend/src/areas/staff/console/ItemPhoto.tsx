@@ -1,7 +1,7 @@
 import { Box, Image } from "@mantine/core";
 import { IconPhoto } from "@tabler/icons-react";
 
-import { tokens } from "./tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** A menu item's square thumbnail, or a grey placeholder when it has no photo yet. */
 export function ItemPhoto({ url, size = 48 }: { url: string | null; size?: number }) {

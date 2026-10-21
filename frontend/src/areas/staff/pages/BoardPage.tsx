@@ -22,7 +22,7 @@ import { PageHeader } from "../console/PageHeader";
 import { SectionCard } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
 import { toast } from "../console/toast";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 const COLUMNS = [
   { status: "placed", label: "board.columns.new", short: "board.columns.new" },

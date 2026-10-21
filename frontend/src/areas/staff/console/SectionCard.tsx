@@ -1,7 +1,7 @@
 import { Box, Group, Paper, type PaperProps, Title } from "@mantine/core";
 import type { ReactNode } from "react";
 
-import { radius, tokens } from "./tokens";
+import { radius, tokens } from "../../../ui/tokens";
 
 /** The design's white card: optional header row (title left, actions right) over a body. */
 export function SectionCard({

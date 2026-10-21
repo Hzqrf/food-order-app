@@ -1,6 +1,6 @@
 import { notifications } from "@mantine/notifications";
 
-import { tokens } from "./tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** The design's dark toast, bottom-right. Console only; customer pages keep their own notifications. */
 export function toast(message: string, kind: "success" | "error" = "success"): void {

@@ -1,56 +1,42 @@
-import { Badge, Box, Container, Group, Text, Title, UnstyledButton } from "@mantine/core";
+import "@fontsource-variable/inter";
+
+import { Box } from "@mantine/core";
 import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { Link, Outlet, useLocation } from "react-router";
+import { Outlet, useLocation } from "react-router";
 
 import { useShop } from "../../api/menu";
-import { LanguageSwitch } from "../../components/LanguageSwitch";
-import { CartProvider } from "./cart";
-import { CartBar } from "./components/CartBar";
+import { tokens } from "../../ui/tokens";
+import { CartProvider, useCart } from "./cart";
+import { TabBar } from "./ui/TabBar";
+
+const TAB_PAGES = new Set(["/", "/cart", "/orders"]);
 
 /** Customers only ever see the shop's own name. The product brand stays out of their way. */
 export default function CustomerLayout() {
-  const { t } = useTranslation();
+  return (
+    <CartProvider>
+      <Shell />
+    </CartProvider>
+  );
+}
+
+function Shell() {
   const { data: shop } = useShop();
+  const cart = useCart();
   const { pathname } = useLocation();
-  const showCartBar = pathname === "/";
+  const tabs = TAB_PAGES.has(pathname);
 
   useEffect(() => {
     if (shop && !pathname.startsWith("/t/")) document.title = shop.name;
   }, [shop, pathname]);
 
   return (
-    <CartProvider>
-      <Box mih="100vh" bg="gray.0">
-        <Box component="header" bg="white" style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}>
-          <Container size="sm" py="sm" px="md">
-            <Group justify="space-between" wrap="nowrap">
-              <UnstyledButton component={Link} to="/" miw={0}>
-                <Title order={3} lineClamp={1}>
-                  {shop?.name ?? " "}
-                </Title>
-                {shop && (
-                  <Group gap={6}>
-                    <Badge size="sm" variant="dot" color={shop.is_open ? "green" : "gray"}>
-                      {shop.is_open ? t("shop.open") : t("shop.closed")}
-                    </Badge>
-                    {shop.is_open && (
-                      <Text size="xs" c="dimmed">
-                        {t("shop.prepTime", { minutes: shop.prep_minutes })}
-                      </Text>
-                    )}
-                  </Group>
-                )}
-              </UnstyledButton>
-              <LanguageSwitch />
-            </Group>
-          </Container>
-        </Box>
-        <Container size="sm" px="md" pb={showCartBar ? 110 : "xl"}>
-          <Outlet />
-        </Container>
-        {showCartBar && <CartBar />}
+    <Box mih="100vh" bg={tokens.pageBg} c={tokens.text} style={{ fontFamily: "'Inter Variable', sans-serif" }}>
+      <Box maw={480} mx="auto" px={16} pb={tabs ? 96 : 24}>
+        <Outlet />
       </Box>
-    </CartProvider>
+      {/* Keep the Cart tab while something is in it, so a paused shop never hides a customer's cart. */}
+      {tabs && <TabBar cartCount={cart.count} showCart={Boolean(shop?.can_order_online) || cart.count > 0} />}
+    </Box>
   );
 }

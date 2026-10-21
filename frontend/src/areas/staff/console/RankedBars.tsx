@@ -1,6 +1,6 @@
 import { Box, Table, Text } from "@mantine/core";
 
-import { tokens } from "./tokens";
+import { tokens } from "../../../ui/tokens";
 
 /** The design's ranked bar table: label, a bar for its share, the value and the share in percent. */
 export function RankedBars({ rows, headers, format }: {

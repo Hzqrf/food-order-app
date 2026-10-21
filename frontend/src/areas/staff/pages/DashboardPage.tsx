@@ -16,7 +16,7 @@ import { MetricCard } from "../console/MetricCard";
 import { PageHeader } from "../console/PageHeader";
 import { RankedBars } from "../console/RankedBars";
 import { SectionCard } from "../console/SectionCard";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 
 const ATTENTION_ICON = {
   paid_but_cancelled: IconReceiptRefund,

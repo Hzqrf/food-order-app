@@ -34,7 +34,7 @@ import { PinPad } from "../components/PinPad";
 import { ConfirmLogoutModal } from "./ConfirmLogoutModal";
 import { LockContext } from "./lock";
 import { NAV, type NavItem } from "./nav";
-import { radius, tokens } from "./tokens";
+import { radius, tokens } from "../../../ui/tokens";
 
 const IDLE_LOCK_MS = 5 * 60_000;
 

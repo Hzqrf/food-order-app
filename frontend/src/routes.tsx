@@ -13,6 +13,8 @@ const CustomerMenuPage = lazy(() => import("./areas/customer/pages/MenuPage"));
 const CartPage = lazy(() => import("./areas/customer/pages/CartPage"));
 const CheckoutPage = lazy(() => import("./areas/customer/pages/CheckoutPage"));
 const OrderPage = lazy(() => import("./areas/customer/pages/OrderPage"));
+const ItemPage = lazy(() => import("./areas/customer/pages/ItemPage"));
+const OrdersPage = lazy(() => import("./areas/customer/pages/OrdersPage"));
 
 const LoginPage = lazy(() => import("./areas/staff/pages/LoginPage"));
 const ConsoleLayout = lazy(() => import("./areas/staff/console/ConsoleLayout"));
@@ -61,7 +63,9 @@ export const router = createBrowserRouter([
     errorElement,
     children: [
       { index: true, element: <Lazy><CustomerMenuPage /></Lazy> },
+      { path: "item/:id", element: <Lazy><ItemPage /></Lazy> },
       { path: "cart", element: <Lazy><CartPage /></Lazy> },
+      { path: "orders", element: <Lazy><OrdersPage /></Lazy> },
       { path: "checkout", element: <Lazy><CheckoutPage /></Lazy> },
       { path: "t/:token", element: <Lazy><OrderPage /></Lazy> },
     ],

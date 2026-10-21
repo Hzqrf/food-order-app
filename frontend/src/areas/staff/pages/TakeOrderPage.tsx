@@ -43,7 +43,7 @@ import { PaymentModal } from "../components/PaymentModal";
 import { ItemPhoto } from "../console/ItemPhoto";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard, tileStyle } from "../console/SectionCard";
-import { tokens } from "../console/tokens";
+import { tokens } from "../../../ui/tokens";
 import type { SentNotice } from "./BoardPage";
 
 const METHODS: PaymentMethod[] = ["cash", "qr_counter", "card_terminal"];

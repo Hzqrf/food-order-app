@@ -51,7 +51,9 @@
     "pausedTitle": "Pesanan dalam talian dihentikan seketika",
     "pausedBody": "Kami sangat sibuk. Sila pesan di kaunter atau cuba sebentar lagi.",
     "counterOnlyTitle": "Pesan di kaunter",
-    "counterOnlyBody": "Pesanan dalam talian belum tersedia. Lihat menu, kemudian pesan di kaunter."
+    "counterOnlyBody": "Pesanan dalam talian belum tersedia. Lihat menu, kemudian pesan di kaunter.",
+    "openUntil": "Buka hingga {{time}} · {{minutes}} min disediakan",
+    "closedOpensAt": "Tutup · buka {{when}}"
   },
   "menu": {
     "empty": "Menu sedang disediakan.",
@@ -470,7 +472,26 @@
       "done": "Selesai",
       "cancelled": "Dibatalkan",
       "paymentFailed": "Bayaran gagal"
-    }
+    },
+    "search": "Cari menu",
+    "noMatch": "Tiada item sepadan dengan \"{{q}}\"",
+    "popular": "Popular",
+    "popularSection": "Popular minggu ini",
+    "busy": "Dapur sedang sibuk. Masa ambil pesanan lebih lama kira-kira {{minutes}} minit.",
+    "tab": {
+      "menu": "Menu",
+      "cart": "Troli",
+      "orders": "Pesanan"
+    },
+    "itemGone": "Item ini sudah tiada dalam menu",
+    "orderAtCounter": "Pesan di kaunter",
+    "addToCart": "Tambah ke troli · {{total}}",
+    "pickup": "Ambil pesanan",
+    "pickupAsap": "Secepat mungkin · siap sekitar {{time}}",
+    "whoCollecting": "Siapa yang mengambil",
+    "name": "Nama",
+    "payment": "Pembayaran",
+    "ordersEmpty": "Pesanan yang anda buat di telefon ini akan dipaparkan di sini."
   },
   "tracking": {
     "readyTitle": "Sedia untuk diambil",
@@ -498,7 +519,11 @@
     "expiresIn": "Bayar dalam {{time}} atau pesanan dibatalkan.",
     "payNow": "Bayar {{total}} sekarang",
     "cancelUnpaid": "Batalkan pesanan ini",
-    "orderAgain": "Pesan semula"
+    "orderAgain": "Pesan semula",
+    "readyAt": "Sedia untuk diambil sekitar {{time}}",
+    "runningLate": "Sedikit lewat. Tidak lama lagi.",
+    "readyNow": "Sudah siap. Tunjukkan kod ini di kaunter.",
+    "inThisOrder": "Dalam pesanan ini"
   },
   "charts": {
     "chart": "Carta",
@@ -638,7 +663,9 @@
       "inStock": "Ada stok",
       "onMenu": "Dalam menu",
       "inStockFor": "{{name}} ada stok",
-      "onMenuFor": "Tunjuk {{name}} dalam menu pelanggan"
+      "onMenuFor": "Tunjuk {{name}} dalam menu pelanggan",
+      "popular": "Papar sebagai Popular",
+      "popularHelp": "Jika tiada yang dipilih, 3 item paling laris dipaparkan secara automatik."
     },
     "period": {
       "daily": "Harian",

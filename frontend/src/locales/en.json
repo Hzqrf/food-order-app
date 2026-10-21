@@ -51,7 +51,9 @@
     "pausedTitle": "Online orders are paused",
     "pausedBody": "We're very busy. Please order at the counter or try again shortly.",
     "counterOnlyTitle": "Order at the counter",
-    "counterOnlyBody": "Online ordering isn't available yet. Have a look at the menu, then order at the counter."
+    "counterOnlyBody": "Online ordering isn't available yet. Have a look at the menu, then order at the counter.",
+    "openUntil": "Open until {{time}} · {{minutes}} min prep",
+    "closedOpensAt": "Closed · opens {{when}}"
   },
   "menu": {
     "empty": "The menu is being prepared.",
@@ -473,7 +475,26 @@
       "done": "Done",
       "cancelled": "Cancelled",
       "paymentFailed": "Payment failed"
-    }
+    },
+    "search": "Search the menu",
+    "noMatch": "No items match \"{{q}}\"",
+    "popular": "Popular",
+    "popularSection": "Popular this week",
+    "busy": "The kitchen is busy. Pickup times are running about {{minutes}} minutes longer.",
+    "tab": {
+      "menu": "Menu",
+      "cart": "Cart",
+      "orders": "Orders"
+    },
+    "itemGone": "This item isn't on the menu any more",
+    "orderAtCounter": "Order at the counter",
+    "addToCart": "Add to cart · {{total}}",
+    "pickup": "Pickup",
+    "pickupAsap": "As soon as possible · ready around {{time}}",
+    "whoCollecting": "Who is collecting",
+    "name": "Name",
+    "payment": "Payment",
+    "ordersEmpty": "Orders you place on this phone show up here."
   },
   "tracking": {
     "readyTitle": "Ready to collect",
@@ -501,7 +522,11 @@
     "expiresIn": "Pay within {{time}} or the order is cancelled.",
     "payNow": "Pay {{total}} now",
     "cancelUnpaid": "Cancel this order",
-    "orderAgain": "Order again"
+    "orderAgain": "Order again",
+    "readyAt": "Ready for pickup at about {{time}}",
+    "runningLate": "Running a little late. It won't be long.",
+    "readyNow": "Ready now. Show this code at the counter.",
+    "inThisOrder": "In this order"
   },
   "charts": {
     "chart": "Chart",
@@ -641,7 +666,9 @@
       "inStock": "In stock",
       "onMenu": "On menu",
       "inStockFor": "{{name}} in stock",
-      "onMenuFor": "Show {{name}} on the customer menu"
+      "onMenuFor": "Show {{name}} on the customer menu",
+      "popular": "Show as Popular",
+      "popularHelp": "If you pick none, the 3 best sellers are shown automatically."
     },
     "period": {
       "daily": "Daily",
