@@ -1,6 +1,7 @@
-import { Alert, Button, Center, Group, Loader, Paper, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
+import { ActionIcon, Alert, Box, Button, Center, Group, Loader, Stack, Text, TextInput, Textarea } from "@mantine/core";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 
@@ -8,13 +9,35 @@ import { isApiError, newIdempotencyKey } from "../../../api/client";
 import { menuKey, useMenu, useShop } from "../../../api/menu";
 import { usePlaceOrder, useQuote } from "../../../api/public";
 import { indexMenu } from "../../../lib/cart";
+import { formatTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { formatMyPhone, normalizeMyPhone } from "../../../lib/phone";
 import { loadDetails, rememberOrder, saveDetails } from "../../../lib/storage";
+import { radius, tokens } from "../../../ui/tokens";
 import { useCart } from "../cart";
 import { CartLines } from "../components/CartLines";
+import { BottomBar } from "../ui/BottomBar";
 
-/** One screen: an optional phone number, a note, the summary, and one button. */
+function Card({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <Box p={16} bg={tokens.card} style={{ borderRadius: radius.card, boxShadow: tokens.cardShadow }}>
+      <Text fz={14} fw={600} c={tokens.text} mb={10}>{title}</Text>
+      {children}
+    </Box>
+  );
+}
+
+/** When the order should be ready if placed now: the usual prep time plus any kitchen delay. */
+function useReadyAround(minutes: number | undefined): string {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return minutes === undefined ? "" : formatTime(new Date(now + minutes * 60_000).toISOString());
+}
+
+/** One screen: pickup time, who is collecting, a note, the summary, and one button. */
 export default function CheckoutPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -25,8 +48,10 @@ export default function CheckoutPage() {
   const items = useMemo(() => indexMenu(menu), [menu]);
   const quote = useQuote(cart.requestLines);
   const place = usePlaceOrder();
+  const readyAround = useReadyAround(shop ? shop.prep_minutes + shop.extra_wait_minutes : undefined);
 
   const saved = loadDetails();
+  const [name, setName] = useState(saved.name);
   const [phone, setPhone] = useState(saved.phone);
   const [note, setNote] = useState("");
   const [touched, setTouched] = useState(false);
@@ -39,7 +64,7 @@ export default function CheckoutPage() {
     return (
       <Center mt={80}>
         <Stack align="center">
-          <Loader />
+          <Loader color="orange.7" />
           <Text>{t("customer.toPayment")}</Text>
         </Stack>
       </Center>
@@ -61,12 +86,12 @@ export default function CheckoutPage() {
     place.mutate(
       {
         key,
-        body: { customer_phone: normalized, note: note.trim() || null,
+        body: { customer_name: name.trim() || null, customer_phone: normalized, note: note.trim() || null,
           items: cart.requestLines, expected_total_sen: total },
       },
       {
         onSuccess: (order) => {
-          saveDetails({ name: "", phone });
+          saveDetails({ name: name.trim(), phone });
           rememberOrder({ token: order.token, number: order.order_number, code: order.order_code,
             placedAt: new Date().toISOString(),
             totalSen: order.total_sen });
@@ -96,34 +121,56 @@ export default function CheckoutPage() {
   };
 
   return (
-    <Stack mt="md">
-      <Title order={3}>{t("customer.checkout")}</Title>
-      {error && <Alert color="red">{error}</Alert>}
-      <Paper withBorder p="md">
-        <Stack>
-          <TextInput label={t("customer.phone")} type="tel" inputMode="tel" autoComplete="tel" maxLength={20}
-            placeholder={t("common.optional")} value={phone} onChange={(e) => setPhone(e.currentTarget.value)}
-            onBlur={() => setTouched(true)}
-            description={normalized ? t("customer.phoneReadBack", { phone: formatMyPhone(normalized) }) : t("customer.phoneHint")}
-            error={touched && !phoneOk ? t("customer.phoneInvalid") : undefined} />
-          <Textarea label={t("customer.orderNote")} placeholder={t("common.optional")} maxLength={200} autosize
-            minRows={1} value={note} onChange={(e) => setNote(e.currentTarget.value)} />
-        </Stack>
-      </Paper>
+    <Box pb={150}>
+      <Group gap={8} pt={12} pb={12}>
+        <ActionIcon variant="subtle" color="dark" size="lg" radius="xl" onClick={() => navigate("/cart")}
+          aria-label={t("common.back")}>
+          <IconArrowLeft size={22} />
+        </ActionIcon>
+        <Text fz={20} fw={600} c={tokens.text} style={{ letterSpacing: "-.02em" }}>{t("customer.checkout")}</Text>
+      </Group>
 
-      <Paper withBorder p="md">
-        <CartLines items={items} quote={quote.data} editable={false} />
-        <Group justify="space-between" mt="sm">
-          <Text fw={700}>{t("common.total")}</Text>
-          <Text fw={700}>{total !== undefined ? formatSen(total) : "…"}</Text>
-        </Group>
-        <Text size="xs" c="dimmed" mt="xs">{t("customer.pickupOnly")}</Text>
-      </Paper>
+      <Stack gap={12}>
+        {error && <Alert color="red" radius={radius.tile}>{error}</Alert>}
 
-      <Button size="xl" radius="xl" loading={place.isPending} disabled={total === undefined || problems > 0} onClick={submit}>
-        {total !== undefined ? t("customer.pay", { total: formatSen(total) }) : t("common.loading")}
-      </Button>
-      <Text size="xs" c="dimmed" ta="center">{t("customer.privacy")}</Text>
-    </Stack>
+        <Card title={t("customer.pickup")}>
+          <Text fz={14} c={tokens.body}>{t("customer.pickupAsap", { time: readyAround })}</Text>
+        </Card>
+
+        <Card title={t("customer.whoCollecting")}>
+          <Stack gap={12}>
+            <TextInput label={t("customer.name")} placeholder={t("common.optional")} maxLength={50} autoComplete="name"
+              value={name} onChange={(e) => setName(e.currentTarget.value)} radius={radius.tile} />
+            <TextInput label={t("customer.phone")} type="tel" inputMode="tel" autoComplete="tel" maxLength={20}
+              placeholder={t("common.optional")} value={phone} onChange={(e) => setPhone(e.currentTarget.value)}
+              onBlur={() => setTouched(true)} radius={radius.tile}
+              description={normalized ? t("customer.phoneReadBack", { phone: formatMyPhone(normalized) }) : t("customer.phoneHint")}
+              error={touched && !phoneOk ? t("customer.phoneInvalid") : undefined} />
+          </Stack>
+        </Card>
+
+        <Card title={t("customer.orderNote")}>
+          <Textarea placeholder={t("common.optional")} maxLength={200} autosize minRows={1} radius={radius.tile}
+            aria-label={t("customer.orderNote")} value={note} onChange={(e) => setNote(e.currentTarget.value)} />
+        </Card>
+
+        <Card title={t("customer.payment")}>
+          <CartLines items={items} quote={quote.data} editable={false} />
+          <Group justify="space-between" mt={14} pt={12} style={{ borderTop: `1px solid ${tokens.border}` }}>
+            <Text fz={15} fw={600}>{t("common.total")}</Text>
+            <Text fz={17} fw={600}>{total !== undefined ? formatSen(total) : "…"}</Text>
+          </Group>
+          <Text fz={12} c={tokens.muted} mt={8}>{t("customer.pickupOnly")}</Text>
+        </Card>
+      </Stack>
+
+      <BottomBar>
+        <Button fullWidth size="md" radius="xl" color="orange.7" loading={place.isPending}
+          disabled={total === undefined || problems > 0} onClick={submit}>
+          {total !== undefined ? t("customer.pay", { total: formatSen(total) }) : t("common.loading")}
+        </Button>
+        <Text fz={11} c={tokens.muted} ta="center" mt={8}>{t("customer.privacy")}</Text>
+      </BottomBar>
+    </Box>
   );
 }
