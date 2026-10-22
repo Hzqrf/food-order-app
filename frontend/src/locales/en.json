@@ -40,7 +40,12 @@
     "invalid_totp": "That code is not right.",
     "device_not_registered": "This device is not registered as the shop tablet.",
     "validation_error": "Some fields are not valid.",
-    "internal_error": "Something went wrong on our side. Try again."
+    "internal_error": "Something went wrong on our side. Try again.",
+    "no_payment_option": "Turn on a payment option in Settings first.",
+    "payment_option_off": "This payment option isn't available any more.",
+    "unpaid_at_counter": "You already have an order waiting to be paid at the counter.",
+    "not_unpaid": "This order has already been paid.",
+    "payment_needed": "Take payment before marking this order collected."
   },
   "shop": {
     "open": "Open",

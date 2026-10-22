@@ -518,7 +518,8 @@ def cancel(db: Session, order_id: int, user: User, body: schemas.CancelIn, ip: s
     if online and body.refund_method != "later" and user.role != "admin":
         # Staff cannot send money back through the gateway; the owner does, then records it.
         raise AppError("forbidden", "Online payments are refunded by the owner.", 403)
-    sm.transition(db, order, sm.CANCELLED, actor_type(user), user.id, body.version, cancel_reason=body.reason)
+    sm.transition(db, order, sm.CANCELLED, actor_type(user), user.id, body.version, cancel_reason=body.reason,
+                  unpaid_no_show=unpaid_at_counter(order))
     if paid and body.refund_method == "later":
         audit(db, user.id, "order_cancelled_after_payment", "order", order.id,
               {"status": "paid"}, {"reason": body.reason, "refund": "owner to refund through the gateway"}, ip)

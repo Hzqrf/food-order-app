@@ -253,3 +253,25 @@ def test_needs_attention_lists_yesterdays_unpaid_order(client, admin, menu, db, 
     db.commit()
     kinds = {a["kind"]: a for a in client.get(f"{API}/admin/dashboard").json()["needs_attention"]}
     assert kinds["unpaid_at_counter"]["order"]["id"] == o["id"]
+
+
+def test_staff_can_cancel_a_ready_no_show(client, staff, menu, db, counter_shop):
+    """A no-show is cooked and waiting: staff on shift must be able to cancel it, not only the owner."""
+    order_at_counter(client, menu)
+    login(client, staff.username)
+    o = next(o for o in client.get(f"{API}/staff/orders").json() if o["pay_at_counter"])
+    o = move(client, o, "ready").json()
+    r = client.post(f"{API}/staff/orders/{o['id']}/cancel",
+                    json={"version": o["version"], "reason": "Didn't come to collect"})
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "cancelled"
+    # The number is free again.
+    assert order_at_counter(client, menu).status_code == 201
+
+
+def test_staff_still_cannot_cancel_a_paid_ready_order(staff_client, menu):
+    o = counter_order(staff_client, [{"menu_item_id": menu["milo"], "quantity": 1}]).json()
+    o = staff_client.post(f"{API}/staff/orders/{o['id']}/transition", json={"to": "ready", "version": o["version"]}).json()
+    r = staff_client.post(f"{API}/staff/orders/{o['id']}/cancel",
+                          json={"version": o["version"], "reason": "x", "refund_method": "cash"})
+    assert r.status_code == 409 and r.json()["error"]["code"] == "invalid_transition"

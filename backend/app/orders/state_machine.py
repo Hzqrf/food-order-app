@@ -45,13 +45,17 @@ _TIMESTAMP = {PLACED: "placed_at", PREPARING: "preparing_at", READY: "ready_at",
               CANCELLED: "cancelled_at"}
 
 
-def can_transition(from_status: str, to_status: str, actor: str) -> bool:
+def can_transition(from_status: str, to_status: str, actor: str, unpaid_no_show: bool = False) -> bool:
+    # Staff may cancel a cooked order only when nothing was paid: a no-show paying at the counter.
+    # Paid orders still need the owner, because money goes back.
+    if unpaid_no_show and actor == STAFF and to_status == CANCELLED and from_status in (PREPARING, READY):
+        return True
     return actor in ALLOWED.get((from_status, to_status), set())
 
 
 def transition(db: Session, order: Order, to_status: str, actor: str, actor_user_id: int | None = None,
                expected_version: int | None = None, note: str | None = None,
-               cancel_reason: str | None = None, ip: str | None = None) -> Order:
+               cancel_reason: str | None = None, ip: str | None = None, unpaid_no_show: bool = False) -> Order:
     """Move an order to a new status, guarded by the allowed table and the order's version.
 
     The UPDATE matches on (id, version), so of two people tapping the same card only the first wins;
@@ -61,7 +65,7 @@ def transition(db: Session, order: Order, to_status: str, actor: str, actor_user
     version = order.version if expected_version is None else expected_version
     if version != order.version:
         raise AppError("version_conflict", "This order was changed by someone else.", 409)
-    if not can_transition(from_status, to_status, actor):
+    if not can_transition(from_status, to_status, actor, unpaid_no_show):
         raise AppError("invalid_transition", f"Cannot move an order from {from_status} to {to_status}.", 409)
     if to_status == CANCELLED and not cancel_reason:
         raise AppError("reason_required", "Give a reason for cancelling.", 422)

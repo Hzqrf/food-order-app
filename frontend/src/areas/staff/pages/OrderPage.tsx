@@ -73,7 +73,9 @@ export default function OrderPage() {
     );
   }
 
-  const canCancel = order.status === "placed" || (isAdmin && ["preparing", "ready"].includes(order.status));
+  // Staff can also cancel a no-show paying at the counter: nothing was paid, so nothing goes back.
+  const canCancel = order.status === "placed" || ((isAdmin || isUnpaidAtCounter(order))
+    && ["preparing", "ready"].includes(order.status));
   const canRefund = isAdmin && order.payment_status === "paid" && order.payments.some((p) => p.refundable_sen > 0);
   const move = (to: string, current: OrderSummary = order) => {
     if (!ensureUnlocked()) return;
