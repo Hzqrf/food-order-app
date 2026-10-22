@@ -359,6 +359,12 @@ def needs_attention(db: Session, branch: Branch, today: date) -> list[schemas.At
                                             Order.business_date >= today - timedelta(days=1))):
         found.append(schemas.Attention(kind="auto_closed", order=_attention_order(o), since=o.completed_at))
 
+    # Paid at the counter, but nobody took the money on the day: take payment or cancel it.
+    for o in db.scalars(select(Order).where(base, Order.pay_at_counter.is_(True), Order.payment_status == "unpaid",
+                                            Order.status != sm.CANCELLED, Order.business_date < today)
+                        .order_by(Order.id.desc()).limit(50)):
+        found.append(schemas.Attention(kind="unpaid_at_counter", order=_attention_order(o), since=o.placed_at))
+
     # The gateway reported a different amount than the bill: the order was not placed.
     mismatched = db.scalars(select(AuditLog.entity_id).where(
         AuditLog.action == "payment_amount_mismatch", AuditLog.created_at >= utcnow() - timedelta(days=7))).all()

@@ -662,6 +662,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/staff/orders/{order_id}/payment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Take Payment */
+        post: operations["take_payment_api_v1_staff_orders__order_id__payment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/staff/orders/{order_id}/claim": {
         parameters: {
             query?: never;
@@ -1075,7 +1092,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "paid_but_cancelled" | "duplicate_payment" | "ready_too_long" | "auto_closed" | "amount_mismatch" | "backup_failed" | "backup_late";
+            kind: "paid_but_cancelled" | "duplicate_payment" | "ready_too_long" | "auto_closed" | "amount_mismatch" | "unpaid_at_counter" | "backup_failed" | "backup_late";
             order?: components["schemas"]["AttentionOrder"] | null;
             /** Amount Sen */
             amount_sen?: number | null;
@@ -2164,6 +2181,77 @@ export interface components {
             position?: string | null;
             /** Joined On */
             joined_on?: string | null;
+        };
+        /**
+         * TakePaymentIn
+         * @description Money taken at pickup for an online order paid at the counter.
+         */
+        TakePaymentIn: {
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "cash" | "qr_counter" | "card_terminal";
+            /** Tendered Sen */
+            tendered_sen?: number | null;
+        };
+        /** TakePaymentOut */
+        TakePaymentOut: {
+            /** Id */
+            id: number;
+            /** Order Number */
+            order_number: string;
+            /** Order Code */
+            order_code: string;
+            /** Business Date */
+            business_date: string;
+            /** Channel */
+            channel: string;
+            /** Status */
+            status: string;
+            /** Payment Status */
+            payment_status: string;
+            /** Customer Name */
+            customer_name: string | null;
+            /** Note */
+            note: string | null;
+            /** Subtotal Sen */
+            subtotal_sen: number;
+            /** Total Sen */
+            total_sen: number;
+            /** Version */
+            version: number;
+            /** Auto Closed */
+            auto_closed: boolean;
+            /** Pay At Counter */
+            pay_at_counter: boolean;
+            /** Cancel Reason */
+            cancel_reason: string | null;
+            /** Created By Name */
+            created_by_name: string | null;
+            /** Claimed By Name */
+            claimed_by_name: string | null;
+            /** Claimed At */
+            claimed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Placed At */
+            placed_at: string | null;
+            /** Preparing At */
+            preparing_at: string | null;
+            /** Ready At */
+            ready_at: string | null;
+            /** Completed At */
+            completed_at: string | null;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            /** Items */
+            items: components["schemas"]["OrderLine"][];
+            /** Change Sen */
+            change_sen: number | null;
         };
         /** TopItem */
         TopItem: {
@@ -3610,6 +3698,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrderSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    take_payment_api_v1_staff_orders__order_id__payment_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "idempotency-key"?: string | null;
+            };
+            path: {
+                order_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TakePaymentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TakePaymentOut"];
                 };
             };
             /** @description Validation Error */

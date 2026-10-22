@@ -266,3 +266,13 @@ class OrderPage(BaseModel):
 
 class CounterOrderOut(OrderSummary):
     change_sen: int | None
+
+
+class TakePaymentIn(BaseModel):
+    """Money taken at pickup for an online order paid at the counter."""
+    method: Literal["cash", "qr_counter", "card_terminal"]
+    tendered_sen: int | None = Field(default=None, ge=0, le=100_000_00)
+
+
+class TakePaymentOut(OrderSummary):
+    change_sen: int | None

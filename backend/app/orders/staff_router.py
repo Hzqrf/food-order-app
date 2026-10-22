@@ -45,6 +45,14 @@ def transition(order_id: int, body: schemas.TransitionIn, user: StaffUser, db: D
     return service.summary(service.move(db, order_id, user, body, client_ip(request)))
 
 
+@router.post("/{order_id}/payment", response_model=schemas.TakePaymentOut)
+def take_payment(order_id: int, body: schemas.TakePaymentIn, user: StaffUser, db: DB, request: Request,
+                 idempotency_key: Annotated[str | None, Header()] = None):
+    key = service.check_idempotency_key(idempotency_key) if idempotency_key else None
+    order, change = service.take_payment(db, order_id, user, body, key, client_ip(request))
+    return schemas.TakePaymentOut(**service.summary(order), change_sen=change)
+
+
 @router.post("/{order_id}/claim", response_model=schemas.OrderSummary)
 def claim(order_id: int, body: schemas.ClaimIn, user: StaffUser, db: DB, request: Request):
     return service.summary(service.claim(db, order_id, user, body, client_ip(request)))

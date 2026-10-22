@@ -71,7 +71,7 @@ class AttentionOrder(BaseModel):
 
 
 class Attention(BaseModel):
-    kind: Literal["paid_but_cancelled", "duplicate_payment", "ready_too_long", "auto_closed", "amount_mismatch",
+    kind: Literal["paid_but_cancelled", "duplicate_payment", "ready_too_long", "auto_closed", "amount_mismatch", "unpaid_at_counter",
                   "backup_failed", "backup_late"]
     # None for shop-wide problems such as a backup.
     order: AttentionOrder | None = None

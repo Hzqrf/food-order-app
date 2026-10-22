@@ -19,7 +19,9 @@ def close_day(db: Session) -> dict[str, int]:
     items = db.execute(update(MenuItem).where(MenuItem.is_sold_out.is_(True)).values(is_sold_out=False)).rowcount
     options = db.execute(update(Option).where(Option.is_sold_out.is_(True)).values(is_sold_out=False)).rowcount
     closed = 0
-    for order in db.scalars(select(Order).where(Order.status == sm.READY)):
+    # An order still waiting to be paid at the counter stays open: it is in Needs attention instead.
+    unpaid = Order.pay_at_counter.is_(True) & (Order.payment_status == "unpaid")
+    for order in db.scalars(select(Order).where(Order.status == sm.READY, ~unpaid)):
         sm.transition(db, order, sm.COMPLETED, sm.SYSTEM, note="auto-closed at day close")
         order.auto_closed = True
         closed += 1

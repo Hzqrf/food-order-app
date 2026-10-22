@@ -192,12 +192,7 @@ def create_counter_order(db: Session, branch: Branch, user: User, body: schemas.
 
     result = priced_or_conflict(db, body.items, body.expected_total_sen)
     total = result.subtotal_sen
-    change = None
-    if body.payment.method == "cash":
-        tendered = body.payment.tendered_sen if body.payment.tendered_sen is not None else total
-        if tendered < total:
-            raise AppError("insufficient_cash", "The amount given is less than the total.", 422)
-        change = tendered - total
+    change = _cash_change(total, body.payment.tendered_sen) if body.payment.method == "cash" else None
 
     now = utcnow()
     order, created = _insert_numbered(
@@ -339,6 +334,52 @@ def customer_cancel(db: Session, order: Order) -> Order:
     return order
 
 
+def _cash_change(total: int, tendered: int | None) -> int:
+    """Change to give back. No amount given means the exact total."""
+    tendered = total if tendered is None else tendered
+    if tendered < total:
+        raise AppError("insufficient_cash", "The amount given is less than the total.", 422)
+    return tendered - total
+
+
+def unpaid_at_counter(order: Order) -> bool:
+    return order.pay_at_counter and order.payment_status == "unpaid"
+
+
+def take_payment(db: Session, order_id: int, user: User, body: schemas.TakePaymentIn, key: str | None,
+                 ip: str) -> tuple[Order, int | None]:
+    """Record the money for an order paid at the counter. Returns (order, change in sen for cash).
+
+    The row is locked, so two staff pressing at once record one payment. A repeated key returns
+    the first result.
+    """
+    order = db.scalar(select(Order).where(Order.id == order_id).with_for_update()
+                      .execution_options(populate_existing=True))
+    if order is None:
+        raise not_found("Order not found.")
+    if key:
+        for p in order.payments:
+            if p.kind == "charge" and (p.raw_payload or {}).get("idempotency_key") == key:
+                return order, p.raw_payload.get("change_sen")
+    if order.status == sm.CANCELLED:
+        raise AppError("invalid_transition", "This order was cancelled.", 409)
+    if not unpaid_at_counter(order):
+        raise AppError("not_unpaid", "This order has already been paid.", 409)
+    total = order.total_sen
+    change = _cash_change(total, body.tendered_sen) if body.method == "cash" else None
+    now = utcnow()
+    db.add(Payment(order_id=order.id, kind="charge", method=body.method, amount_sen=total, status="succeeded",
+                   paid_at=now, recorded_by_user_id=user.id,
+                   raw_payload={"tendered_sen": body.tendered_sen, "change_sen": change, "idempotency_key": key}))
+    order.payment_status = "paid"
+    order.version += 1
+    audit(db, user.id, "payment_taken", "order", order.id, {"payment_status": "unpaid"},
+          {"payment_status": "paid", "method": body.method, "amount_sen": total}, ip)
+    db.flush()
+    db.refresh(order)
+    return order, change
+
+
 def _change_from(order: Order) -> int | None:
     for p in order.payments:
         if p.kind == "charge" and p.raw_payload:
@@ -435,6 +476,8 @@ def _locked(db: Session, order_id: int) -> Order:
 
 def move(db: Session, order_id: int, user: User, body: schemas.TransitionIn, ip: str) -> Order:
     order = _locked(db, order_id)
+    if body.to == sm.COMPLETED and unpaid_at_counter(order):
+        raise AppError("payment_needed", "Take payment before marking this order collected.", 409)
     return sm.transition(db, order, body.to, actor_type(user), user.id, body.version, note=body.note, ip=ip)
 
 

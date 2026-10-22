@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.config import get_settings
-from app.models import AuditLog
-from tests.conftest import login, new_key
+from app.jobs import close_day
+from app.models import AuditLog, Order, Payment
+from app.shop.service import business_date
+from tests.conftest import counter_order, login, new_key
 from tests.test_online import place
 
 API = "/api/v1"
@@ -123,3 +127,129 @@ def test_option_that_is_off_is_refused(client, menu, db, branch, monkeypatch):
     counter_on(db, branch)
     r = place(client, menu)
     assert r.status_code == 409 and r.json()["error"]["code"] == "payment_option_off"
+
+
+# --- Taking payment at pickup -------------------------------------------------------------------
+
+
+def unpaid_order(client, menu, admin) -> dict:
+    """A RM10 pay-at-counter order, with the admin logged in on `client`."""
+    order_at_counter(client, menu)
+    login(client, admin.username)
+    return next(o for o in client.get(f"{API}/staff/orders").json() if o["pay_at_counter"])
+
+
+def take(client, order_id, key=None, **body):
+    return client.post(f"{API}/staff/orders/{order_id}/payment", json=body,
+                       headers={"Idempotency-Key": key or new_key()})
+
+
+def charges(db, order_id):
+    return db.scalars(select(Payment).where(Payment.order_id == order_id, Payment.kind == "charge")).all()
+
+
+def test_take_cash_payment_with_change(client, admin, menu, db, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    r = take(client, o["id"], method="cash", tendered_sen=2000)
+    assert r.status_code == 200, r.text
+    assert (r.json()["change_sen"], r.json()["payment_status"]) == (1000, "paid")
+    [p] = charges(db, o["id"])
+    assert (p.method, p.status, p.amount_sen, p.recorded_by_user_id) == ("cash", "succeeded", 1000, admin.id)
+    assert p.raw_payload["tendered_sen"] == 2000 and p.raw_payload["change_sen"] == 1000
+    assert db.scalars(select(AuditLog).where(AuditLog.action == "payment_taken")).one().entity_id == o["id"]
+
+
+def test_take_qr_payment(client, admin, menu, db, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    r = take(client, o["id"], method="qr_counter")
+    assert r.status_code == 200 and r.json()["change_sen"] is None and r.json()["payment_status"] == "paid"
+
+
+def test_take_payment_twice_is_refused(client, admin, menu, db, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    take(client, o["id"], method="qr_counter")
+    r = take(client, o["id"], method="qr_counter")
+    assert r.status_code == 409 and r.json()["error"]["code"] == "not_unpaid"
+    assert len(charges(db, o["id"])) == 1
+
+
+def test_take_payment_same_key_is_one_payment(client, admin, menu, db, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    key = new_key()
+    assert take(client, o["id"], key=key, method="cash", tendered_sen=1000).status_code == 200
+    again = take(client, o["id"], key=key, method="cash", tendered_sen=1000)
+    assert again.status_code == 200 and again.json()["payment_status"] == "paid"
+    assert len(charges(db, o["id"])) == 1
+
+
+def test_take_payment_refuses_paid_orders(client, admin, menu, db, counter_shop):
+    login(client, admin.username)
+    paid = counter_order(client, [{"menu_item_id": menu["milo"], "quantity": 1}]).json()
+    r = take(client, paid["id"], method="cash", tendered_sen=450)
+    assert r.status_code == 409 and r.json()["error"]["code"] == "not_unpaid"
+
+    o = unpaid_order(client, menu, admin)
+    client.post(f"{API}/staff/orders/{o['id']}/cancel", json={"version": o["version"], "reason": "x"})
+    r = take(client, o["id"], method="qr_counter")
+    assert r.status_code == 409 and r.json()["error"]["code"] == "invalid_transition"
+
+
+def test_insufficient_cash(client, admin, menu, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    r = take(client, o["id"], method="cash", tendered_sen=500)
+    assert r.status_code == 422 and r.json()["error"]["code"] == "insufficient_cash"
+
+
+def move(client, o, to):
+    return client.post(f"{API}/staff/orders/{o['id']}/transition", json={"to": to, "version": o["version"]})
+
+
+def test_collect_needs_payment(client, admin, menu, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    r = move(client, o, "ready")
+    assert r.status_code == 200
+    o = r.json()
+    r = move(client, o, "completed")
+    assert r.status_code == 409 and r.json()["error"]["code"] == "payment_needed"
+    o = take(client, o["id"], method="qr_counter").json()
+    assert move(client, o, "completed").status_code == 200
+
+
+def sales_today(client) -> int:
+    return client.get(f"{API}/admin/dashboard").json()["today"]["sales_sen"]
+
+
+def test_no_show_cancel_needs_no_refund(client, admin, menu, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    r = client.post(f"{API}/staff/orders/{o['id']}/cancel",
+                    json={"version": o["version"], "reason": "Didn't come to collect"})
+    assert r.status_code == 200 and r.json()["status"] == "cancelled"
+    assert sales_today(client) == 0
+
+
+def test_sales_count_after_payment(client, admin, menu, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    assert sales_today(client) == 0
+    take(client, o["id"], method="qr_counter")
+    assert sales_today(client) == 1000
+
+
+def test_day_close_leaves_unpaid_ready_orders_open(client, admin, menu, db, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    move(client, o, "ready")
+    paid = counter_order(client, [{"menu_item_id": menu["milo"], "quantity": 1}]).json()
+    move(client, paid, "ready")
+    close_day(db)
+    db.commit()
+    db.expire_all()
+    assert db.get(Order, o["id"]).status == "ready"
+    assert db.get(Order, paid["id"]).status == "completed"
+
+
+def test_needs_attention_lists_yesterdays_unpaid_order(client, admin, menu, db, counter_shop):
+    o = unpaid_order(client, menu, admin)
+    db.execute(update(Order).where(Order.id == o["id"]).values(
+        business_date=business_date(counter_shop) - timedelta(days=1)))
+    db.commit()
+    kinds = {a["kind"]: a for a in client.get(f"{API}/admin/dashboard").json()["needs_attention"]}
+    assert kinds["unpaid_at_counter"]["order"]["id"] == o["id"]
