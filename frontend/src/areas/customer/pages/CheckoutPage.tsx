@@ -17,6 +17,7 @@ import { radius, tokens } from "../../../ui/tokens";
 import { useCart } from "../cart";
 import { CartLines } from "../components/CartLines";
 import { BottomBar } from "../ui/BottomBar";
+import { ChoiceRow } from "../ui/ChoiceRow";
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -55,6 +56,12 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState(saved.phone);
   const [note, setNote] = useState("");
   const [touched, setTouched] = useState(false);
+  // The ways this shop takes payment for an online order, in the order they are offered.
+  const options = [shop?.pay_online_available && "online", shop?.pay_at_counter && "counter"]
+    .filter((o): o is "online" | "counter" => Boolean(o));
+  const [picked, setPicked] = useState<"online" | "counter" | null>(null);
+  const choice = picked && options.includes(picked) ? picked : options[0];
+  const atCounter = choice === "counter";
   const [error, setError] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   // One key per checkout attempt: a retry after a dropped connection returns the same order.
@@ -72,9 +79,9 @@ export default function CheckoutPage() {
   }
   if (cart.count === 0) return <Navigate to="/cart" replace />;
 
-  // Phone is optional; an empty field is fine, a half-typed number is not.
+  // Phone is optional when paying online; paying at the counter needs it, so the shop can call.
   const normalized = normalizeMyPhone(phone);
-  const phoneOk = phone.trim() === "" || normalized !== null;
+  const phoneOk = atCounter ? normalized !== null : phone.trim() === "" || normalized !== null;
   const total = quote.data?.total_sen;
   const problems = quote.data?.problems.length ?? 0;
   const canSubmit = phoneOk && total !== undefined && problems === 0 && shop?.can_order_online;
@@ -87,7 +94,7 @@ export default function CheckoutPage() {
       {
         key,
         body: { customer_name: name.trim() || null, customer_phone: normalized, note: note.trim() || null,
-          items: cart.requestLines, expected_total_sen: total, pay_at_counter: false },
+          items: cart.requestLines, expected_total_sen: total, pay_at_counter: atCounter },
       },
       {
         onSuccess: (order) => {
@@ -112,6 +119,11 @@ export default function CheckoutPage() {
             setError(t("customer.phoneInvalid"));
           } else if (isApiError(e, "too_many_unpaid")) {
             setError(t("customer.tooManyUnpaid"));
+          } else if (isApiError(e, "unpaid_at_counter")) {
+            setError(t("customer.unpaidAtCounter"));
+          } else if (isApiError(e, "payment_option_off")) {
+            qc.invalidateQueries({ queryKey: ["shop"] });
+            setError(t("customer.paymentOptionOff"));
           } else {
             setError(isApiError(e, "network_error") ? t("apiError.network_error") : t("error.body"));
           }
@@ -142,10 +154,12 @@ export default function CheckoutPage() {
             <TextInput label={t("customer.name")} placeholder={t("common.optional")} maxLength={50} autoComplete="name"
               value={name} onChange={(e) => setName(e.currentTarget.value)} radius={radius.tile} />
             <TextInput label={t("customer.phone")} type="tel" inputMode="tel" autoComplete="tel" maxLength={20}
-              placeholder={t("common.optional")} value={phone} onChange={(e) => setPhone(e.currentTarget.value)}
-              onBlur={() => setTouched(true)} radius={radius.tile}
-              description={normalized ? t("customer.phoneReadBack", { phone: formatMyPhone(normalized) }) : t("customer.phoneHint")}
-              error={touched && !phoneOk ? t("customer.phoneInvalid") : undefined} />
+              placeholder={atCounter ? undefined : t("common.optional")} required={atCounter} value={phone}
+              onChange={(e) => setPhone(e.currentTarget.value)} onBlur={() => setTouched(true)} radius={radius.tile}
+              description={normalized ? t("customer.phoneReadBack", { phone: formatMyPhone(normalized) })
+                : atCounter ? undefined : t("customer.phoneHint")}
+              error={touched && !phoneOk
+                ? t(atCounter && phone.trim() === "" ? "customer.phoneNeeded" : "customer.phoneInvalid") : undefined} />
           </Stack>
         </Card>
 
@@ -155,19 +169,32 @@ export default function CheckoutPage() {
         </Card>
 
         <Card title={t("customer.payment")}>
+          {options.length > 1 ? (
+            <Stack gap={8} mb={14}>
+              {options.map((o) => (
+                <ChoiceRow key={o} type="radio" label={t(o === "online" ? "customer.payNowOnline" : "customer.payAtCounter")}
+                  priceDeltaSen={0} checked={choice === o} disabled={false} onChange={() => setPicked(o)} />
+              ))}
+            </Stack>
+          ) : choice && (
+            <Text fz={14} fw={500} mb={12}>
+              {t(choice === "online" ? "customer.payNowOnline" : "customer.payAtCounter")}
+            </Text>
+          )}
           <CartLines items={items} quote={quote.data} editable={false} />
           <Group justify="space-between" mt={14} pt={12} style={{ borderTop: `1px solid ${tokens.border}` }}>
             <Text fz={15} fw={600}>{t("common.total")}</Text>
             <Text fz={17} fw={600}>{total !== undefined ? formatSen(total) : "…"}</Text>
           </Group>
-          <Text fz={12} c={tokens.muted} mt={8}>{t("customer.pickupOnly")}</Text>
+          <Text fz={12} c={tokens.muted} mt={8}>{t(atCounter ? "customer.payAtCounterNote" : "customer.pickupOnly")}</Text>
         </Card>
       </Stack>
 
       <BottomBar>
         <Button fullWidth size="md" radius="xl" color="orange.7" loading={place.isPending}
           disabled={total === undefined || problems > 0} onClick={submit}>
-          {total !== undefined ? t("customer.pay", { total: formatSen(total) }) : t("common.loading")}
+          {total === undefined ? t("common.loading")
+            : t(atCounter ? "customer.placeOrder" : "customer.pay", { total: formatSen(total) })}
         </Button>
         <Text fz={11} c={tokens.muted} ta="center" mt={8}>{t("customer.privacy")}</Text>
       </BottomBar>

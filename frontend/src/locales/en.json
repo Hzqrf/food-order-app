@@ -158,7 +158,9 @@
     "autoClosed": "Auto-closed",
     "cancel": "Cancel order",
     "cancelReason": "Cancelled because",
-    "idLabel": "Order ID {{code}}"
+    "idLabel": "Order ID {{code}}",
+    "unpaid": "Unpaid · {{total}}",
+    "takePayment": "Take payment"
   },
   "cancel": {
     "title": "Cancel order {{number}}",
@@ -166,7 +168,8 @@
     "reasons": {
       "soldOut": "Sold out",
       "changedMind": "Customer changed mind",
-      "duplicate": "Duplicate order"
+      "duplicate": "Duplicate order",
+      "noShow": "Didn't come to collect"
     },
     "refundHow": "How does the {{amount}} go back?",
     "refundCash": "Cash handed back now",
@@ -315,7 +318,12 @@
       "totpConfirm": "Turn on",
       "changePassword": "Change password",
       "currentPassword": "Current password",
-      "onlineOff": "Online ordering stays off until online payments are set up."
+      "onlineOff": "Online ordering stays off until online payments are set up.",
+      "payOnline": "Pay online",
+      "payOnlineNotSetUp": "Not set up yet. Ask your developer to connect a payment gateway.",
+      "payAtCounter": "Pay at the counter (QR or cash)",
+      "payAtCounterHint": "Customers order on their phone and pay when they collect. A mobile number is required.",
+      "noPaymentOption": "Customers can't order online until a payment option is on."
     },
     "loadMore": "Load more",
     "filters": {
@@ -356,7 +364,8 @@
       "backup_failed": "The nightly backup failed",
       "backup_late": "No recent backup: the nightly backup has not run",
       "backupHint": "Check the server, or ask whoever runs it.",
-      "open": "Open"
+      "open": "Open",
+      "unpaid_at_counter": "Unpaid order from {{date}}: take payment or cancel it."
     },
     "reports": {
       "csv": "Download CSV",
@@ -494,7 +503,14 @@
     "whoCollecting": "Who is collecting",
     "name": "Name",
     "payment": "Payment",
-    "ordersEmpty": "Orders you place on this phone show up here."
+    "ordersEmpty": "Orders you place on this phone show up here.",
+    "payNowOnline": "Pay now online",
+    "payAtCounter": "Pay at the counter (QR or cash)",
+    "payAtCounterNote": "Pay by QR or cash when you collect.",
+    "placeOrder": "Place order · {{total}}",
+    "phoneNeeded": "Needed so the shop can reach you",
+    "unpaidAtCounter": "You already have an order waiting to be paid at the counter.",
+    "paymentOptionOff": "This payment option isn't available any more."
   },
   "tracking": {
     "readyTitle": "Ready to collect",
@@ -526,7 +542,8 @@
     "readyAt": "Ready for pickup at about {{time}}",
     "runningLate": "Running a little late. It won't be long.",
     "readyNow": "Ready now. Show this code at the counter.",
-    "inThisOrder": "In this order"
+    "inThisOrder": "In this order",
+    "payAtCounter": "Pay {{total}} by QR or cash when you collect."
   },
   "charts": {
     "chart": "Chart",

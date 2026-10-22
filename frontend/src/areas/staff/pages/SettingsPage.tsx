@@ -98,16 +98,17 @@ export default function SettingsPage() {
                 <div>
                   <Text fw={500} size="sm">{t("admin.settings.onlineOrders")}</Text>
                   <Text size="xs" c="dimmed">
-                    {shop.online_payments_enabled ? t("admin.settings.onlineOrdersHint") : t("admin.settings.onlineOff")}
+                    {shop.online_ordering_available ? t("admin.settings.onlineOrdersHint") : t("admin.settings.noPaymentOption")}
                   </Text>
                 </div>
-                <Switch size="lg" color="green" disabled={!shop.online_payments_enabled}
-                  checked={shop.online_payments_enabled && shop.is_accepting_online_orders}
+                <Switch size="lg" color="green" disabled={!shop.online_ordering_available}
+                  checked={shop.online_ordering_available && shop.is_accepting_online_orders}
                   aria-label={t("admin.settings.onlineOrders")}
                   onChange={(e) => setOnline.mutate(e.currentTarget.checked, {
                     onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
                   })} />
               </Group>
+              <PaymentOptions />
             </Stack>
           </SectionCard>
           <DeviceSection />
@@ -115,6 +116,30 @@ export default function SettingsPage() {
         </Stack>
       </SimpleGrid>
     </>
+  );
+}
+
+/** Which ways customers may pay for an online order. Paying online also needs a gateway. */
+function PaymentOptions() {
+  const { t } = useTranslation();
+  const { data: shop } = useSettings();
+  const update = useUpdateSettings();
+  if (!shop) return null;
+  const save = (body: { pay_online?: boolean; pay_at_counter?: boolean }) =>
+    update.mutate(body, { onError: (err) => notifyError(t, err) });
+  return (
+    <Stack gap="sm" pl="md" style={{ borderLeft: "2px solid var(--mantine-color-gray-2)" }}>
+      <Switch label={t("admin.settings.payOnline")} disabled={!shop.online_payments_enabled || update.isPending}
+        description={shop.online_payments_enabled ? undefined : t("admin.settings.payOnlineNotSetUp")}
+        checked={shop.online_payments_enabled && shop.pay_online_enabled}
+        onChange={(e) => save({ pay_online: e.currentTarget.checked })} />
+      <Switch label={t("admin.settings.payAtCounter")} description={t("admin.settings.payAtCounterHint")}
+        disabled={update.isPending} checked={shop.pay_at_counter}
+        onChange={(e) => save({ pay_at_counter: e.currentTarget.checked })} />
+      {!shop.online_ordering_available && (
+        <Alert color="yellow" variant="light">{t("admin.settings.noPaymentOption")}</Alert>
+      )}
+    </Stack>
   );
 }
 

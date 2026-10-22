@@ -157,6 +157,12 @@ export default function OrderPage() {
         </Alert>
       )}
 
+      {order.pay_at_counter && order.payment_status === "unpaid" && order.status !== "cancelled" && (
+        <Card bg={tokens.busyBg}>
+          <Text fz={14} fw={500} c={tokens.body}>{t("tracking.payAtCounter", { total: formatSen(order.total_sen ?? 0) })}</Text>
+        </Card>
+      )}
+
       {STEPS.includes(order.status as (typeof STEPS)[number]) && <Card><Timeline order={order} /></Card>}
 
       <Card>

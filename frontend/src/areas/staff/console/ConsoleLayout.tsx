@@ -199,7 +199,7 @@ export default function ConsoleLayout() {
 
           <AppShell.Section pt="md" style={{ borderTop: `1px solid ${tokens.border}` }}>
             <Stack gap="xs" align={showLabels ? "stretch" : "center"}>
-              {shop?.online_payments_enabled && (
+              {shop?.online_ordering_available && (
                 <Tooltip label={t("staff.onlineOrdersHint")} position="right">
                   <Switch
                     size="sm"

@@ -126,7 +126,7 @@ export default function ItemPage() {
         ) : (
           <Text ta="center" fw={500} c={tokens.muted} py={8}>
             {item.is_sold_out ? t("menu.soldOut")
-              : shop && !shop.online_payments_enabled ? t("customer.orderAtCounter") : t("customer.orderingClosed")}
+              : shop && !shop.online_ordering_available ? t("customer.orderAtCounter") : t("customer.orderingClosed")}
           </Text>
         )}
       </BottomBar>

@@ -90,9 +90,9 @@ export default function MenuPage() {
 
       <Stack gap={20} mt={16}>
         {shop && !shop.can_order_online && (
-          <Alert color="gray" radius={radius.tile} title={!shop.online_payments_enabled ? t("shop.counterOnlyTitle")
+          <Alert color="gray" radius={radius.tile} title={!shop.online_ordering_available ? t("shop.counterOnlyTitle")
             : shop.is_open ? t("shop.pausedTitle") : t("shop.closedTitle")}>
-            {!shop.online_payments_enabled ? t("shop.counterOnlyBody")
+            {!shop.online_ordering_available ? t("shop.counterOnlyBody")
               : shop.is_open ? t("shop.pausedBody") : t("shop.closedBody")}
           </Alert>
         )}

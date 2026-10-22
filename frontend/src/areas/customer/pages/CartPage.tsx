@@ -42,7 +42,7 @@ export default function CartPage() {
       <Stack gap={12}>
         {shop && !shop.can_order_online && (
           <Alert color="gray" radius={radius.tile}>
-            {shop.online_payments_enabled ? t("shop.pausedBody") : t("shop.counterOnlyBody")}
+            {shop.online_ordering_available ? t("shop.pausedBody") : t("shop.counterOnlyBody")}
           </Alert>
         )}
         {problems > 0 && <Alert color="red" radius={radius.tile}>{t("customer.someUnavailable")}</Alert>}

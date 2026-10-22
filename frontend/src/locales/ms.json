@@ -157,7 +157,9 @@
     "autoClosed": "Ditutup automatik",
     "cancel": "Batalkan pesanan",
     "cancelReason": "Dibatalkan kerana",
-    "idLabel": "ID pesanan {{code}}"
+    "idLabel": "ID pesanan {{code}}",
+    "unpaid": "Belum bayar · {{total}}",
+    "takePayment": "Terima bayaran"
   },
   "cancel": {
     "title": "Batalkan pesanan {{number}}",
@@ -165,7 +167,8 @@
     "reasons": {
       "soldOut": "Sudah habis",
       "changedMind": "Pelanggan ubah fikiran",
-      "duplicate": "Pesanan berganda"
+      "duplicate": "Pesanan berganda",
+      "noShow": "Tidak datang mengambil"
     },
     "refundHow": "Bagaimana {{amount}} dipulangkan?",
     "refundCash": "Tunai diserahkan sekarang",
@@ -313,7 +316,12 @@
       "totpConfirm": "Hidupkan",
       "changePassword": "Tukar kata laluan",
       "currentPassword": "Kata laluan semasa",
-      "onlineOff": "Pesanan dalam talian kekal ditutup sehingga bayaran dalam talian disediakan."
+      "onlineOff": "Pesanan dalam talian kekal ditutup sehingga bayaran dalam talian disediakan.",
+      "payOnline": "Bayar dalam talian",
+      "payOnlineNotSetUp": "Belum disediakan. Minta pembangun anda sambungkan gerbang pembayaran.",
+      "payAtCounter": "Bayar di kaunter (QR atau tunai)",
+      "payAtCounterHint": "Pelanggan pesan di telefon dan bayar semasa mengambil. Nombor telefon diperlukan.",
+      "noPaymentOption": "Pelanggan tidak boleh pesan dalam talian sehingga satu pilihan pembayaran dihidupkan."
     },
     "loadMore": "Muat lagi",
     "filters": {
@@ -354,7 +362,8 @@
       "backup_failed": "Sandaran malam gagal",
       "backup_late": "Tiada sandaran terkini: sandaran malam tidak berjalan",
       "backupHint": "Periksa pelayan, atau tanya orang yang menguruskannya.",
-      "open": "Buka"
+      "open": "Buka",
+      "unpaid_at_counter": "Pesanan belum bayar dari {{date}}: terima bayaran atau batalkan."
     },
     "reports": {
       "csv": "Muat turun CSV",
@@ -491,7 +500,14 @@
     "whoCollecting": "Siapa yang mengambil",
     "name": "Nama",
     "payment": "Pembayaran",
-    "ordersEmpty": "Pesanan yang anda buat di telefon ini akan dipaparkan di sini."
+    "ordersEmpty": "Pesanan yang anda buat di telefon ini akan dipaparkan di sini.",
+    "payNowOnline": "Bayar sekarang dalam talian",
+    "payAtCounter": "Bayar di kaunter (QR atau tunai)",
+    "payAtCounterNote": "Bayar dengan QR atau tunai semasa mengambil.",
+    "placeOrder": "Buat pesanan · {{total}}",
+    "phoneNeeded": "Diperlukan supaya kedai boleh hubungi anda",
+    "unpaidAtCounter": "Anda sudah ada pesanan yang menunggu bayaran di kaunter.",
+    "paymentOptionOff": "Pilihan pembayaran ini tidak lagi tersedia."
   },
   "tracking": {
     "readyTitle": "Sedia untuk diambil",
@@ -523,7 +539,8 @@
     "readyAt": "Sedia untuk diambil sekitar {{time}}",
     "runningLate": "Sedikit lewat. Tidak lama lagi.",
     "readyNow": "Sudah siap. Tunjukkan kod ini di kaunter.",
-    "inThisOrder": "Dalam pesanan ini"
+    "inThisOrder": "Dalam pesanan ini",
+    "payAtCounter": "Bayar {{total}} dengan QR atau tunai semasa mengambil."
   },
   "charts": {
     "chart": "Carta",

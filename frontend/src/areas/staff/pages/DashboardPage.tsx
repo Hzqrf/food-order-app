@@ -1,5 +1,5 @@
 import { Badge, Group, Paper, SimpleGrid, Stack, Switch, Text, ThemeIcon, UnstyledButton } from "@mantine/core";
-import { IconAlertTriangle, IconCircleCheck, IconClockHour4, IconCopy, IconDatabaseExclamation, IconReceiptRefund } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCash, IconCircleCheck, IconClockHour4, IconCopy, IconDatabaseExclamation, IconReceiptRefund } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
@@ -9,7 +9,7 @@ import type { Attention } from "../../../api/types";
 import { BarChart } from "../../../components/BarChart";
 import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
-import { formatDateTime } from "../../../lib/dates";
+import { formatDateTime, shortDay } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { percentChange } from "../console/delta";
 import { MetricCard } from "../console/MetricCard";
@@ -24,6 +24,7 @@ const ATTENTION_ICON = {
   ready_too_long: IconClockHour4,
   auto_closed: IconAlertTriangle,
   amount_mismatch: IconAlertTriangle,
+  unpaid_at_counter: IconCash,
   backup_failed: IconDatabaseExclamation,
   backup_late: IconDatabaseExclamation,
 } as const;
@@ -100,7 +101,7 @@ export default function DashboardPage() {
               </div>
             )}
           </Group>
-          {data.online_payments_enabled ? (
+          {data.online_ordering_available ? (
             <Switch size="md" color="green" checked={data.accepting_online_orders}
               label={data.accepting_online_orders ? t("staff.onlineOn") : t("staff.onlinePaused")}
               description={data.is_open ? undefined : t("admin.today.closedNow")}
@@ -108,7 +109,7 @@ export default function DashboardPage() {
                 onSuccess: () => refetch(), onError: (err) => notifyError(t, err),
               })} />
           ) : (
-            <Text size="sm" c="dimmed">{t("admin.settings.onlineOff")}</Text>
+            <Text size="sm" c="dimmed">{t("admin.settings.noPaymentOption")}</Text>
           )}
         </SectionCard>
 
@@ -147,6 +148,7 @@ function AttentionRow({ item, onOpen }: { item: Attention; onOpen?: () => void }
         <div style={{ flex: 1, minWidth: 0 }}>
           <Text size="sm" fw={600}>{t(`admin.attention.${item.kind}`, {
             amount: item.amount_sen != null ? formatSen(item.amount_sen) : "",
+            date: item.order ? shortDay(item.order.business_date) : "",
           })}</Text>
           <Text size="xs" c="dimmed">
             {detail}
