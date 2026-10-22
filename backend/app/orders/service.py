@@ -17,7 +17,7 @@ from app.orders import state_machine as sm
 from app.payments import service as payments
 from app.phone import normalize_my_phone
 from app.security import limiter
-from app.shop.service import business_date, takes_online_orders
+from app.shop.service import business_date, online_payment_ready, takes_online_orders
 
 STAFF_SEARCH_DAYS = 7
 
@@ -230,7 +230,14 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
     if not takes_online_orders(branch):
         raise AppError("shop_closed", "The shop is not taking online orders right now.", 409)
     limiter.hit("online-order", ip, limit=10, window_seconds=600)
-    # The phone number is optional. When given it must be a real number, since the shop may call it.
+    at_counter = body.pay_at_counter
+    if not (branch.pay_at_counter if at_counter else online_payment_ready(branch)):
+        raise AppError("payment_option_off", "This payment option isn't available any more.", 409)
+    if at_counter and not body.customer_phone:
+        raise AppError("invalid_phone", "Enter a Malaysian phone number, for example 012-345 6789.", 422,
+                       [{"field": "customer_phone", "message": "required to pay at the counter"}])
+    # The phone number is optional when paying online. When given it must be a real number, since
+    # the shop may call it.
     phone = None
     if body.customer_phone:
         phone = normalize_my_phone(body.customer_phone)
@@ -241,16 +248,27 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
                                                               Order.status == sm.PENDING_PAYMENT))
         if unpaid >= MAX_UNPAID_PER_PHONE:
             raise AppError("too_many_unpaid", "Finish paying for your earlier orders first.", 429)
+        # The kitchen starts these at once, so one waiting order per number limits no-shows.
+        if at_counter and db.scalar(select(func.count(Order.id)).where(
+                Order.customer_phone == phone, Order.pay_at_counter.is_(True),
+                Order.payment_status == "unpaid", Order.status.in_(sm.ACTIVE))):
+            raise AppError("unpaid_at_counter", "You already have an order waiting to be paid at the counter.", 429)
 
     result = priced_or_conflict(db, body.items, body.expected_total_sen)
+    now = utcnow()
+    # Paid at the counter: straight to the kitchen, unpaid until staff take the money at pickup.
+    state = (dict(status=sm.PLACED, placed_at=now, pay_at_counter=True) if at_counter
+             else dict(status=sm.PENDING_PAYMENT))
     order, created = _insert_numbered(
-        db, branch, result, idempotency_key, utcnow(),
+        db, branch, result, idempotency_key, now,
         channel="online", created_by_user_id=None, customer_name=body.customer_name, customer_phone=phone,
-        note=body.note, status=sm.PENDING_PAYMENT, payment_status="unpaid",
+        note=body.note, payment_status="unpaid", **state,
     )
     if not created:
         return order, _payment_url_for(db, order), False
     sm.record_creation(db, order, sm.CUSTOMER, None)
+    if at_counter:
+        return order, None, True
     return order, payments.start_payment(db, order), True
 
 
@@ -298,7 +316,7 @@ def tracking(order: Order, branch: Branch) -> schemas.TrackingOut:
         created_at=order.created_at, placed_at=order.placed_at, ready_at=order.ready_at,
         completed_at=order.completed_at, cancelled_at=order.cancelled_at, cancel_reason=order.cancel_reason,
         expires_at=payments.expiry_of(order) if pending else None,
-        can_pay=pending and not _expired(order), can_cancel=pending,
+        can_pay=pending and not _expired(order), can_cancel=pending, pay_at_counter=order.pay_at_counter,
     )
 
 
@@ -534,6 +552,7 @@ def summary(order: Order) -> dict:
         channel=order.channel, status=order.status, payment_status=order.payment_status,
         customer_name=order.customer_name, note=order.note, subtotal_sen=order.subtotal_sen,
         total_sen=order.total_sen, version=order.version, auto_closed=order.auto_closed,
+        pay_at_counter=order.pay_at_counter,
         cancel_reason=order.cancel_reason,
         created_by_name=order.created_by.full_name if order.created_by else None,
         claimed_by_name=order.claimed_by.full_name if order.claimed_by else None, claimed_at=order.claimed_at,

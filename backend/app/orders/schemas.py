@@ -81,6 +81,8 @@ class OnlineOrderIn(BaseModel):
     items: list[CartLineIn] = Field(min_length=1, max_length=50)
     # The total the customer saw. If the server's total differs, the order is refused for review.
     expected_total_sen: int
+    # Pay by QR or cash on pickup instead of online. Needs a phone number.
+    pay_at_counter: bool = False
 
     _clean = field_validator("customer_name", "customer_phone", "note")(_strip)
 
@@ -93,7 +95,8 @@ class OnlineOrderOut(BaseModel):
     total_sen: int
     # None when the gateway could not be reached; the tracking page offers "Pay now" to retry.
     payment_url: str | None
-    expires_at: datetime
+    # None for an order paid at the counter: it never expires.
+    expires_at: datetime | None
 
 
 class PaymentLinkOut(BaseModel):
@@ -133,6 +136,7 @@ class TrackingOut(BaseModel):
     expires_at: datetime | None = None
     can_pay: bool = False
     can_cancel: bool = False
+    pay_at_counter: bool = False
 
 
 class TransitionIn(BaseModel):
@@ -214,6 +218,7 @@ class OrderSummary(BaseModel):
     total_sen: int
     version: int
     auto_closed: bool
+    pay_at_counter: bool
     cancel_reason: str | None
     created_by_name: str | None
     claimed_by_name: str | None

@@ -24,7 +24,7 @@ def place_order(body: schemas.OnlineOrderIn, request: Request, response: Respons
     return schemas.OnlineOrderOut(order_number=service.fmt_number(order.order_number), order_code=order.order_code,
                                   token=order.public_token,
                                   status=order.status, total_sen=order.total_sen, payment_url=url,
-                                  expires_at=expiry_of(order))
+                                  expires_at=None if order.pay_at_counter else expiry_of(order))
 
 
 @router.get("/t/{token}", response_model=schemas.TrackingOut)

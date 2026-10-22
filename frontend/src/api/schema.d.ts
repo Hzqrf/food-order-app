@@ -1277,6 +1277,8 @@ export interface components {
             version: number;
             /** Auto Closed */
             auto_closed: boolean;
+            /** Pay At Counter */
+            pay_at_counter: boolean;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -1328,6 +1330,8 @@ export interface components {
             accepting_online_orders: boolean;
             /** Online Payments Enabled */
             online_payments_enabled: boolean;
+            /** Online Ordering Available */
+            online_ordering_available: boolean;
             /** Is Open */
             is_open: boolean;
             /** Top Items */
@@ -1550,6 +1554,11 @@ export interface components {
             items: components["schemas"]["CartLineIn"][];
             /** Expected Total Sen */
             expected_total_sen: number;
+            /**
+             * Pay At Counter
+             * @default false
+             */
+            pay_at_counter: boolean;
         };
         /** OnlineOrderOut */
         OnlineOrderOut: {
@@ -1565,11 +1574,8 @@ export interface components {
             total_sen: number;
             /** Payment Url */
             payment_url: string | null;
-            /**
-             * Expires At
-             * Format: date-time
-             */
-            expires_at: string;
+            /** Expires At */
+            expires_at: string | null;
         };
         /** OnlineOrdersIn */
         OnlineOrdersIn: {
@@ -1670,6 +1676,8 @@ export interface components {
             version: number;
             /** Auto Closed */
             auto_closed: boolean;
+            /** Pay At Counter */
+            pay_at_counter: boolean;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -1807,6 +1815,8 @@ export interface components {
             version: number;
             /** Auto Closed */
             auto_closed: boolean;
+            /** Pay At Counter */
+            pay_at_counter: boolean;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -2037,6 +2047,10 @@ export interface components {
                     string
                 ][];
             } | null;
+            /** Pay Online */
+            pay_online?: boolean | null;
+            /** Pay At Counter */
+            pay_at_counter?: boolean | null;
         };
         /** ShopOut */
         ShopOut: {
@@ -2060,6 +2074,14 @@ export interface components {
             timezone: string;
             /** Extra Wait Minutes */
             extra_wait_minutes: number;
+            /** Pay Online Available */
+            pay_online_available: boolean;
+            /** Pay Online Enabled */
+            pay_online_enabled: boolean;
+            /** Pay At Counter */
+            pay_at_counter: boolean;
+            /** Online Ordering Available */
+            online_ordering_available: boolean;
         };
         /** SoldOutIn */
         SoldOutIn: {
@@ -2266,6 +2288,11 @@ export interface components {
              * @default false
              */
             can_cancel: boolean;
+            /**
+             * Pay At Counter
+             * @default false
+             */
+            pay_at_counter: boolean;
         };
         /** TransitionIn */
         TransitionIn: {

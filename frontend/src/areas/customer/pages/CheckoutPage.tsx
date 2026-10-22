@@ -87,7 +87,7 @@ export default function CheckoutPage() {
       {
         key,
         body: { customer_name: name.trim() || null, customer_phone: normalized, note: note.trim() || null,
-          items: cart.requestLines, expected_total_sen: total },
+          items: cart.requestLines, expected_total_sen: total, pay_at_counter: false },
       },
       {
         onSuccess: (order) => {
