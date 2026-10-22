@@ -19,7 +19,7 @@ from app.models import (AuditLog, Branch, MenuCategory, MenuItem, Order, OrderIt
 from app.orders import state_machine as sm
 from app.orders.service import fmt_number, refundable_by_charge
 from app.reports import schemas
-from app.shop.service import business_date, is_open
+from app.shop.service import business_date, is_open, online_ordering_available
 
 SALES_STATUSES = (sm.PLACED, sm.PREPARING, sm.READY, sm.COMPLETED)
 UNPAID_REASONS = ("payment_expired", "customer_cancelled")
@@ -384,6 +384,7 @@ def dashboard(db: Session, branch: Branch) -> schemas.Dashboard:
                                 ready=live.get(sm.READY, 0), awaiting_payment=live.get(sm.PENDING_PAYMENT, 0)),
         accepting_online_orders=branch.is_accepting_online_orders,
         online_payments_enabled=get_settings().online_payments_enabled,
+        online_ordering_available=online_ordering_available(branch),
         is_open=is_open(branch),
         top_items=[schemas.TopItem(menu_item_id=r.menu_item_id, name=r.name, quantity=r.quantity,
                                    sales_sen=r.sales_sen) for r in items(db, branch, today, today, limit=5)

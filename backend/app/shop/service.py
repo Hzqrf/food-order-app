@@ -37,9 +37,19 @@ def is_open(branch: Branch, now: datetime | None = None) -> bool:
     return any(start > end and hhmm < end for start, end in branch.opening_hours.get(yesterday, []))
 
 
+def online_payment_ready(branch: Branch) -> bool:
+    """Customers can pay online: a gateway is set up and the owner allows it."""
+    return get_settings().online_payments_enabled and branch.pay_online
+
+
+def online_ordering_available(branch: Branch) -> bool:
+    """There is some way to pay for an online order: online, or at the counter on pickup."""
+    return online_payment_ready(branch) or branch.pay_at_counter
+
+
 def takes_online_orders(branch: Branch) -> bool:
-    """Online ordering needs a payment gateway, opening hours, and the switch on."""
-    return get_settings().online_payments_enabled and is_open(branch) and branch.is_accepting_online_orders
+    """Online ordering needs a payment option, opening hours, and the switch on."""
+    return online_ordering_available(branch) and is_open(branch) and branch.is_accepting_online_orders
 
 
 def shop_out(db: Session, branch: Branch) -> schemas.ShopOut:
@@ -50,14 +60,16 @@ def shop_out(db: Session, branch: Branch) -> schemas.ShopOut:
         can_order_online=takes_online_orders(branch), online_payments_enabled=get_settings().online_payments_enabled,
         prep_minutes=branch.prep_minutes, opening_hours=branch.opening_hours, timezone=branch.timezone,
         extra_wait_minutes=extra_wait_minutes(db, branch),
+        pay_online_available=online_payment_ready(branch), pay_online_enabled=branch.pay_online,
+        pay_at_counter=branch.pay_at_counter, online_ordering_available=online_ordering_available(branch),
     )
 
 
 def set_online_orders(db: Session, branch: Branch, user: User, accepting: bool, ip: str) -> None:
     if branch.is_accepting_online_orders == accepting:
         return
-    if accepting and not get_settings().online_payments_enabled:
-        raise AppError("online_payments_off", "Online payments are not set up yet, so online orders stay off.", 409)
+    if accepting and not online_ordering_available(branch):
+        raise AppError("no_payment_option", "Turn on a payment option in Settings first.", 409)
     audit(db, user.id, "online_orders_resumed" if accepting else "online_orders_paused", "branch", branch.id,
           {"is_accepting_online_orders": branch.is_accepting_online_orders},
           {"is_accepting_online_orders": accepting}, ip)

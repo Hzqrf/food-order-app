@@ -19,6 +19,12 @@ class ShopOut(BaseModel):
     timezone: str
     # Minutes only: how much longer pickups are running right now (0 when on time).
     extra_wait_minutes: int
+    # Payment options. pay_online_available = gateway set up and the owner's pay_online switch on.
+    pay_online_available: bool
+    pay_online_enabled: bool
+    pay_at_counter: bool
+    # Some way to pay for an online order exists (online or at the counter).
+    online_ordering_available: bool
 
 
 class OnlineOrdersIn(BaseModel):
@@ -30,6 +36,8 @@ class SettingsPatch(BaseModel):
     timezone: str | None = None
     prep_minutes: int | None = Field(default=None, ge=1, le=240)
     opening_hours: dict[str, list[tuple[HHMM, HHMM]]] | None = None
+    pay_online: bool | None = None
+    pay_at_counter: bool | None = None
 
     @field_validator("timezone")
     @classmethod

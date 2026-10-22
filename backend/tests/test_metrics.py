@@ -138,7 +138,8 @@ def test_shop_reports_extra_wait(client, staff_client, menu, db):
     assert body["extra_wait_minutes"] == 10
     assert set(body) == {"name", "is_open", "is_accepting_online_orders", "can_order_online",
                          "online_payments_enabled", "prep_minutes", "opening_hours", "timezone",
-                         "extra_wait_minutes"}
+                         "extra_wait_minutes", "pay_online_available", "pay_online_enabled", "pay_at_counter",
+                         "online_ordering_available"}
 
 
 def test_extra_wait_ignores_orders_from_earlier_days(staff_client, menu, db, branch):

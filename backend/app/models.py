@@ -20,6 +20,7 @@ from sqlalchemy import (
     TypeDecorator,
     UniqueConstraint,
     false,
+    true,
 )
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -80,6 +81,9 @@ class Branch(TimestampMixin, Base):
     # {"mon": [["10:00", "22:00"]], ..., "sun": []}
     opening_hours: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     prep_minutes: Mapped[int] = mapped_column(Integer, default=15)
+    # The owner's payment options for online orders. Paying online also needs a gateway.
+    pay_online: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    pay_at_counter: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 class User(TimestampMixin, Base):
@@ -241,6 +245,8 @@ class Order(TimestampMixin, Base):
     note: Mapped[str | None] = mapped_column(String(200))
     cancel_reason: Mapped[str | None] = mapped_column(String(200))
     auto_closed: Mapped[bool] = mapped_column(Boolean, default=False)
+    # An online order the customer pays for at pickup. Set at creation, never changed.
+    pay_at_counter: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     version: Mapped[int] = mapped_column(Integer, default=1)
     idempotency_key: Mapped[str | None] = mapped_column(String(64), unique=True)
     placed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)

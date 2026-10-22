@@ -58,7 +58,7 @@ def test_counter_only_mode_turns_online_ordering_off(client, staff, menu, branch
     login(client, staff.username)
     client.patch(f"{API}/staff/shop/online-orders", json={"accepting": False})
     r = client.patch(f"{API}/staff/shop/online-orders", json={"accepting": True})
-    assert r.json()["error"]["code"] == "online_payments_off"
+    assert r.json()["error"]["code"] == "no_payment_option"
     assert payments_tick(None) == {"reconciled": 0, "expired": 0}
 
     # Counter orders work as usual.

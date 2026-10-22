@@ -86,6 +86,7 @@ class Dashboard(BaseModel):
     live: LiveCounts
     accepting_online_orders: bool
     online_payments_enabled: bool
+    online_ordering_available: bool
     is_open: bool
     top_items: list[TopItem]
     last_14_days: list[DayPoint]
