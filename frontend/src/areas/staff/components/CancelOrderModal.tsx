@@ -8,7 +8,8 @@ import type { OrderDetail } from "../../../api/types";
 import { notifyError } from "../../../components/errors";
 import { formatSen } from "../../../lib/money";
 
-const QUICK_REASONS = ["cancel.reasons.soldOut", "cancel.reasons.changedMind", "cancel.reasons.duplicate"];
+const QUICK_REASONS = ["cancel.reasons.soldOut", "cancel.reasons.changedMind", "cancel.reasons.duplicate",
+  "cancel.reasons.noShow"];
 
 /** Cancelling a paid order forces a decision on how the money goes back. */
 type RefundMethod = "cash" | "original" | "later";

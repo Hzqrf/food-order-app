@@ -1,4 +1,4 @@
-import { Table, Text, TextInput } from "@mantine/core";
+import { Badge, Group, Table, Text, TextInput } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 import { useOrderSearch } from "../../../api/orders";
 import { formatDateTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
+import { isUnpaidAtCounter } from "../components/TakePaymentModal";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard } from "../console/SectionCard";
 import { StatusLabel } from "../console/StatusLabel";
@@ -54,7 +55,16 @@ export default function SearchPage() {
                     <Table.Td>{formatDateTime(o.created_at)}</Table.Td>
                     <Table.Td>{o.customer_name ?? "—"}</Table.Td>
                     <Table.Td>{t(`channel.${o.channel}`)}</Table.Td>
-                    <Table.Td><StatusLabel kind="status" value={o.status} /></Table.Td>
+                    <Table.Td>
+                      <Group gap={6} wrap="nowrap">
+                        <StatusLabel kind="status" value={o.status} />
+                        {isUnpaidAtCounter(o) && (
+                          <Badge size="sm" variant="filled" color="orange.7">
+                            {t("order.unpaid", { total: formatSen(o.total_sen) })}
+                          </Badge>
+                        )}
+                      </Group>
+                    </Table.Td>
                     <Table.Td ta="right" fw={600}>{formatSen(o.total_sen)}</Table.Td>
                   </Table.Tr>
                 ))}

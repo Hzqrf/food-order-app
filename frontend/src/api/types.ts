@@ -16,6 +16,7 @@ export type OnlineOrderOut = S["OnlineOrderOut"];
 export type TrackingOut = S["TrackingOut"];
 export type CounterOrderIn = S["CounterOrderIn"];
 export type CounterOrderOut = S["CounterOrderOut"];
+export type TakePaymentOut = S["TakePaymentOut"];
 export type OrderSummary = S["OrderSummary"];
 export type OrderDetail = S["OrderDetail"];
 export type QueueMetrics = S["QueueMetrics"];

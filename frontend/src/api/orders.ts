@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./client";
-import type { CancelIn, CounterOrderIn, CounterOrderOut, OrderDetail, OrderSummary, QueueMetrics } from "./types";
+import type { CancelIn, CounterOrderIn, CounterOrderOut, OrderDetail, OrderSummary, PaymentMethod, QueueMetrics,
+  TakePaymentOut } from "./types";
 
 export const boardKey = ["board"];
 
@@ -68,6 +69,15 @@ export function useCreateCounterOrder() {
 export function useTransition() {
   return useOrderMutation(({ id, to, version }: { id: number; to: string; version: number }) =>
     api<OrderSummary>(`/staff/orders/${id}/transition`, { body: { to, version } }),
+  );
+}
+
+/** Money taken at pickup for an online order paid at the counter. */
+export function useTakePayment() {
+  return useOrderMutation(({ id, method, tenderedSen, key }:
+    { id: number; method: PaymentMethod; tenderedSen: number | null; key: string }) =>
+    api<TakePaymentOut>(`/staff/orders/${id}/payment`,
+      { body: { method, tendered_sen: tenderedSen }, headers: { "Idempotency-Key": key } }),
   );
 }
 

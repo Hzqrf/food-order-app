@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import type { OrderSummary } from "../../../api/types";
 import { formatSen } from "../../../lib/money";
+import { isUnpaidAtCounter } from "./TakePaymentModal";
 import { minutesSince } from "../../../lib/dates";
 import { tileStyle } from "../console/SectionCard";
 import { tokens } from "../../../ui/tokens";
@@ -75,6 +76,12 @@ export function OrderCard({
             {order.customer_name ? `${order.customer_name} · ` : ""}
             <Text span ff="monospace" inherit>{order.order_code}</Text>
           </Text>
+        )}
+        {/* Its own line: the header is too narrow on a three-column board. */}
+        {isUnpaidAtCounter(order) && (
+          <Badge size="md" variant="filled" color="orange.7" mt={6}>
+            {t("order.unpaid", { total: formatSen(order.total_sen) })}
+          </Badge>
         )}
         <Stack gap={2} mt={8}>
           {order.items.map((line) => (

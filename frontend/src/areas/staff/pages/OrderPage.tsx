@@ -6,12 +6,14 @@ import { useNavigate, useParams } from "react-router";
 import { useSession } from "../../../api/auth";
 import { isApiError } from "../../../api/client";
 import { useOrder, useTransition } from "../../../api/orders";
+import type { OrderSummary } from "../../../api/types";
 import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
 import { formatDateTime, formatTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { CancelOrderModal } from "../components/CancelOrderModal";
 import { RefundModal } from "../components/RefundModal";
+import { isUnpaidAtCounter, TakePaymentModal } from "../components/TakePaymentModal";
 import { useStaff } from "../console/lock";
 import { PageHeader } from "../console/PageHeader";
 import { SectionCard, tileStyle } from "../console/SectionCard";
@@ -47,6 +49,9 @@ export default function OrderPage() {
   const transition = useTransition();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [paying, setPaying] = useState(false);
+  // What to do once the money is in: nothing, or finish the hand-over that asked for it.
+  const [afterPaid, setAfterPaid] = useState<"completed" | null>(null);
   const isAdmin = session?.user?.role === "admin";
   // Came from the queue, search or sales: go back there; a pasted link goes to the queue.
   const back = () => (window.history.length > 1 ? navigate(-1) : navigate("/staff"));
@@ -70,15 +75,21 @@ export default function OrderPage() {
 
   const canCancel = order.status === "placed" || (isAdmin && ["preparing", "ready"].includes(order.status));
   const canRefund = isAdmin && order.payment_status === "paid" && order.payments.some((p) => p.refundable_sen > 0);
-  const move = (to: string) => {
+  const move = (to: string, current: OrderSummary = order) => {
     if (!ensureUnlocked()) return;
+    // An order paid at the counter can't leave unpaid: take the money first, then hand it over.
+    if (to === "completed" && isUnpaidAtCounter(current)) {
+      setAfterPaid("completed");
+      setPaying(true);
+      return;
+    }
     // Handing over from a ready order happens on the queue, which gives 5 seconds to undo it.
-    if (to === "completed" && order.status === "ready") {
+    if (to === "completed" && current.status === "ready") {
       const state: QueueState = { handOver: order.id };
       navigate("/staff", { state });
       return;
     }
-    transition.mutate({ id: order.id, to, version: order.version }, {
+    transition.mutate({ id: current.id, to, version: current.version }, {
       onSuccess: () => toast(t("console.order.moved", { number: order.order_number, status: t(`status.${to}`) })),
       onError: (e) => notifyError(t, e),
     });
@@ -99,12 +110,23 @@ export default function OrderPage() {
               {order.auto_closed && <Badge color="yellow" variant="light">{t("order.autoClosed")}</Badge>}
             </Group>
           }
-          actions={FORWARD[order.status]?.map((to, i) => (
-            <Button key={to} variant={i === 0 ? "filled" : "light"} color={i === 0 ? undefined : "gray"}
-              loading={transition.isPending} onClick={() => move(to)}>
-              {t(`board.moveTo.${to}`)}
-            </Button>
-          ))}
+          actions={<>
+            {isUnpaidAtCounter(order) && (
+              <Button color="orange.7" onClick={() => {
+                if (!ensureUnlocked()) return;
+                setAfterPaid(null);
+                setPaying(true);
+              }}>
+                {t("order.takePayment")}
+              </Button>
+            )}
+            {FORWARD[order.status]?.map((to, i) => (
+              <Button key={to} variant={i === 0 ? "filled" : "light"} color={i === 0 ? undefined : "gray"}
+                loading={transition.isPending} onClick={() => move(to)}>
+                {t(`board.moveTo.${to}`)}
+              </Button>
+            ))}
+          </>}
         >
           <Stack gap={12}>
             {order.items.map((line) => (
@@ -211,6 +233,8 @@ export default function OrderPage() {
       </SimpleGrid>
       <CancelOrderModal order={cancelOpen ? order : null} onClose={() => setCancelOpen(false)} />
       <RefundModal order={refundOpen ? order : null} onClose={() => setRefundOpen(false)} />
+      <TakePaymentModal order={paying ? order : null} onClose={() => setPaying(false)}
+        onPaid={(paid) => afterPaid && move(afterPaid, { ...order, ...paid })} />
     </Stack>
   );
 }

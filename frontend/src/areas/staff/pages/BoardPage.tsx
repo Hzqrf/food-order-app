@@ -16,6 +16,7 @@ import { notifyError } from "../../../components/errors";
 import { useNewOrderAlert } from "../../../hooks/useNewOrderAlert";
 import { formatTime } from "../../../lib/dates";
 import { NEXT_STEP, OrderCard } from "../components/OrderCard";
+import { isUnpaidAtCounter, TakePaymentModal } from "../components/TakePaymentModal";
 import { useStaff } from "../console/lock";
 import { MetricCard } from "../console/MetricCard";
 import { PageHeader } from "../console/PageHeader";
@@ -86,6 +87,8 @@ export default function BoardPage() {
   useInterval(() => setNow(Date.now()), 30_000, { autoInvoke: true });
   const [sent, setSent] = useState<SentNotice | null>(null);
   const [handOverId, setHandOverId] = useState<number | null>(null);
+  // An order paid at the counter: take the money, then hand it over.
+  const [paying, setPaying] = useState<OrderSummary | null>(null);
 
   // Take what other pages handed over, then clear it from history so a reload doesn't repeat it.
   useEffect(() => {
@@ -156,6 +159,7 @@ export default function BoardPage() {
     if (!ensureUnlocked()) return;
     acknowledge(order.id);
     if (to !== "completed") return send(order, to);
+    if (isUnpaidAtCounter(order)) return setPaying(order);
 
     setHandingOver((prev) => new Set(prev).add(order.id));
     const notifId = `undo-${order.id}`;
@@ -284,6 +288,8 @@ export default function BoardPage() {
           );
         })}
       </SimpleGrid>
+      <TakePaymentModal order={paying} onClose={() => setPaying(null)}
+        onPaid={(paid) => advance({ ...paying!, ...paid }, "completed")} />
     </Stack>
   );
 }
