@@ -45,7 +45,10 @@
     "payment_option_off": "This payment option isn't available any more.",
     "unpaid_at_counter": "You already have an order waiting to be paid at the counter.",
     "not_unpaid": "This order has already been paid.",
-    "payment_needed": "Take payment before marking this order collected."
+    "payment_needed": "Take payment before marking this order collected.",
+    "preorders_off": "Pre-orders aren't available right now.",
+    "slot_unavailable": "Pick one of the available times.",
+    "slot_full": "That time just filled up. Pick another time."
   },
   "shop": {
     "open": "Open",
@@ -119,7 +122,10 @@
     "emptyNew": "No new orders.",
     "handedOverToast": "{{number}} handed over",
     "changedElsewhere": "Order {{number}} was updated on another screen.",
-    "offline": "Offline. Showing orders as of {{time}}."
+    "offline": "Offline. Showing orders as of {{time}}.",
+    "later": "Later today",
+    "laterCard": "For {{time}} · starts {{start}}",
+    "startEarly": "Start early"
   },
   "channel": {
     "online": "Online",
@@ -328,7 +334,10 @@
       "payOnlineNotSetUp": "Not set up yet. Ask your developer to connect a payment gateway.",
       "payAtCounter": "Pay at the counter (QR or cash)",
       "payAtCounterHint": "Customers order on their phone and pay when they collect. A mobile number is required.",
-      "noPaymentOption": "Customers can't order online until a payment option is on."
+      "noPaymentOption": "Customers can't order online until a payment option is on.",
+      "preorders": "Pre-orders",
+      "preordersHint": "Customers can choose a pickup time later today.",
+      "preorderSlotLimit": "Max pre-orders per 15 minutes"
     },
     "loadMore": "Load more",
     "filters": {
@@ -515,7 +524,11 @@
     "placeOrder": "Place order · {{total}}",
     "phoneNeeded": "Needed so the shop can reach you",
     "unpaidAtCounter": "You already have an order waiting to be paid at the counter.",
-    "paymentOptionOff": "This payment option isn't available any more."
+    "paymentOptionOff": "This payment option isn't available any more.",
+    "chooseTime": "Choose a time",
+    "slotFull": "Full",
+    "pickTime": "Pick a pickup time",
+    "forTime": "For {{time}}"
   },
   "tracking": {
     "readyTitle": "Ready to collect",
@@ -636,7 +649,10 @@
         "lateHint": "Past their promised time",
         "today": "Orders today",
         "minutes_one": "{{count}} min",
-        "minutes_other": "{{count}} min"
+        "minutes_other": "{{count}} min",
+        "preorders": "Pre-orders today",
+        "nextAt": "Next at {{time}}",
+        "noneWaiting": "None waiting"
       }
     },
     "order": {

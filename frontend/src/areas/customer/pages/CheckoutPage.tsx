@@ -1,4 +1,4 @@
-import { ActionIcon, Alert, Box, Button, Center, Group, Loader, Stack, Text, TextInput, Textarea } from "@mantine/core";
+import { ActionIcon, Alert, Box, Button, Center, Chip, Group, Loader, Stack, Text, TextInput, Textarea } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -6,10 +6,11 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 
 import { isApiError, newIdempotencyKey } from "../../../api/client";
-import { menuKey, useMenu, useShop } from "../../../api/menu";
+import { menuKey, useMenu, usePickupSlots, useShop } from "../../../api/menu";
 import { usePlaceOrder, useQuote } from "../../../api/public";
 import { indexMenu } from "../../../lib/cart";
 import { formatTime } from "../../../lib/dates";
+import { clockLabel } from "../../../lib/hours";
 import { formatSen } from "../../../lib/money";
 import { formatMyPhone, normalizeMyPhone } from "../../../lib/phone";
 import { loadDetails, rememberOrder, saveDetails } from "../../../lib/storage";
@@ -62,6 +63,13 @@ export default function CheckoutPage() {
   const [picked, setPicked] = useState<"online" | "counter" | null>(null);
   const choice = picked && options.includes(picked) ? picked : options[0];
   const atCounter = choice === "counter";
+  // As soon as possible, or a pickup time later today (a pre-order).
+  const [when, setWhen] = useState<"asap" | "later">("asap");
+  const [slot, setSlot] = useState<string | null>(null);
+  const pickup = usePickupSlots(Boolean(shop?.preorders_enabled));
+  const slots = pickup.data ?? [];
+  const canPreorder = Boolean(shop?.preorders_enabled) && slots.length > 0;
+  const later = canPreorder && when === "later";
   const [error, setError] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   // One key per checkout attempt: a retry after a dropped connection returns the same order.
@@ -84,7 +92,7 @@ export default function CheckoutPage() {
   const phoneOk = atCounter ? normalized !== null : phone.trim() === "" || normalized !== null;
   const total = quote.data?.total_sen;
   const problems = quote.data?.problems.length ?? 0;
-  const canSubmit = phoneOk && total !== undefined && problems === 0 && shop?.can_order_online;
+  const canSubmit = phoneOk && total !== undefined && problems === 0 && shop?.can_order_online && (!later || slot !== null);
 
   const submit = () => {
     setTouched(true);
@@ -94,7 +102,8 @@ export default function CheckoutPage() {
       {
         key,
         body: { customer_name: name.trim() || null, customer_phone: normalized, note: note.trim() || null,
-          items: cart.requestLines, expected_total_sen: total, pay_at_counter: atCounter },
+          items: cart.requestLines, expected_total_sen: total, pay_at_counter: atCounter,
+          pickup_time: later ? slot : null },
       },
       {
         onSuccess: (order) => {
@@ -119,6 +128,14 @@ export default function CheckoutPage() {
             setError(t("customer.phoneInvalid"));
           } else if (isApiError(e, "too_many_unpaid")) {
             setError(t("customer.tooManyUnpaid"));
+          } else if (isApiError(e, "slot_full") || isApiError(e, "slot_unavailable")) {
+            pickup.refetch();
+            setSlot(null);
+            setError(t(`apiError.${isApiError(e, "slot_full") ? "slot_full" : "slot_unavailable"}`));
+          } else if (isApiError(e, "preorders_off")) {
+            qc.invalidateQueries({ queryKey: ["shop"] });
+            setWhen("asap");
+            setError(t("apiError.preorders_off"));
           } else if (isApiError(e, "unpaid_at_counter")) {
             setError(t("customer.unpaidAtCounter"));
           } else if (isApiError(e, "payment_option_off")) {
@@ -146,7 +163,27 @@ export default function CheckoutPage() {
         {error && <Alert color="red" radius={radius.tile}>{error}</Alert>}
 
         <Card title={t("customer.pickup")}>
-          <Text fz={14} c={tokens.body}>{t("customer.pickupAsap", { time: readyAround })}</Text>
+          {canPreorder ? (
+            <Stack gap={8}>
+              <ChoiceRow type="radio" label={t("customer.pickupAsap", { time: readyAround })} priceDeltaSen={0}
+                checked={!later} disabled={false} onChange={() => setWhen("asap")} />
+              <ChoiceRow type="radio" label={t("customer.chooseTime")} priceDeltaSen={0}
+                checked={later} disabled={false} onChange={() => setWhen("later")} />
+              {later && (
+                <Chip.Group value={slot ?? ""} onChange={(v) => setSlot(typeof v === "string" && v ? v : null)}>
+                  <Group gap={8} mt={4}>
+                    {slots.map((s) => (
+                      <Chip key={s.time} value={s.time} disabled={!s.available} color="orange.7" radius="md">
+                        {s.available ? clockLabel(s.time) : `${clockLabel(s.time)} · ${t("customer.slotFull")}`}
+                      </Chip>
+                    ))}
+                  </Group>
+                </Chip.Group>
+              )}
+            </Stack>
+          ) : (
+            <Text fz={14} c={tokens.body}>{t("customer.pickupAsap", { time: readyAround })}</Text>
+          )}
         </Card>
 
         <Card title={t("customer.whoCollecting")}>
@@ -192,10 +229,11 @@ export default function CheckoutPage() {
 
       <BottomBar>
         <Button fullWidth size="md" radius="xl" color="orange.7" loading={place.isPending}
-          disabled={total === undefined || problems > 0} onClick={submit}>
+          disabled={total === undefined || problems > 0 || (later && slot === null)} onClick={submit}>
           {total === undefined ? t("common.loading")
             : t(atCounter ? "customer.placeOrder" : "customer.pay", { total: formatSen(total) })}
         </Button>
+        {later && slot === null && <Text fz={12} c="orange.8" ta="center" mt={6}>{t("customer.pickTime")}</Text>}
         <Text fz={11} c={tokens.muted} ta="center" mt={8}>{t("customer.privacy")}</Text>
       </BottomBar>
     </Box>

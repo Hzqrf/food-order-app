@@ -29,6 +29,12 @@ function Card({ children, bg = tokens.card }: { children: ReactNode; bg?: string
  */
 function heading(t: TFunction, order: TrackingOut, now: number, extraMinutes: number): string | null {
   if (order.status === "ready") return t("tracking.readyNow");
+  // A pre-order: the customer chose the time, so no kitchen delay is added.
+  if ((order.status === "placed" || order.status === "preparing") && order.pickup_at) {
+    return Date.parse(order.pickup_at) > now
+      ? t("tracking.readyAt", { time: formatTime(order.pickup_at) })
+      : t("tracking.runningLate");
+  }
   if ((order.status === "placed" || order.status === "preparing") && order.placed_at && order.prep_minutes) {
     const promise = new Date(order.placed_at).getTime() + (order.prep_minutes + extraMinutes) * 60_000;
     return promise > now

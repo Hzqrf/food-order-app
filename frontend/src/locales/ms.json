@@ -45,7 +45,10 @@
     "payment_option_off": "Pilihan pembayaran ini tidak lagi tersedia.",
     "unpaid_at_counter": "Anda sudah ada pesanan yang menunggu bayaran di kaunter.",
     "not_unpaid": "Pesanan ini sudah dibayar.",
-    "payment_needed": "Terima bayaran dahulu sebelum menandakan pesanan ini sudah diambil."
+    "payment_needed": "Terima bayaran dahulu sebelum menandakan pesanan ini sudah diambil.",
+    "preorders_off": "Pra-pesanan tidak tersedia sekarang.",
+    "slot_unavailable": "Pilih salah satu masa yang tersedia.",
+    "slot_full": "Masa itu baru sahaja penuh. Pilih masa lain."
   },
   "shop": {
     "open": "Buka",
@@ -118,7 +121,10 @@
     "emptyNew": "Tiada pesanan baru.",
     "handedOverToast": "{{number}} sudah diserah",
     "changedElsewhere": "Pesanan {{number}} dikemas kini di skrin lain.",
-    "offline": "Luar talian. Pesanan setakat {{time}}."
+    "offline": "Luar talian. Pesanan setakat {{time}}.",
+    "later": "Kemudian hari ini",
+    "laterCard": "Untuk {{time}} · mula {{start}}",
+    "startEarly": "Mula awal"
   },
   "channel": {
     "online": "Dalam talian",
@@ -326,7 +332,10 @@
       "payOnlineNotSetUp": "Belum disediakan. Minta pembangun anda sambungkan gerbang pembayaran.",
       "payAtCounter": "Bayar di kaunter (QR atau tunai)",
       "payAtCounterHint": "Pelanggan pesan di telefon dan bayar semasa mengambil. Nombor telefon diperlukan.",
-      "noPaymentOption": "Pelanggan tidak boleh pesan dalam talian sehingga satu pilihan pembayaran dihidupkan."
+      "noPaymentOption": "Pelanggan tidak boleh pesan dalam talian sehingga satu pilihan pembayaran dihidupkan.",
+      "preorders": "Pra-pesanan",
+      "preordersHint": "Pelanggan boleh pilih masa ambil kemudian hari ini.",
+      "preorderSlotLimit": "Maksimum pra-pesanan setiap 15 minit"
     },
     "loadMore": "Muat lagi",
     "filters": {
@@ -512,7 +521,11 @@
     "placeOrder": "Buat pesanan · {{total}}",
     "phoneNeeded": "Diperlukan supaya kedai boleh hubungi anda",
     "unpaidAtCounter": "Anda sudah ada pesanan yang menunggu bayaran di kaunter.",
-    "paymentOptionOff": "Pilihan pembayaran ini tidak lagi tersedia."
+    "paymentOptionOff": "Pilihan pembayaran ini tidak lagi tersedia.",
+    "chooseTime": "Pilih masa",
+    "slotFull": "Penuh",
+    "pickTime": "Pilih masa ambil",
+    "forTime": "Untuk {{time}}"
   },
   "tracking": {
     "readyTitle": "Sedia untuk diambil",
@@ -633,7 +646,10 @@
         "lateHint": "Melepasi masa yang dijanjikan",
         "today": "Pesanan hari ini",
         "minutes_one": "{{count}} minit",
-        "minutes_other": "{{count}} minit"
+        "minutes_other": "{{count}} minit",
+        "preorders": "Pra-pesanan hari ini",
+        "nextAt": "Seterusnya {{time}}",
+        "noneWaiting": "Tiada yang menunggu"
       }
     },
     "order": {

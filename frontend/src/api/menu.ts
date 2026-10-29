@@ -22,6 +22,16 @@ export function useMenu() {
   return useQuery({ queryKey: menuKey, queryFn: () => api<MenuOut>("/menu"), staleTime: 30_000 });
 }
 
+export type PickupSlot = { time: string; available: boolean };
+
+/** Today's pickup times for pre-orders. Refreshed every minute: slots fill up and the earliest moves. */
+export function usePickupSlots(enabled: boolean) {
+  return useQuery({
+    queryKey: ["pickup-slots"], enabled, refetchInterval: 60_000,
+    queryFn: () => api<{ slots: PickupSlot[] }>("/shop/pickup-slots").then((r) => r.slots),
+  });
+}
+
 export function useShop() {
   return useQuery({ queryKey: ["shop"], queryFn: () => api<ShopOut>("/shop"), staleTime: 30_000 });
 }

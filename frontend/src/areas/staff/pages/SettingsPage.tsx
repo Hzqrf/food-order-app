@@ -139,6 +139,20 @@ function PaymentOptions() {
       {!shop.online_ordering_available && (
         <Alert color="yellow" variant="light">{t("admin.settings.noPaymentOption")}</Alert>
       )}
+      <Switch label={t("admin.settings.preorders")} description={t("admin.settings.preordersHint")}
+        disabled={update.isPending} checked={shop.preorders_enabled}
+        onChange={(e) => update.mutate({ preorders_enabled: e.currentTarget.checked },
+          { onError: (err) => notifyError(t, err) })} />
+      {shop.preorders_enabled && (
+        <NumberInput label={t("admin.settings.preorderSlotLimit")} min={1} max={50} w={260}
+          defaultValue={shop.preorder_slot_limit} key={shop.preorder_slot_limit}
+          onBlur={(e) => {
+            const n = Number(e.currentTarget.value);
+            if (Number.isInteger(n) && n >= 1 && n <= 50 && n !== shop.preorder_slot_limit) {
+              update.mutate({ preorder_slot_limit: n }, { onError: (err) => notifyError(t, err) });
+            }
+          }} />
+      )}
     </Stack>
   );
 }

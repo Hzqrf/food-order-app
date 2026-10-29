@@ -7,7 +7,7 @@ import { Link } from "react-router";
 
 import { api, isApiError } from "../../../api/client";
 import type { TrackingOut } from "../../../api/types";
-import { formatDateTime } from "../../../lib/dates";
+import { formatDateTime, formatTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { forgetOrder, loadRecent } from "../../../lib/storage";
 import { radius, tokens } from "../../../ui/tokens";
@@ -76,6 +76,7 @@ export function RecentOrders() {
                 </Group>
                 <Text fz={13} c={tokens.muted} mt={2}>
                   {formatSen(o.totalSen)} · {formatDateTime(o.placedAt)}
+                  {data?.pickup_at ? ` · ${t("customer.forTime", { time: formatTime(data.pickup_at) })}` : ""}
                 </Text>
               </Box>
               <IconChevronRight size={18} color={tokens.muted} />
