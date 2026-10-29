@@ -268,6 +268,8 @@ class Order(TimestampMixin, Base):
     events: Mapped[list["OrderStatusEvent"]] = relationship(order_by="OrderStatusEvent.id")
     payments: Mapped[list["Payment"]] = relationship(order_by="Payment.id")
     created_by: Mapped[User | None] = relationship(foreign_keys=[created_by_user_id])
+    # For the prep time a pre-order's start time is worked out from. One shop row, loaded once.
+    branch: Mapped[Branch] = relationship()
     claimed_by: Mapped[User | None] = relationship(foreign_keys=[claimed_by_user_id])
 
 

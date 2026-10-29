@@ -191,6 +191,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shop/pickup-slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pickup Slots
+         * @description Today's pickup times for pre-orders. Not cached: a slot can fill up at any moment.
+         */
+        get: operations["pickup_slots_api_v1_shop_pickup_slots_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/staff/shop/online-orders": {
         parameters: {
             query?: never;
@@ -1296,6 +1316,10 @@ export interface components {
             auto_closed: boolean;
             /** Pay At Counter */
             pay_at_counter: boolean;
+            /** Pickup At */
+            pickup_at: string | null;
+            /** Start At */
+            start_at: string | null;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -1576,6 +1600,8 @@ export interface components {
              * @default false
              */
             pay_at_counter: boolean;
+            /** Pickup Time */
+            pickup_time?: string | null;
         };
         /** OnlineOrderOut */
         OnlineOrderOut: {
@@ -1695,6 +1721,10 @@ export interface components {
             auto_closed: boolean;
             /** Pay At Counter */
             pay_at_counter: boolean;
+            /** Pickup At */
+            pickup_at: string | null;
+            /** Start At */
+            start_at: string | null;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -1834,6 +1864,10 @@ export interface components {
             auto_closed: boolean;
             /** Pay At Counter */
             pay_at_counter: boolean;
+            /** Pickup At */
+            pickup_at: string | null;
+            /** Start At */
+            start_at: string | null;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -1913,6 +1947,11 @@ export interface components {
             peak_hour: number | null;
             /** Gross Profit Sen */
             gross_profit_sen: number;
+        };
+        /** PickupSlotsOut */
+        PickupSlotsOut: {
+            /** Slots */
+            slots: components["schemas"]["Slot"][];
         };
         /** Problem */
         Problem: {
@@ -2068,6 +2107,10 @@ export interface components {
             pay_online?: boolean | null;
             /** Pay At Counter */
             pay_at_counter?: boolean | null;
+            /** Preorders Enabled */
+            preorders_enabled?: boolean | null;
+            /** Preorder Slot Limit */
+            preorder_slot_limit?: number | null;
         };
         /** ShopOut */
         ShopOut: {
@@ -2099,6 +2142,17 @@ export interface components {
             pay_at_counter: boolean;
             /** Online Ordering Available */
             online_ordering_available: boolean;
+            /** Preorders Enabled */
+            preorders_enabled: boolean;
+            /** Preorder Slot Limit */
+            preorder_slot_limit: number;
+        };
+        /** Slot */
+        Slot: {
+            /** Time */
+            time: string;
+            /** Available */
+            available: boolean;
         };
         /** SoldOutIn */
         SoldOutIn: {
@@ -2225,6 +2279,10 @@ export interface components {
             auto_closed: boolean;
             /** Pay At Counter */
             pay_at_counter: boolean;
+            /** Pickup At */
+            pickup_at: string | null;
+            /** Start At */
+            start_at: string | null;
             /** Cancel Reason */
             cancel_reason: string | null;
             /** Created By Name */
@@ -2381,6 +2439,8 @@ export interface components {
              * @default false
              */
             pay_at_counter: boolean;
+            /** Pickup At */
+            pickup_at?: string | null;
         };
         /** TransitionIn */
         TransitionIn: {
@@ -2693,6 +2753,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ShopOut"];
+                };
+            };
+        };
+    };
+    pickup_slots_api_v1_shop_pickup_slots_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PickupSlotsOut"];
                 };
             };
         };

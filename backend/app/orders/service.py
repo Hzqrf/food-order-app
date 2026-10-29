@@ -1,5 +1,5 @@
 import secrets
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.mysql import insert as mysql_insert
@@ -12,7 +12,7 @@ from app.deps import actor_type
 from app.errors import AppError, not_found
 from app.models import (Branch, MenuItem, MenuItemOptionGroup, Option, OptionGroup, Order, OrderCounter,
                         OrderItem, OrderItemOption, OrderStatusEvent, Payment, User, utcnow)
-from app.orders import pricing, schemas
+from app.orders import pricing, schemas, slots, timing
 from app.orders import state_machine as sm
 from app.payments import service as payments
 from app.phone import normalize_my_phone
@@ -249,6 +249,8 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
                 Order.payment_status == "unpaid", Order.status.in_(sm.ACTIVE))):
             raise AppError("unpaid_at_counter", "You already have an order waiting to be paid at the counter.", 429)
 
+    pickup_at = _pickup_time(db, branch, body.pickup_time) if body.pickup_time else None
+
     result = priced_or_conflict(db, body.items, body.expected_total_sen)
     now = utcnow()
     # Paid at the counter: straight to the kitchen, unpaid until staff take the money at pickup.
@@ -257,7 +259,7 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
     order, created = _insert_numbered(
         db, branch, result, idempotency_key, now,
         channel="online", created_by_user_id=None, customer_name=body.customer_name, customer_phone=phone,
-        note=body.note, payment_status="unpaid", **state,
+        note=body.note, payment_status="unpaid", pickup_at=pickup_at, **state,
     )
     if not created:
         return order, _payment_url_for(db, order), False
@@ -265,6 +267,21 @@ def create_online_order(db: Session, branch: Branch, body: schemas.OnlineOrderIn
     if at_counter:
         return order, None, True
     return order, payments.start_payment(db, order), True
+
+
+def _pickup_time(db: Session, branch: Branch, hhmm: str) -> datetime:
+    """Check a pre-order's slot and hold it: the branch row is locked while counting, so two
+    orders can't both take the last place."""
+    if not branch.preorders_enabled:
+        raise AppError("preorders_off", "Pre-orders aren't available right now.", 409)
+    pickup_at = slots.slot_to_utc(db, branch, hhmm)
+    if pickup_at is None:
+        raise AppError("slot_unavailable", "Pick one of the available times.", 422,
+                       [{"field": "pickup_time", "message": "not one of today's pickup times"}])
+    db.execute(select(Branch.id).where(Branch.id == branch.id).with_for_update())
+    if slots.count_in_slot(db, branch, pickup_at) >= branch.preorder_slot_limit:
+        raise AppError("slot_full", "That time just filled up. Pick another time.", 409)
+    return pickup_at
 
 
 def _payment_url_for(db: Session, order: Order) -> str | None:
@@ -312,6 +329,7 @@ def tracking(order: Order, branch: Branch) -> schemas.TrackingOut:
         completed_at=order.completed_at, cancelled_at=order.cancelled_at, cancel_reason=order.cancel_reason,
         expires_at=payments.expiry_of(order) if pending else None,
         can_pay=pending and not _expired(order), can_cancel=pending, pay_at_counter=order.pay_at_counter,
+        pickup_at=order.pickup_at,
     )
 
 
@@ -597,6 +615,7 @@ def summary(order: Order) -> dict:
         customer_name=order.customer_name, note=order.note, subtotal_sen=order.subtotal_sen,
         total_sen=order.total_sen, version=order.version, auto_closed=order.auto_closed,
         pay_at_counter=order.pay_at_counter,
+        pickup_at=order.pickup_at, start_at=timing.start_at(order, order.branch.prep_minutes),
         cancel_reason=order.cancel_reason,
         created_by_name=order.created_by.full_name if order.created_by else None,
         claimed_by_name=order.claimed_by.full_name if order.claimed_by else None, claimed_at=order.claimed_at,

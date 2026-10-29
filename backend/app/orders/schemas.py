@@ -83,6 +83,8 @@ class OnlineOrderIn(BaseModel):
     expected_total_sen: int
     # Pay by QR or cash on pickup instead of online. Needs a phone number.
     pay_at_counter: bool = False
+    # A pre-order: "HH:MM", one of today's pickup slots. None means as soon as possible.
+    pickup_time: str | None = Field(default=None, max_length=5)
 
     _clean = field_validator("customer_name", "customer_phone", "note")(_strip)
 
@@ -137,6 +139,7 @@ class TrackingOut(BaseModel):
     can_pay: bool = False
     can_cancel: bool = False
     pay_at_counter: bool = False
+    pickup_at: datetime | None = None
 
 
 class TransitionIn(BaseModel):
@@ -219,6 +222,9 @@ class OrderSummary(BaseModel):
     version: int
     auto_closed: bool
     pay_at_counter: bool
+    # Pre-orders: the chosen pickup time, and when the kitchen should start (pickup - prep).
+    pickup_at: datetime | None
+    start_at: datetime | None
     cancel_reason: str | None
     created_by_name: str | None
     claimed_by_name: str | None

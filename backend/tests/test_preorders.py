@@ -7,9 +7,11 @@ from sqlalchemy import select, update
 
 from app.models import AuditLog, Order
 from app.orders import timing
-from app.orders.slots import pickup_slots
+from app.orders.slots import pickup_slots, slot_to_utc
 from app.shop.service import business_date
-from tests.conftest import counter_order
+from tests.conftest import counter_order, login, new_key
+from tests.test_online import place, ref_of, webhook
+from tests.test_pay_at_counter import counter_on, no_gateway  # noqa: F401  (fixture)
 
 API = "/api/v1"
 KL = ZoneInfo("Asia/Kuala_Lumpur")
@@ -127,3 +129,84 @@ def test_preorder_settings_audited_and_validated(client, admin_client, db, branc
     assert admin_client.patch(f"{API}/admin/settings", json={"preorder_slot_limit": 0}).status_code == 422
     shop = client.get(f"{API}/shop").json()
     assert (shop["preorders_enabled"], shop["preorder_slot_limit"]) == (True, 3)
+
+
+# --- Placing pre-orders -------------------------------------------------------------------------
+
+
+def first_slot(client):
+    slots = client.get(f"{API}/shop/pickup-slots").json()["slots"]
+    return next(s["time"] for s in slots if s["available"])
+
+
+def slot_utc(db, branch, hhmm):
+    return slot_to_utc(db, branch, hhmm)
+
+
+def test_online_preorder_waits_for_payment_then_is_placed(client, staff, menu, db, branch):
+    preorders_on(db, branch)
+    hhmm = first_slot(client)
+    r = place(client, menu, pickup_time=hhmm)
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["status"] == "pending_payment"
+    assert webhook(client, ref_of(body["payment_url"])).status_code == 200
+    track = client.get(f"{API}/t/{body['token']}").json()
+    expected = slot_utc(db, branch, hhmm)
+    assert track["status"] == "placed"
+    assert datetime.fromisoformat(track["pickup_at"]) == expected
+    login(client, staff.username)
+    [row] = client.get(f"{API}/staff/orders").json()
+    assert datetime.fromisoformat(row["pickup_at"]) == expected
+    assert datetime.fromisoformat(row["start_at"]) == expected - timedelta(minutes=15)
+
+
+def test_counter_preorder_is_placed_unpaid(client, menu, db, branch, no_gateway):
+    counter_on(db, branch)
+    preorders_on(db, branch)
+    r = place(client, menu, pickup_time=first_slot(client), pay_at_counter=True)
+    assert r.status_code == 201, r.text
+    track = client.get(f"{API}/t/{r.json()['token']}").json()
+    assert (track["status"], track["payment_status"]) == ("placed", "unpaid") and track["pickup_at"]
+
+
+def test_bad_times_refused(client, menu, db, branch):
+    preorders_on(db, branch, hours=["00:00", "00:00"])
+    for bad in ("25:00", "12:07", "abc", (datetime.now(KL) - timedelta(hours=1)).strftime("%H:00")):
+        r = place(client, menu, pickup_time=bad)
+        assert r.status_code == 422 and r.json()["error"]["code"] == "slot_unavailable", bad
+
+
+def test_preorders_off_refused(client, menu):
+    r = place(client, menu, pickup_time="12:00")
+    assert r.status_code == 409 and r.json()["error"]["code"] == "preorders_off"
+
+
+def test_last_place_goes_to_one_order(client, menu, db, branch):
+    preorders_on(db, branch, limit=1)
+    hhmm = first_slot(client)
+    assert place(client, menu, pickup_time=hhmm).status_code == 201
+    r = place(client, menu, phone="013-222 3333", pickup_time=hhmm)
+    assert r.status_code == 409 and r.json()["error"]["code"] == "slot_full"
+    slots = client.get(f"{API}/shop/pickup-slots").json()["slots"]
+    assert next(s for s in slots if s["time"] == hhmm)["available"] is False
+
+
+def test_preorder_retry_same_key_same_order(client, menu, db, branch):
+    preorders_on(db, branch, limit=1)
+    hhmm = first_slot(client)
+    key = new_key()
+    first = place(client, menu, key=key, pickup_time=hhmm)
+    again = place(client, menu, key=key, pickup_time=hhmm)
+    assert first.status_code == 201 and again.status_code in (200, 201)
+    assert again.json()["order_code"] == first.json()["order_code"]
+
+
+def test_asap_orders_have_no_pickup_time(client, staff, menu, db, branch):
+    preorders_on(db, branch)
+    body = place(client, menu).json()
+    webhook(client, ref_of(body["payment_url"]))
+    assert client.get(f"{API}/t/{body['token']}").json()["pickup_at"] is None
+    login(client, staff.username)
+    [row] = client.get(f"{API}/staff/orders").json()
+    assert row["pickup_at"] is None and row["start_at"] is None
