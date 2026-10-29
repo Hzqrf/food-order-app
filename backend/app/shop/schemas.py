@@ -25,6 +25,8 @@ class ShopOut(BaseModel):
     pay_at_counter: bool
     # Some way to pay for an online order exists (online or at the counter).
     online_ordering_available: bool
+    preorders_enabled: bool
+    preorder_slot_limit: int
 
 
 class OnlineOrdersIn(BaseModel):
@@ -38,6 +40,8 @@ class SettingsPatch(BaseModel):
     opening_hours: dict[str, list[tuple[HHMM, HHMM]]] | None = None
     pay_online: bool | None = None
     pay_at_counter: bool | None = None
+    preorders_enabled: bool | None = None
+    preorder_slot_limit: int | None = Field(default=None, ge=1, le=50)
 
     @field_validator("timezone")
     @classmethod

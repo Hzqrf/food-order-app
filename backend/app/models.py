@@ -84,6 +84,9 @@ class Branch(TimestampMixin, Base):
     # The owner's payment options for online orders. Paying online also needs a gateway.
     pay_online: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
     pay_at_counter: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    # Pre-orders: customers may pick a pickup time later today, at most this many per 15 minutes.
+    preorders_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    preorder_slot_limit: Mapped[int] = mapped_column(Integer, default=5, server_default="5")
 
 
 class User(TimestampMixin, Base):
@@ -247,6 +250,8 @@ class Order(TimestampMixin, Base):
     auto_closed: Mapped[bool] = mapped_column(Boolean, default=False)
     # An online order the customer pays for at pickup. Set at creation, never changed.
     pay_at_counter: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    # A pre-order's chosen pickup time (UTC). None for as-soon-as-possible and counter orders.
+    pickup_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     version: Mapped[int] = mapped_column(Integer, default=1)
     idempotency_key: Mapped[str | None] = mapped_column(String(64), unique=True)
     placed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)

@@ -37,6 +37,36 @@ def is_open(branch: Branch, now: datetime | None = None) -> bool:
     return any(start > end and hhmm < end for start, end in branch.opening_hours.get(yesterday, []))
 
 
+def window_close(branch: Branch, now: datetime | None = None) -> datetime | None:
+    """When the opening window that `now` falls in closes, in shop-local time. None when closed.
+
+    Open around the clock closes at the next day-close hour, the end of the business day.
+    """
+    local = local_now(branch, now)
+    hhmm = local.strftime("%H:%M")
+    today = DAYS[local.weekday()]
+    yesterday = DAYS[(local.weekday() - 1) % 7]
+
+    def on(day_offset: int, at: str) -> datetime:
+        hours, minutes = int(at[:2]), int(at[3:])
+        return (local + timedelta(days=day_offset)).replace(hour=hours, minute=minutes, second=0, microsecond=0)
+
+    for start, end in branch.opening_hours.get(today, []):
+        if start == end:
+            close_hour = get_settings().day_close_hour
+            day = business_date(branch, now) + timedelta(days=1)
+            return local.replace(year=day.year, month=day.month, day=day.day, hour=close_hour, minute=0,
+                                 second=0, microsecond=0)
+        if start < end and start <= hhmm < end:
+            return on(0, end)
+        if start > end and hhmm >= start:
+            return on(1, end)
+    for start, end in branch.opening_hours.get(yesterday, []):
+        if start > end and hhmm < end:
+            return on(0, end)
+    return None
+
+
 def online_payment_ready(branch: Branch) -> bool:
     """Customers can pay online: a gateway is set up and the owner allows it."""
     return get_settings().online_payments_enabled and branch.pay_online
@@ -62,6 +92,7 @@ def shop_out(db: Session, branch: Branch) -> schemas.ShopOut:
         extra_wait_minutes=extra_wait_minutes(db, branch),
         pay_online_available=online_payment_ready(branch), pay_online_enabled=branch.pay_online,
         pay_at_counter=branch.pay_at_counter, online_ordering_available=online_ordering_available(branch),
+        preorders_enabled=branch.preorders_enabled, preorder_slot_limit=branch.preorder_slot_limit,
     )
 
 

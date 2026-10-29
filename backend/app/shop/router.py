@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Request
+from pydantic import BaseModel
 
 from app.deps import DB, AdminUser, BranchDep, StaffUser, client_ip
+from app.orders import slots
+from app.orders.slots import Slot
 from app.shop import schemas, service
 
 router = APIRouter(tags=["shop"])
@@ -9,6 +12,16 @@ router = APIRouter(tags=["shop"])
 @router.get("/shop", response_model=schemas.ShopOut)
 def get_shop(branch: BranchDep, db: DB):
     return service.shop_out(db, branch)
+
+
+class PickupSlotsOut(BaseModel):
+    slots: list[Slot]
+
+
+@router.get("/shop/pickup-slots", response_model=PickupSlotsOut)
+def pickup_slots(branch: BranchDep, db: DB):
+    """Today's pickup times for pre-orders. Not cached: a slot can fill up at any moment."""
+    return PickupSlotsOut(slots=slots.pickup_slots(db, branch))
 
 
 @router.patch("/staff/shop/online-orders", response_model=schemas.ShopOut)
