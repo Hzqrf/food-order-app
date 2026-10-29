@@ -86,7 +86,7 @@ export default function BoardPage() {
   // Pre-orders wait in Later today until their start time. The new-order sound and flash are for
   // what lands in New, so a pre-order rings when it joins New, not when it was booked.
   const liveOrders = useMemo(() => board.data?.filter((o) => !isLater(o, now)), [board.data, now]);
-  const { flashing, acknowledge } = useNewOrderAlert(liveOrders);
+  const { flashing, acknowledge, markSeen } = useNewOrderAlert(liveOrders);
   const [sent, setSent] = useState<SentNotice | null>(null);
   const [handOverId, setHandOverId] = useState<number | null>(null);
   // An order paid at the counter: take the money, then hand it over.
@@ -235,7 +235,7 @@ export default function BoardPage() {
         </Group>
       )}
       {later.length > 0 && (
-        <LaterStrip orders={later} busyId={busyId} onStart={(o) => advance(o, "preparing")}
+        <LaterStrip orders={later} busyId={busyId} onStart={(o) => { markSeen(o.id); advance(o, "preparing"); }}
           onOpen={(o) => { if (ensureUnlocked()) navigate(`/staff/orders/${o.id}`); }} />
       )}
       {board.isError && (

@@ -40,10 +40,13 @@ export function OrderCard({
   onOpen: () => void;
 }) {
   const { t } = useTranslation();
-  const age = minutesSince(order.placed_at ?? order.created_at, now);
+  // A pre-order counts from its start time and is due at its pickup time, not placed + prep.
+  const age = minutesSince(order.start_at ?? order.placed_at ?? order.created_at, now);
   const cooking = minutesSince(order.preparing_at ?? order.placed_at ?? order.created_at, now);
   const waiting = minutesSince(order.ready_at ?? order.created_at, now);
-  const late = order.status !== "ready" && age >= prepMinutes;
+  const due = order.pickup_at ? Date.parse(order.pickup_at)
+    : Date.parse(order.placed_at ?? order.created_at) + prepMinutes * 60_000;
+  const late = order.status !== "ready" && now >= due;
   const progress = Math.min(100, (cooking / Math.max(prepMinutes, 1)) * 100);
 
   const when = (() => {

@@ -68,8 +68,12 @@ export default function CheckoutPage() {
   const [slot, setSlot] = useState<string | null>(null);
   const pickup = usePickupSlots(Boolean(shop?.preorders_enabled));
   const slots = pickup.data ?? [];
-  const canPreorder = Boolean(shop?.preorders_enabled) && slots.length > 0;
-  const later = canPreorder && when === "later";
+  // Once "Choose a time" is picked it stays picked, even if the list refreshes empty: the order must
+  // never quietly become as-soon-as-possible. The server answers if the time is no longer possible.
+  const later = when === "later";
+  const canPreorder = (Boolean(shop?.preorders_enabled) && slots.length > 0) || later;
+  // A time the latest list no longer offers (passed, or full) is not a choice any more.
+  const chosen = later && slots.some((s) => s.time === slot && s.available) ? slot : null;
   const [error, setError] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   // One key per checkout attempt: a retry after a dropped connection returns the same order.
@@ -92,7 +96,7 @@ export default function CheckoutPage() {
   const phoneOk = atCounter ? normalized !== null : phone.trim() === "" || normalized !== null;
   const total = quote.data?.total_sen;
   const problems = quote.data?.problems.length ?? 0;
-  const canSubmit = phoneOk && total !== undefined && problems === 0 && shop?.can_order_online && (!later || slot !== null);
+  const canSubmit = phoneOk && total !== undefined && problems === 0 && shop?.can_order_online && (!later || chosen !== null);
 
   const submit = () => {
     setTouched(true);
@@ -103,7 +107,7 @@ export default function CheckoutPage() {
         key,
         body: { customer_name: name.trim() || null, customer_phone: normalized, note: note.trim() || null,
           items: cart.requestLines, expected_total_sen: total, pay_at_counter: atCounter,
-          pickup_time: later ? slot : null },
+          pickup_time: later ? chosen : null },
       },
       {
         onSuccess: (order) => {
@@ -170,7 +174,7 @@ export default function CheckoutPage() {
               <ChoiceRow type="radio" label={t("customer.chooseTime")} priceDeltaSen={0}
                 checked={later} disabled={false} onChange={() => setWhen("later")} />
               {later && (
-                <Chip.Group value={slot ?? ""} onChange={(v) => setSlot(typeof v === "string" && v ? v : null)}>
+                <Chip.Group value={chosen ?? ""} onChange={(v) => setSlot(typeof v === "string" && v ? v : null)}>
                   <Group gap={8} mt={4}>
                     {slots.map((s) => (
                       <Chip key={s.time} value={s.time} disabled={!s.available} color="orange.7" radius="md">
@@ -229,11 +233,11 @@ export default function CheckoutPage() {
 
       <BottomBar>
         <Button fullWidth size="md" radius="xl" color="orange.7" loading={place.isPending}
-          disabled={total === undefined || problems > 0 || (later && slot === null)} onClick={submit}>
+          disabled={total === undefined || problems > 0 || (later && chosen === null)} onClick={submit}>
           {total === undefined ? t("common.loading")
             : t(atCounter ? "customer.placeOrder" : "customer.pay", { total: formatSen(total) })}
         </Button>
-        {later && slot === null && <Text fz={12} c="orange.8" ta="center" mt={6}>{t("customer.pickTime")}</Text>}
+        {later && chosen === null && <Text fz={12} c="orange.8" ta="center" mt={6}>{t("customer.pickTime")}</Text>}
         <Text fz={11} c={tokens.muted} ta="center" mt={8}>{t("customer.privacy")}</Text>
       </BottomBar>
     </Box>

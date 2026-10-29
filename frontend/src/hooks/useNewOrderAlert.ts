@@ -58,5 +58,10 @@ export function useNewOrderAlert(orders: OrderSummary[] | undefined) {
     });
   }, []);
 
-  return { flashing, acknowledge };
+  // For an order staff moved onto the board themselves (Start early on a pre-order): no chime.
+  const markSeen = useCallback((id: number) => {
+    seen.current?.add(id);
+  }, []);
+
+  return { flashing, acknowledge, markSeen };
 }
