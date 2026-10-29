@@ -156,9 +156,11 @@ class QueueMetrics(BaseModel):
     open_orders: int
     avg_prep_minutes: float | None  # cooking started to ready, today's orders
     avg_prep_minutes_last_week: float | None  # the same weekday last week
-    running_late: int  # not ready yet and past placed_at + prep_minutes
+    running_late: int  # not ready yet and past its due time (pickup time, or placed + prep)
     orders_today: int
     orders_same_day_last_week: int
+    preorders_today: int  # today's pre-orders, not cancelled
+    next_preorder_at: datetime | None  # earliest pickup still waiting to start
 
 
 class CancelIn(BaseModel):

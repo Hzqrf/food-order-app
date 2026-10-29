@@ -38,7 +38,8 @@ def test_metrics_counts_and_average(staff_client, menu, db, branch):
 def test_metrics_with_no_orders(staff_client, branch):
     m = staff_client.get(f"{API}/staff/orders/metrics").json()
     assert m == {"open_orders": 0, "avg_prep_minutes": None, "avg_prep_minutes_last_week": None,
-                 "running_late": 0, "orders_today": 0, "orders_same_day_last_week": 0}
+                 "running_late": 0, "orders_today": 0, "orders_same_day_last_week": 0,
+                 "preorders_today": 0, "next_preorder_at": None}
 
 
 def test_metrics_last_week_comparison(staff_client, menu, db, branch):

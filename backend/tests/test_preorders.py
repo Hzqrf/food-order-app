@@ -5,7 +5,8 @@ from zoneinfo import ZoneInfo
 import pytest
 from sqlalchemy import select, update
 
-from app.models import AuditLog, Order
+from app.models import AuditLog, Order, utcnow
+from app.orders.metrics import extra_wait_minutes, queue_metrics
 from app.orders import timing
 from app.orders.slots import pickup_slots, slot_to_utc
 from app.shop.service import business_date
@@ -210,3 +211,50 @@ def test_asap_orders_have_no_pickup_time(client, staff, menu, db, branch):
     login(client, staff.username)
     [row] = client.get(f"{API}/staff/orders").json()
     assert row["pickup_at"] is None and row["start_at"] is None
+
+
+# --- Due time in late and busy figures ----------------------------------------------------------
+
+
+def counter_ids(staff_client, menu, n):
+    return [counter_order(staff_client, [{"menu_item_id": menu["milo"], "quantity": 1}]).json()["id"]
+            for _ in range(n)]
+
+
+def test_preorder_placed_early_is_not_late(staff_client, menu, db, branch):
+    now = utcnow()
+    [o] = counter_ids(staff_client, menu, 1)
+    set_order(db, o, placed_at=now - timedelta(minutes=120), pickup_at=now + timedelta(minutes=60))
+    m = queue_metrics(db, branch, now)
+    assert m.running_late == 0 and m.open_orders == 0
+    assert extra_wait_minutes(db, branch, now) == 0
+
+
+def test_paid_online_preorder_is_later_not_late(staff_client, menu, db, branch):
+    now = utcnow()
+    [o] = counter_ids(staff_client, menu, 1)
+    set_order(db, o, status="placed", placed_at=now - timedelta(minutes=30), pickup_at=now + timedelta(minutes=45))
+    m = queue_metrics(db, branch, now)
+    assert m.running_late == 0 and m.open_orders == 0
+
+
+def test_overdue_preorder_is_late(staff_client, menu, db, branch):
+    now = utcnow()
+    for o in counter_ids(staff_client, menu, 2):
+        set_order(db, o, placed_at=now - timedelta(minutes=90), pickup_at=now - timedelta(minutes=7))
+    m = queue_metrics(db, branch, now)
+    assert m.running_late == 2 and m.open_orders == 2
+    assert extra_wait_minutes(db, branch, now) == 10
+
+
+def test_preorders_today_and_next(staff_client, menu, db, branch):
+    now = utcnow()
+    a, b, c, d = counter_ids(staff_client, menu, 4)
+    set_order(db, a, pickup_at=now + timedelta(minutes=30))
+    set_order(db, b, pickup_at=now + timedelta(minutes=90))
+    set_order(db, c, pickup_at=now - timedelta(minutes=10), status="preparing")
+    set_order(db, d, pickup_at=now + timedelta(minutes=20), status="cancelled")
+    m = queue_metrics(db, branch, now)
+    assert m.preorders_today == 3
+    assert m.next_preorder_at == (now + timedelta(minutes=30)).replace(microsecond=0) or \
+        abs((m.next_preorder_at - (now + timedelta(minutes=30))).total_seconds()) < 1

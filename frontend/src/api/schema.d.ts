@@ -1980,6 +1980,10 @@ export interface components {
             orders_today: number;
             /** Orders Same Day Last Week */
             orders_same_day_last_week: number;
+            /** Preorders Today */
+            preorders_today: number;
+            /** Next Preorder At */
+            next_preorder_at: string | null;
         };
         /** QuoteIn */
         QuoteIn: {
