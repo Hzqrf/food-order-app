@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { OrderSummary } from "../../../api/types";
 import { formatSen } from "../../../lib/money";
 import { isUnpaidAtCounter } from "./TakePaymentModal";
-import { minutesSince } from "../../../lib/dates";
+import { formatTime, minutesSince } from "../../../lib/dates";
 import { tileStyle } from "../console/SectionCard";
 import { tokens } from "../../../ui/tokens";
 import classes from "./OrderCard.module.css";
@@ -77,11 +77,18 @@ export function OrderCard({
             <Text span ff="monospace" inherit>{order.order_code}</Text>
           </Text>
         )}
-        {/* Its own line: the header is too narrow on a three-column board. */}
-        {isUnpaidAtCounter(order) && (
-          <Badge size="md" variant="filled" color="orange.7" mt={6}>
-            {t("order.unpaid", { total: formatSen(order.total_sen) })}
-          </Badge>
+        {/* Their own line: the header is too narrow on a three-column board. */}
+        {(isUnpaidAtCounter(order) || order.pickup_at) && (
+          <Group gap={6} mt={6}>
+            {order.pickup_at && (
+              <Badge size="md" variant="light" color="blue">{t("customer.forTime", { time: formatTime(order.pickup_at) })}</Badge>
+            )}
+            {isUnpaidAtCounter(order) && (
+              <Badge size="md" variant="filled" color="orange.7">
+                {t("order.unpaid", { total: formatSen(order.total_sen) })}
+              </Badge>
+            )}
+          </Group>
         )}
         <Stack gap={2} mt={8}>
           {order.items.map((line) => (

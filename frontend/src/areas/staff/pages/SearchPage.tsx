@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { useOrderSearch } from "../../../api/orders";
-import { formatDateTime } from "../../../lib/dates";
+import { formatDateTime, formatTime } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { isUnpaidAtCounter } from "../components/TakePaymentModal";
 import { PageHeader } from "../console/PageHeader";
@@ -58,6 +58,11 @@ export default function SearchPage() {
                     <Table.Td>
                       <Group gap={6} wrap="nowrap">
                         <StatusLabel kind="status" value={o.status} />
+                        {o.pickup_at && (
+                          <Badge size="sm" variant="light" color="blue">
+                            {t("customer.forTime", { time: formatTime(o.pickup_at) })}
+                          </Badge>
+                        )}
                         {isUnpaidAtCounter(o) && (
                           <Badge size="sm" variant="filled" color="orange.7">
                             {t("order.unpaid", { total: formatSen(o.total_sen) })}

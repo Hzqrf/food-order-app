@@ -109,6 +109,9 @@ export default function OrderPage() {
                 {t("console.order.items")}
               </Text>
               <StatusLabel kind="status" value={order.status} />
+              {order.pickup_at && (
+                <Badge color="blue" variant="light">{t("customer.forTime", { time: formatTime(order.pickup_at) })}</Badge>
+              )}
               {order.auto_closed && <Badge color="yellow" variant="light">{t("order.autoClosed")}</Badge>}
             </Group>
           }

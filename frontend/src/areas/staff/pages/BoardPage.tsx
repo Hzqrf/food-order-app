@@ -2,7 +2,7 @@ import { Alert, Button, Group, SegmentedControl, SimpleGrid, Stack, Text } from 
 import { useInterval, useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconCircleCheck, IconPlus } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router";
 
@@ -15,6 +15,7 @@ import { ErrorState } from "../../../components/ErrorState";
 import { notifyError } from "../../../components/errors";
 import { useNewOrderAlert } from "../../../hooks/useNewOrderAlert";
 import { formatTime } from "../../../lib/dates";
+import { isLater, LaterStrip } from "../components/LaterStrip";
 import { NEXT_STEP, OrderCard } from "../components/OrderCard";
 import { isUnpaidAtCounter, TakePaymentModal } from "../components/TakePaymentModal";
 import { useStaff } from "../console/lock";
@@ -45,7 +46,6 @@ function Metrics({ m }: { m: QueueMetrics | undefined }) {
   const prep = m?.avg_prep_minutes ?? null;
   const prepBefore = m?.avg_prep_minutes_last_week ?? null;
   const prepChange = prep !== null && prepBefore ? Math.round(((prep - prepBefore) / prepBefore) * 100) : null;
-  const orderChange = m ? m.orders_today - m.orders_same_day_last_week : null;
   return (
     <SimpleGrid cols={{ base: 2, md: 4 }} spacing={{ base: 12, sm: 20 }}>
       <MetricCard label={t("console.queue.metrics.open")} value={m ? String(m.open_orders) : null}
@@ -57,10 +57,9 @@ function Metrics({ m }: { m: QueueMetrics | undefined }) {
         deltaLabel={prepBefore !== null ? t("console.vsLastWeek") : undefined} />
       <MetricCard label={t("console.queue.metrics.late")} value={m ? String(m.running_late) : null}
         deltaLabel={t("console.queue.metrics.lateHint")} />
-      <MetricCard label={t("console.queue.metrics.today")} value={m ? String(m.orders_today) : null}
-        delta={orderChange ? String(Math.abs(orderChange)) : undefined}
-        direction={orderChange ? (orderChange > 0 ? "up" : "down") : undefined}
-        deltaLabel={t("console.vsLastWeek")} />
+      <MetricCard label={t("console.queue.metrics.preorders")} value={m ? String(m.preorders_today) : null}
+        deltaLabel={m?.next_preorder_at ? t("console.queue.metrics.nextAt", { time: formatTime(m.next_preorder_at) })
+          : t("console.queue.metrics.noneWaiting")} />
     </SimpleGrid>
   );
 }
@@ -76,7 +75,6 @@ export default function BoardPage() {
   const { data: session } = useSession();
   const transition = useTransition();
   const claim = useClaim();
-  const { flashing, acknowledge } = useNewOrderAlert(board.data);
   const wide = useMediaQuery("(min-width: 62em)", true);
   const [column, setColumn] = useState<string>("placed");
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -85,6 +83,10 @@ export default function BoardPage() {
   const timers = useRef(new Map<number, { handle: number; send: () => void }>());
   const [now, setNow] = useState(Date.now());
   useInterval(() => setNow(Date.now()), 30_000, { autoInvoke: true });
+  // Pre-orders wait in Later today until their start time. The new-order sound and flash are for
+  // what lands in New, so a pre-order rings when it joins New, not when it was booked.
+  const liveOrders = useMemo(() => board.data?.filter((o) => !isLater(o, now)), [board.data, now]);
+  const { flashing, acknowledge } = useNewOrderAlert(liveOrders);
   const [sent, setSent] = useState<SentNotice | null>(null);
   const [handOverId, setHandOverId] = useState<number | null>(null);
   // An order paid at the counter: take the money, then hand it over.
@@ -215,7 +217,9 @@ export default function BoardPage() {
   if (board.isPending) return <>{header}<Text c="dimmed">{t("common.loading")}</Text></>;
   if (board.isError && !board.data) return <>{header}<ErrorState onRetry={() => board.refetch()} /></>;
 
-  const orders = (board.data ?? []).filter((o) => !handingOver.has(o.id));
+  const orders = (liveOrders ?? []).filter((o) => !handingOver.has(o.id));
+  const later = (board.data ?? []).filter((o) => isLater(o, now))
+    .sort((a, b) => Date.parse(a.pickup_at!) - Date.parse(b.pickup_at!));
   const prep = shop?.prep_minutes ?? 15;
   const visible = wide ? COLUMNS : COLUMNS.filter((c) => c.status === column);
 
@@ -229,6 +233,10 @@ export default function BoardPage() {
             {t("console.queue.sent", { number: sent.number, method: t(`paymentMethod.${sent.method}`) })}
           </Text>
         </Group>
+      )}
+      {later.length > 0 && (
+        <LaterStrip orders={later} busyId={busyId} onStart={(o) => advance(o, "preparing")}
+          onOpen={(o) => { if (ensureUnlocked()) navigate(`/staff/orders/${o.id}`); }} />
       )}
       {board.isError && (
         <Alert color="red" variant="light">
