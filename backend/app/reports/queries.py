@@ -19,6 +19,7 @@ from app.models import (AuditLog, Branch, MenuCategory, MenuItem, Order, OrderIt
 from app.orders import state_machine as sm
 from app.orders.service import fmt_number, refundable_by_charge
 from app.reports import schemas
+from app.reports.masking import mask_phone
 from app.shop.service import business_date, is_open, online_ordering_available
 
 SALES_STATUSES = (sm.PLACED, sm.PREPARING, sm.READY, sm.COMPLETED)
@@ -308,6 +309,49 @@ def staff(db: Session, branch: Branch, start: date, end: date) -> list[schemas.S
     ) for uid, name, n, sales, secs in rows]
     # Biggest first; orders nobody claimed go last.
     return sorted(out, key=lambda r: (r.user_id is None, -r.sales_sen))
+
+
+CUSTOMER_ROWS = 50
+
+
+def customers(db: Session, branch: Branch, q: schemas.CustomerQuery) -> schemas.CustomerReport:
+    """Online customers by phone number. Numbers are masked here; full ones are never returned."""
+    online = (*_sales(branch, q.date_from, q.date_to), Order.channel == "online")
+    with_phone = (*online, Order.customer_phone.is_not(None))
+    agg = db.execute(
+        select(Order.customer_phone, func.count(Order.id), func.sum(Order.total_sen),
+               func.max(func.coalesce(Order.placed_at, Order.created_at)))
+        .where(*with_phone).group_by(Order.customer_phone)).all()
+    phones = [a[0] for a in agg]
+    # Returning: a paid sales order with the same number before the period started.
+    before = set(db.scalars(select(Order.customer_phone).distinct().where(
+        Order.branch_id == branch.id, Order.business_date < q.date_from, Order.status.in_(SALES_STATUSES),
+        Order.payment_status == "paid", Order.customer_phone.in_(phones)))) if phones else set()
+    all_online = db.scalar(select(func.count(Order.id)).where(*online)) or 0
+    phone_orders = sum(int(a[1]) for a in agg)
+    spent = sum(int(a[2] or 0) for a in agg)
+
+    key = {"spent": lambda a: (-int(a[2] or 0), -a[1]),
+           "orders": lambda a: (-a[1], -int(a[2] or 0)),
+           "last": lambda a: (-a[3].timestamp(),)}[q.sort]
+    top = sorted(agg, key=key)[:CUSTOMER_ROWS]
+    names: dict[str, str] = {}
+    if top:
+        for phone, name in db.execute(
+                select(Order.customer_phone, Order.customer_name)
+                .where(*with_phone, Order.customer_phone.in_([a[0] for a in top]),
+                       Order.customer_name.is_not(None), Order.customer_name != "")
+                .order_by(func.coalesce(Order.placed_at, Order.created_at).desc())):
+            names.setdefault(phone, name.split()[0])
+    return schemas.CustomerReport(
+        date_from=q.date_from, date_to=q.date_to, customers=len(agg), returning=len(before),
+        repeat_rate_pct=round(len(before) * 100 / len(agg), 1) if agg else None,
+        spend_per_customer_sen=spent // len(agg) if agg else None,
+        phone_coverage_pct=round(phone_orders * 100 / all_online, 1) if all_online else None,
+        rows=[schemas.CustomerRow(phone_masked=mask_phone(phone), first_name=names.get(phone), orders=n,
+                                  spent_sen=int(total or 0), last_order_at=last, is_new=phone not in before)
+              for phone, n, total, last in top],
+    )
 
 
 def report(db: Session, branch: Branch, r: schemas.Range) -> schemas.Report:

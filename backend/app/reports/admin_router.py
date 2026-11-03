@@ -26,6 +26,11 @@ def report(_: AdminUser, branch: BranchDep, db: DB, r: Annotated[schemas.Range, 
     return queries.report(db, branch, r)
 
 
+@router.get("/reports/customers", response_model=schemas.CustomerReport)
+def customer_report(_: AdminUser, branch: BranchDep, db: DB, q: Annotated[schemas.CustomerQuery, Query()]):
+    return queries.customers(db, branch, q)
+
+
 @router.get("/reports/orders.csv")
 def orders_csv(_: AdminUser, branch: BranchDep, db: DB, r: Annotated[schemas.Range, Query()]):
     """The accountant's export: one row per order in the range."""

@@ -119,6 +119,31 @@ class HourRow(BaseModel):
     avg_daily_sales_sen: int  # averaged over the days in the range, so quiet and busy days are comparable
 
 
+class CustomerQuery(Range):
+    sort: Literal["spent", "orders", "last"] = "spent"
+
+
+class CustomerRow(BaseModel):
+    # Partly hidden, e.g. 012-***6789. There is deliberately no field for the full number.
+    phone_masked: str
+    first_name: str | None
+    orders: int
+    spent_sen: int
+    last_order_at: datetime
+    is_new: bool  # no paid order with this number before the period
+
+
+class CustomerReport(BaseModel):
+    date_from: date
+    date_to: date
+    customers: int
+    returning: int
+    repeat_rate_pct: float | None
+    spend_per_customer_sen: int | None
+    phone_coverage_pct: float | None  # online sales orders that gave a phone
+    rows: list[CustomerRow]  # top 50 by the chosen sort
+
+
 class StaffRow(BaseModel):
     """Sales credited to whoever cooked them (pressed Take or Start Cooking)."""
     user_id: int | None  # None = nobody claimed the order

@@ -964,6 +964,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/reports/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Customer Report */
+        get: operations["customer_report_api_v1_admin_reports_customers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/reports/orders.csv": {
         parameters: {
             query?: never;
@@ -1357,6 +1374,49 @@ export interface components {
             method: "cash" | "qr_counter" | "card_terminal";
             /** Tendered Sen */
             tendered_sen?: number | null;
+        };
+        /** CustomerReport */
+        CustomerReport: {
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+            /** Customers */
+            customers: number;
+            /** Returning */
+            returning: number;
+            /** Repeat Rate Pct */
+            repeat_rate_pct: number | null;
+            /** Spend Per Customer Sen */
+            spend_per_customer_sen: number | null;
+            /** Phone Coverage Pct */
+            phone_coverage_pct: number | null;
+            /** Rows */
+            rows: components["schemas"]["CustomerRow"][];
+        };
+        /** CustomerRow */
+        CustomerRow: {
+            /** Phone Masked */
+            phone_masked: string;
+            /** First Name */
+            first_name: string | null;
+            /** Orders */
+            orders: number;
+            /** Spent Sen */
+            spent_sen: number;
+            /**
+             * Last Order At
+             * Format: date-time
+             */
+            last_order_at: string;
+            /** Is New */
+            is_new: boolean;
         };
         /** Dashboard */
         Dashboard: {
@@ -2067,6 +2127,8 @@ export interface components {
             /** Payments */
             payments: components["schemas"]["PaymentRow"][];
             cancellations: components["schemas"]["Cancellations"];
+            /** Staff */
+            staff: components["schemas"]["StaffRow"][];
             previous: components["schemas"]["Totals"];
         };
         /** SessionOut */
@@ -2239,6 +2301,24 @@ export interface components {
             position?: string | null;
             /** Joined On */
             joined_on?: string | null;
+        };
+        /**
+         * StaffRow
+         * @description Sales credited to whoever cooked them (pressed Take or Start Cooking).
+         */
+        StaffRow: {
+            /** User Id */
+            user_id: number | null;
+            /** Name */
+            name: string | null;
+            /** Orders */
+            orders: number;
+            /** Sales Sen */
+            sales_sen: number;
+            /** Share Pct */
+            share_pct: number | null;
+            /** Avg Cook Minutes */
+            avg_cook_minutes: number | null;
         };
         /**
          * TakePaymentIn
@@ -4329,6 +4409,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Report"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    customer_report_api_v1_admin_reports_customers_get: {
+        parameters: {
+            query: {
+                date_from: string;
+                date_to: string;
+                group_by?: "day" | "week" | "month";
+                sort?: "spent" | "orders" | "last";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerReport"];
                 };
             };
             /** @description Validation Error */
