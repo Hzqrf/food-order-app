@@ -1,7 +1,8 @@
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./client";
-import type { AuditPage, Dashboard, OrderPage, RefundIn, Report, SettingsPatch, ShopOut, StaffIn, StaffOut } from "./types";
+import type { AuditPage, CustomerReport, Dashboard, OrderPage, RefundIn, Report, SettingsPatch, ShopOut, StaffIn,
+  StaffOut } from "./types";
 
 const staffKey = ["admin-staff"];
 
@@ -94,6 +95,17 @@ export function useReport(range: ReportRange) {
     queryKey: ["admin-report", range],
     queryFn: () => api<Report>(`/admin/reports?${qs(range)}`),
     placeholderData: keepPreviousData, // refetch keeps the previous frame, no layout jump
+  });
+}
+
+export type CustomerSort = "spent" | "orders" | "last";
+
+/** Online customers by masked phone number. Loaded only while the By customer tab is open. */
+export function useCustomerReport(range: { date_from: string; date_to: string }, sort: CustomerSort) {
+  return useQuery({
+    queryKey: ["customer-report", range.date_from, range.date_to, sort],
+    queryFn: () => api<CustomerReport>(`/admin/reports/customers?${qs({ ...range, sort })}`),
+    placeholderData: keepPreviousData,
   });
 }
 

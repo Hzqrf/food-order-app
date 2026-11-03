@@ -39,6 +39,7 @@ export type TotpSetupOut = S["TotpSetupOut"];
 export type Dashboard = S["Dashboard"];
 export type Attention = S["Attention"];
 export type Report = S["Report"];
+export type CustomerReport = S["CustomerReport"];
 export type OrderPage = S["OrderPage"];
 export type AuditPage = S["AuditPage"];
 export type AuditRow = S["AuditRow"];

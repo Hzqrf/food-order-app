@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 
 import { useReport } from "../../../api/admin";
 import { ErrorState } from "../../../components/ErrorState";
+import { CustomerPanel, StaffPanel } from "../components/PeopleTabs";
 import { formatDateTime, shortDay } from "../../../lib/dates";
 import { formatSen } from "../../../lib/money";
 import { PageHeader } from "../console/PageHeader";
@@ -45,6 +46,8 @@ export default function SalesReportPage() {
           <Tabs.List mb={20}>
             <Tabs.Tab value="day">{t("console.report.byDay")}</Tabs.Tab>
             <Tabs.Tab value="item">{t("console.report.byItem")}</Tabs.Tab>
+            <Tabs.Tab value="staff">{t("console.report.byStaff")}</Tabs.Tab>
+            <Tabs.Tab value="customer">{t("console.report.byCustomer")}</Tabs.Tab>
             <Tabs.Tab value="channel">{t("admin.reports.channels")}</Tabs.Tab>
             <Tabs.Tab value="cancelled">{t("admin.reports.cancellations")}</Tabs.Tab>
           </Tabs.List>
@@ -107,6 +110,12 @@ export default function SalesReportPage() {
             </SectionCard>
           </Tabs.Panel>
 
+          <Tabs.Panel value="staff">
+            <StaffPanel rows={r.staff} />
+          </Tabs.Panel>
+          <Tabs.Panel value="customer">
+            <CustomerPanel range={{ date_from: period.date_from, date_to: period.date_to }} />
+          </Tabs.Panel>
           <Tabs.Panel value="item">
             <SectionCard padded={false}>
               <Table.ScrollContainer minWidth={680}>
