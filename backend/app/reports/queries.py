@@ -10,7 +10,7 @@ from collections import defaultdict
 from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import and_, case, func, select
+from sqlalchemy import and_, case, func, select, text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -290,6 +290,26 @@ def cancellations(db: Session, branch: Branch, start: date, end: date) -> schema
 # --- The two screens -----------------------------------------------------------------------------
 
 
+def staff(db: Session, branch: Branch, start: date, end: date) -> list[schemas.StaffRow]:
+    """Sales by who cooked them. Same orders as Sales, so the rows add up to the Sales figure."""
+    cook_seconds = func.avg(case(
+        (and_(Order.preparing_at.is_not(None), Order.ready_at.is_not(None)),
+         func.timestampdiff(text("SECOND"), Order.preparing_at, Order.ready_at))))
+    rows = db.execute(
+        select(Order.claimed_by_user_id, User.full_name, func.count(Order.id), func.sum(Order.total_sen), cook_seconds)
+        .outerjoin(User, User.id == Order.claimed_by_user_id)
+        .where(*_sales(branch, start, end))
+        .group_by(Order.claimed_by_user_id, User.full_name)).all()
+    total = sum(int(r[3] or 0) for r in rows)
+    out = [schemas.StaffRow(
+        user_id=uid, name=name if uid is not None else None, orders=n, sales_sen=int(sales or 0),
+        share_pct=round(int(sales or 0) * 100 / total, 1) if total else None,
+        avg_cook_minutes=round(float(secs) / 60, 1) if secs is not None else None,
+    ) for uid, name, n, sales, secs in rows]
+    # Biggest first; orders nobody claimed go last.
+    return sorted(out, key=lambda r: (r.user_id is None, -r.sales_sen))
+
+
 def report(db: Session, branch: Branch, r: schemas.Range) -> schemas.Report:
     return schemas.Report(
         date_from=r.date_from, date_to=r.date_to, group_by=r.group_by,
@@ -300,6 +320,7 @@ def report(db: Session, branch: Branch, r: schemas.Range) -> schemas.Report:
         channels=channels(db, branch, r.date_from, r.date_to),
         payments=payments(db, branch, r.date_from, r.date_to),
         cancellations=cancellations(db, branch, r.date_from, r.date_to),
+        staff=staff(db, branch, r.date_from, r.date_to),
         previous=totals(db, branch, r.date_from - timedelta(days=(r.date_to - r.date_from).days + 1),
                         r.date_from - timedelta(days=1)),
     )

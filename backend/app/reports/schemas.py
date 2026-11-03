@@ -119,6 +119,16 @@ class HourRow(BaseModel):
     avg_daily_sales_sen: int  # averaged over the days in the range, so quiet and busy days are comparable
 
 
+class StaffRow(BaseModel):
+    """Sales credited to whoever cooked them (pressed Take or Start Cooking)."""
+    user_id: int | None  # None = nobody claimed the order
+    name: str | None
+    orders: int
+    sales_sen: int
+    share_pct: float | None
+    avg_cook_minutes: float | None  # Start Cooking to Ready
+
+
 class ItemRow(BaseModel):
     menu_item_id: int
     name: str
@@ -179,6 +189,7 @@ class Report(BaseModel):
     channels: list[ChannelRow]
     payments: list[PaymentRow]
     cancellations: Cancellations
+    staff: list[StaffRow]
     previous: Totals  # the same number of days just before date_from
 
 
