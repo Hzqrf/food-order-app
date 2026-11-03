@@ -128,8 +128,15 @@ def customers(client, branch, sort=None):
 
 def test_mask_phone():
     assert mask_phone("+60123456789") == "012-***6789"
-    assert mask_phone("+6031234567") == "031-***4567"
+    assert mask_phone("+6031234567") == "031-***567"  # 9 digits: at least 3 stay hidden
     assert mask_phone("+60123") == "***"
+
+
+def test_mask_hides_at_least_three_digits():
+    """A 9-digit landline (04-123 4567) must not show 7 of its 9 digits."""
+    masked = mask_phone("+6041234567")
+    assert masked == "041-***567"
+    assert sum(ch.isdigit() for ch in masked) <= 9 - 3
 
 
 def test_customers_grouped_by_phone(client, admin, menu, branch):
